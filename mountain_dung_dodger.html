@@ -515,12 +515,8 @@
             
             if (gameState === 'math') {
                 gameState = 'playing';
-                // Reset player position to safe ground after math session
-                player.x = 50;
-                player.y = 350;
-                player.vx = 0;
-                player.vy = 0;
-                player.onGround = false;
+                // Generate new level with increased difficulty
+                generateLevel(level);
             }
         }
         
