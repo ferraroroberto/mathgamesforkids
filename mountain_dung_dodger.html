@@ -33,13 +33,13 @@
             height: 100vh;
             max-width: 100vw;
             max-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
         }
         
         canvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 100%;
             height: 100%;
             max-width: 400px;
@@ -49,7 +49,7 @@
             image-rendering: crisp-edges;
             border: 4px solid #000;
             background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 100%);
-            object-fit: contain;
+            z-index: 1;
         }
         
         #hud {
@@ -64,6 +64,8 @@
             display: flex;
             justify-content: space-between;
             pointer-events: none;
+            z-index: 1000;
+            background: rgba(0, 255, 0, 0.3); /* Temporary debug background */
         }
         
         #mobileControls {
@@ -77,6 +79,8 @@
             padding: 10px;
             pointer-events: auto;
             max-width: calc(100vw - 20px);
+            z-index: 1000;
+            background: rgba(255, 0, 0, 0.3); /* Temporary debug background */
         }
         
         .controlGroup {
@@ -123,6 +127,7 @@
             max-width: 100vw;
             max-height: 100vh;
             overflow: hidden;
+            z-index: 2000;
         }
         
         #startScreen h1 {
@@ -370,7 +375,7 @@
         // Player
         let player = {
             x: 50,
-            y: 300,
+            y: 360,
             width: 16,
             height: 24,
             vx: 0,
@@ -611,7 +616,7 @@
             let levelLength = 100 + levelNum * 50;
             
             // Starting platform
-            platforms.push({ x: 0, y: 380, width: 100, height: 100, type: 'ground' });
+            platforms.push({ x: 0, y: 376, width: 100, height: 100, type: 'ground' });
             
             // Generate winding mountain path
             for (let i = 0; i < levelLength; i++) {
@@ -663,7 +668,7 @@
             
             // Reset player
             player.x = 50;
-            player.y = 355;
+            player.y = 360;
             player.vx = 0;
             player.vy = 0;
             player.onGround = false;
@@ -790,7 +795,7 @@
                     gameOver();
                 } else {
                     player.x = 50;
-                    player.y = 355;
+                    player.y = 360;
                     player.vx = 0;
                     player.vy = 0;
                     player.onGround = false;
@@ -990,6 +995,11 @@
             document.body.style.height = '100vh';
             document.documentElement.style.width = '100vw';
             document.body.style.width = '100vw';
+            
+            // Debug: Log container dimensions
+            const container = document.getElementById('gameContainer');
+            console.log('Container dimensions:', container.offsetWidth, container.offsetHeight);
+            console.log('Viewport dimensions:', window.innerWidth, window.innerHeight);
         }
         
         // Call on load and resize
