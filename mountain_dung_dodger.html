@@ -451,20 +451,15 @@
             mathExerciseCount = 0;
             mathCorrectAnswers = 0;
             
-            // Debug logging
-            console.log('Starting math exercise with difficulty:', selectedDifficulty);
-            
             currentMathProblem = generateMathProblem(selectedDifficulty);
             
             // Ensure the math problem is properly displayed
             if (currentMathProblem && currentMathProblem.problem) {
                 document.getElementById('mathProblem').textContent = currentMathProblem.problem;
-                console.log('Math problem set:', currentMathProblem.problem);
             } else {
                 // Fallback if problem generation fails
                 currentMathProblem = { problem: "5 + 3 = ?", answer: 8 };
                 document.getElementById('mathProblem').textContent = currentMathProblem.problem;
-                console.log('Fallback math problem set:', currentMathProblem.problem);
             }
             
             document.getElementById('mathAnswer').value = '';
@@ -542,9 +537,6 @@
                 player.vx = 0;
                 player.vy = 0;
                 player.onGround = false; // Let collision detection set this
-                
-                // Debug logging
-                console.log('Player position reset after math session:', player.x, player.y, 'onGround:', player.onGround);
             }
         }
         
