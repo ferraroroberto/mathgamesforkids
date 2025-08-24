@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Retro 80s Game Collection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2C3E50 0%, #34495E 50%, #2C3E50 100%);
+            font-family: 'Courier New', monospace;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            border: 3px solid #FFD700;
+            box-shadow: 0 8px 0 #B8860B, inset 0 0 20px rgba(255, 215, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 48px;
+            color: #FFD700;
+            text-shadow: 4px 4px 0 #000, 8px 8px 0 #B8860B;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            font-size: 18px;
+            color: #87CEEB;
+            text-shadow: 2px 2px 0 #000;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Game Grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .game-card {
+            background: rgba(0, 0, 0, 0.7);
+            border: 4px solid #4CAF50;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 0 #2E7D32, inset 0 0 20px rgba(76, 175, 80, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .game-card:hover::before {
+            left: 100%;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 0 #2E7D32, 0 0 30px rgba(76, 175, 80, 0.3);
+            border-color: #66BB6A;
+        }
+
+        .game-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: #FFD700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #2C3E50;
+            box-shadow: 0 4px 0 #B8860B, inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .game-title {
+            font-size: 24px;
+            color: #FFD700;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .game-description {
+            font-size: 14px;
+            color: #B0BEC5;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .play-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #4CAF50, #66BB6A);
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            border: 3px solid #2E7D32;
+            box-shadow: 0 4px 0 #2E7D32;
+            transition: all 0.2s ease;
+            font-family: 'Courier New', monospace;
+        }
+
+        .play-button:hover {
+            background: linear-gradient(45deg, #66BB6A, #81C784);
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #2E7D32;
+        }
+
+        .play-button:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #2E7D32;
+        }
+
+        /* Coming Soon Card */
+        .coming-soon {
+            background: rgba(0, 0, 0, 0.5);
+            border: 4px dashed #FF9800;
+            opacity: 0.7;
+        }
+
+        .coming-soon .game-icon {
+            background: #FF9800;
+            box-shadow: 0 4px 0 #E68900, inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .coming-soon .game-title {
+            color: #FF9800;
+        }
+
+        .coming-soon .play-button {
+            background: linear-gradient(45deg, #FF9800, #FFB74D);
+            border-color: #E68900;
+            box-shadow: 0 4px 0 #E68900;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 30px 0;
+            color: #95A5A6;
+            font-size: 14px;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 36px;
+            }
+            
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .game-card {
+                padding: 20px;
+            }
+        }
+
+        /* Retro Scan Lines Effect */
+        .scan-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+        }
+
+        /* Glitch Effect */
+        .glitch {
+            animation: glitch 2s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="scan-lines"></div>
+    
+    <div class="container">
+        <header class="header">
+            <h1 class="glitch">🎮 RETRO 80s GAME COLLECTION 🎮</h1>
+            <p>Welcome to the ultimate collection of retro-style educational games! Experience the nostalgia of the 80s while learning and having fun.</p>
+        </header>
+
+        <div class="games-grid">
+            <!-- Mountain Dung Dodger Game -->
+            <div class="game-card">
+                <div class="game-icon">🏔️</div>
+                <h2 class="game-title">Mountain Dung Dodger - Math Edition</h2>
+                <p class="game-description">
+                    Climb mountains, dodge cow dung, and solve math problems in this exciting platformer! 
+                    Choose your grade level (1-5) and test your math skills while having fun. 
+                    Perfect for students learning addition, subtraction, and multiplication.
+                </p>
+                <a href="mountain_dung_dodger.html" class="play-button">PLAY NOW</a>
+            </div>
+
+            <!-- Coming Soon Games -->
+            <div class="game-card coming-soon">
+                <div class="game-icon">🚀</div>
+                <h2 class="game-title">Space Math Explorer</h2>
+                <p class="game-description">
+                    Blast off into space and solve math problems to navigate through asteroid fields! 
+                    Coming soon with geometry and advanced math challenges.
+                </p>
+                <span class="play-button">COMING SOON</span>
+            </div>
+
+            <div class="game-card coming-soon">
+                <div class="game-icon">🏰</div>
+                <h2 class="game-title">Castle Quest - History Edition</h2>
+                <p class="game-description">
+                    Explore medieval castles while learning about history and solving puzzles! 
+                    Coming soon with interactive historical facts and educational content.
+                </p>
+                <span class="play-button">COMING SOON</span>
+            </div>
+
+            <div class="game-card coming-soon">
+                <div class="game-icon">🌍</div>
+                <h2 class="game-title">World Geography Challenge</h2>
+                <p class="game-description">
+                    Travel around the world and learn about countries, capitals, and cultures! 
+                    Coming soon with interactive maps and geography quizzes.
+                </p>
+                <span class="play-button">COMING SOON</span>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>🎯 Educational Gaming for the Modern Age 🎯</p>
+            <p>Built with HTML5, CSS3, and JavaScript - No external dependencies!</p>
+        </footer>
+    </div>
+
+    <script>
+        // Add some retro 80s interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover sound effect simulation
+            const gameCards = document.querySelectorAll('.game-card:not(.coming-soon)');
+            
+            gameCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    // Simulate retro hover effect
+                    this.style.transform = 'translateY(-5px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // Add glitch effect to header on hover
+            const header = document.querySelector('.header h1');
+            header.addEventListener('mouseenter', function() {
+                this.classList.add('glitch');
+            });
+            
+            header.addEventListener('mouseleave', function() {
+                this.classList.remove('glitch');
+            });
+
+            // Add retro click effect to play buttons
+            const playButtons = document.querySelectorAll('.play-button');
+            playButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    if (this.textContent === 'COMING SOON') {
+                        e.preventDefault();
+                        return;
+                    }
+                    
+                    // Add retro click animation
+                    this.style.transform = 'translateY(4px) scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = 'translateY(0) scale(1)';
+                    }, 150);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
