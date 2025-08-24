@@ -149,29 +149,7 @@
             box-shadow: 0 0 0 #2E7D32;
         }
 
-        /* Coming Soon Card */
-        .coming-soon {
-            background: rgba(0, 0, 0, 0.5);
-            border: 4px dashed #FF9800;
-            opacity: 0.7;
-        }
 
-        .coming-soon .game-icon {
-            background: #FF9800;
-            box-shadow: 0 4px 0 #E68900, inset 0 0 15px rgba(255, 255, 255, 0.3);
-        }
-
-        .coming-soon .game-title {
-            color: #FF9800;
-        }
-
-        .coming-soon .play-button {
-            background: linear-gradient(45deg, #FF9800, #FFB74D);
-            border-color: #E68900;
-            box-shadow: 0 4px 0 #E68900;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
 
         /* Footer */
         .footer {
@@ -252,37 +230,6 @@
                 </p>
                 <a href="mountain_dung_dodger.html" class="play-button">PLAY NOW</a>
             </div>
-
-            <!-- Coming Soon Games -->
-            <div class="game-card coming-soon">
-                <div class="game-icon">🚀</div>
-                <h2 class="game-title">Space Math Explorer</h2>
-                <p class="game-description">
-                    Blast off into space and solve math problems to navigate through asteroid fields! 
-                    Coming soon with geometry and advanced math challenges.
-                </p>
-                <span class="play-button">COMING SOON</span>
-            </div>
-
-            <div class="game-card coming-soon">
-                <div class="game-icon">🏰</div>
-                <h2 class="game-title">Castle Quest - History Edition</h2>
-                <p class="game-description">
-                    Explore medieval castles while learning about history and solving puzzles! 
-                    Coming soon with interactive historical facts and educational content.
-                </p>
-                <span class="play-button">COMING SOON</span>
-            </div>
-
-            <div class="game-card coming-soon">
-                <div class="game-icon">🌍</div>
-                <h2 class="game-title">World Geography Challenge</h2>
-                <p class="game-description">
-                    Travel around the world and learn about countries, capitals, and cultures! 
-                    Coming soon with interactive maps and geography quizzes.
-                </p>
-                <span class="play-button">COMING SOON</span>
-            </div>
         </div>
 
         <footer class="footer">
@@ -295,7 +242,7 @@
         // Add some retro 80s interactive effects
         document.addEventListener('DOMContentLoaded', function() {
             // Add hover sound effect simulation
-            const gameCards = document.querySelectorAll('.game-card:not(.coming-soon)');
+            const gameCards = document.querySelectorAll('.game-card');
             
             gameCards.forEach(card => {
                 card.addEventListener('mouseenter', function() {
@@ -322,11 +269,6 @@
             const playButtons = document.querySelectorAll('.play-button');
             playButtons.forEach(button => {
                 button.addEventListener('click', function(e) {
-                    if (this.textContent === 'COMING SOON') {
-                        e.preventDefault();
-                        return;
-                    }
-                    
                     // Add retro click animation
                     this.style.transform = 'translateY(4px) scale(0.95)';
                     setTimeout(() => {
