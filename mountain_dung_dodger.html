@@ -328,7 +328,7 @@
         // Player
         let player = {
             x: 50,
-            y: 300,
+            y: 355, // Position player slightly above the starting platform for proper collision detection
             width: 16,
             height: 24,
             vx: 0,
@@ -621,7 +621,7 @@
             
             // Reset player
             player.x = 50;
-            player.y = 350;
+            player.y = 355; // Position player slightly above the starting platform for proper collision detection
             player.vx = 0;
             player.vy = 0;
             player.onGround = false;
@@ -663,8 +663,8 @@
                     player.y < plat.y + plat.height &&
                     player.y + player.height > plat.y) {
                     
-                    // Top collision
-                    if (player.vy > 0 && player.y < plat.y - player.height + 10) {
+                    // Top collision - player landing on platform
+                    if (player.vy > 0 && player.y < plat.y) {
                         player.y = plat.y - player.height;
                         player.vy = 0;
                         player.onGround = true;
@@ -748,7 +748,7 @@
                     gameOver();
                 } else {
                     player.x = 50;
-                    player.y = 350;
+                    player.y = 355; // Position player slightly above the starting platform for proper collision detection
                     player.vx = 0;
                     player.vy = 0;
                     player.onGround = false;
