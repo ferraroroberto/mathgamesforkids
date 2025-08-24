@@ -1,1342 +1,341 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  />
-  <title>ELEMENTAL DUEL - 80s Arcade</title>
-  <style>
-    @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      font-family: "Press Start 2P", monospace;
-      background: linear-gradient(180deg, #0a0a0a 0%, #1a0033 50%, #330066 100%);
-      color: #00ff00;
-      height: 100vh;
-      overflow: hidden;
-      position: relative;
-    }
-
-    body::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        rgba(0, 255, 0, 0.03) 0px,
-        transparent 1px,
-        transparent 2px,
-        rgba(0, 255, 0, 0.03) 3px
-      );
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .screen {
-      display: none;
-      position: absolute;
-      inset: 0;
-      padding: 20px;
-      animation: screenGlow 0.1s;
-      z-index: 2;
-    }
-
-    .screen.active {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    @keyframes screenGlow {
-      0% {
-        filter: brightness(0);
-      }
-      50% {
-        filter: brightness(1.5);
-      }
-      100% {
-        filter: brightness(1);
-      }
-    }
-
-    /* Title Screen */
-    .title-screen h1 {
-      font-size: clamp(24px, 8vw, 48px);
-      color: #ff00ff;
-      text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff,
-        2px 2px 0 #330066;
-      margin-bottom: 30px;
-      animation: titlePulse 2s infinite;
-      text-align: center;
-    }
-
-    @keyframes titlePulse {
-      0%,
-      100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.05);
-      }
-    }
-
-    .backstory {
-      max-width: 600px;
-      text-align: center;
-      line-height: 1.8;
-      font-size: clamp(10px, 2.5vw, 14px);
-      color: #00ffff;
-      margin: 30px 0;
-      padding: 20px;
-      border: 2px solid #00ffff;
-      background: rgba(0, 0, 0, 0.8);
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-    }
-
-    .btn {
-      padding: 15px 30px;
-      font-size: clamp(12px, 3vw, 16px);
-      background: linear-gradient(180deg, #ff00ff 0%, #660066 100%);
-      color: #ffffff;
-      border: 3px solid #ff00ff;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      transition: all 0.3s;
-      font-family: inherit;
-      margin: 10px;
-      box-shadow: 0 4px 0 #330033;
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 0 #330033, 0 0 20px #ff00ff;
-    }
-
-    .btn:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px 0 #330033;
-    }
-
-    /* Game HUD */
-    .game-hud {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      right: 20px;
-      display: flex;
-      justify-content: space-between;
-      z-index: 10;
-    }
-
-    .hud-section {
-      background: rgba(0, 0, 0, 0.9);
-      border: 2px solid #00ff00;
-      padding: 10px;
-      min-width: 150px;
-    }
-
-    .hud-label {
-      font-size: 10px;
-      color: #00ff00;
-      margin-bottom: 5px;
-    }
-
-    .hp-bar {
-      width: 100%;
-      height: 20px;
-      background: #003300;
-      border: 1px solid #00ff00;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hp-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #00ff00, #00ff00);
-      transition: width 0.3s;
-      box-shadow: 0 0 10px #00ff00;
-    }
-
-    .hp-text {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      color: white;
-      text-shadow: 1px 1px 0 black;
-    }
-
-    .arena {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      margin: 120px 0 80px 0;
-      width: 100%;
-      max-width: 800px;
-    }
-
-    .fighter {
-      text-align: center;
-      animation: idle 1s infinite;
-    }
-
-    @keyframes idle {
-      0%,
-      100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-5px);
-      }
-    }
-
-    .fighter-sprite {
-      font-size: clamp(60px, 15vw, 120px);
-      margin-bottom: 20px;
-      filter: drop-shadow(0 0 20px currentColor);
-    }
-
-    .player .fighter-sprite {
-      color: #00ff00;
-    }
-
-    .enemy .fighter-sprite {
-      color: #ff0000;
-    }
-
-    .fighter-name {
-      font-size: clamp(10px, 2.5vw, 14px);
-      margin-bottom: 10px;
-    }
-
-    .fighter.damage {
-      animation: takeDamage 0.5s;
-    }
-
-    @keyframes takeDamage {
-      0%,
-      100% {
-        transform: translateX(0);
-        filter: brightness(1) hue-rotate(0deg);
-      }
-      20% {
-        transform: translateX(-10px);
-        filter: brightness(2) hue-rotate(180deg);
-      }
-      40% {
-        transform: translateX(10px);
-        filter: brightness(0.5) hue-rotate(90deg);
-      }
-      60% {
-        transform: translateX(-5px);
-        filter: brightness(1.5) hue-rotate(270deg);
-      }
-      80% {
-        transform: translateX(5px);
-        filter: brightness(1) hue-rotate(45deg);
-      }
-    }
-
-    .vs-text {
-      font-size: clamp(20px, 5vw, 32px);
-      color: #ffff00;
-      text-shadow: 0 0 20px #ffff00;
-      animation: vsPulse 1s infinite;
-    }
-
-    @keyframes vsPulse {
-      0%,
-      100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.2);
-      }
-    }
-
-    .element-controls {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      max-width: 400px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    .element-btn {
-      padding: 20px;
-      font-size: clamp(14px, 3.5vw, 18px);
-      border: 3px solid;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.3s;
-      text-transform: uppercase;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .element-btn::before {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      transition: all 0.3s;
-    }
-
-    .element-btn:hover::before {
-      width: 100%;
-      height: 100%;
-    }
-
-    .element-btn.fire {
-      background: linear-gradient(135deg, #ff6600 0%, #ff0000 100%);
-      border-color: #ff0000;
-      color: white;
-    }
-    .element-btn.fire::before {
-      background: rgba(255, 255, 0, 0.3);
-    }
-
-    .element-btn.water {
-      background: linear-gradient(135deg, #0099ff 0%, #0033ff 100%);
-      border-color: #0033ff;
-      color: white;
-    }
-    .element-btn.water::before {
-      background: rgba(0, 255, 255, 0.3);
-    }
-
-    .element-btn.earth {
-      background: linear-gradient(135deg, #996633 0%, #663300 100%);
-      border-color: #663300;
-      color: white;
-    }
-    .element-btn.earth::before {
-      background: rgba(255, 255, 0, 0.3);
-    }
-
-    .element-btn.air {
-      background: linear-gradient(135deg, #cccccc 0%, #666666 100%);
-      border-color: #666666;
-      color: white;
-    }
-    .element-btn.air::before {
-      background: rgba(255, 255, 255, 0.3);
-    }
-
-    .element-btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 30px currentColor;
-    }
-
-    .element-btn:active {
-      transform: scale(0.95);
-    }
-
-    .element-btn span {
-      position: relative;
-      z-index: 1;
-    }
-
-    .element-btn .shortcut {
-      display: block;
-      font-size: 10px;
-      margin-top: 5px;
-      opacity: 0.8;
-    }
-
-    /* Tutorial */
-    .tutorial-content {
-      background: rgba(0, 0, 0, 0.95);
-      border: 3px solid #00ffff;
-      padding: 30px;
-      max-width: 600px;
-      text-align: center;
-      box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
-    }
-
-    .tutorial-content h2 {
-      color: #ffff00;
-      margin-bottom: 20px;
-      font-size: clamp(16px, 4vw, 24px);
-    }
-
-    .tutorial-content p {
-      line-height: 1.8;
-      margin: 15px 0;
-      font-size: clamp(10px, 2.5vw, 12px);
-    }
-
-    .element-chart {
-      margin: 20px 0;
-      padding: 20px;
-      background: rgba(0, 255, 0, 0.1);
-      border: 1px solid #00ff00;
-    }
-
-    .element-rule {
-      margin: 10px 0;
-      color: #00ff00;
-      text-align: center;
-    }
-
-    /* Level Complete */
-    .level-complete h2 {
-      font-size: clamp(24px, 6vw, 36px);
-      color: #00ff00;
-      margin-bottom: 30px;
-      text-shadow: 0 0 20px #00ff00;
-      animation: completePulse 1s infinite;
-      text-align: center;
-    }
-
-    @keyframes completePulse {
-      0%,
-      100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.1);
-      }
-    }
-
-    .stats {
-      background: rgba(0, 0, 0, 0.8);
-      border: 2px solid #00ff00;
-      padding: 20px;
-      margin: 20px 0;
-      font-size: clamp(10px, 2.5vw, 14px);
-      width: min(560px, 90vw);
-    }
-
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      margin: 10px 0;
-    }
-
-    .stat-label {
-      color: #00ffff;
-    }
-
-    .stat-value {
-      color: #ffff00;
-    }
-
-    /* Result Display */
-    .result-display {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: clamp(24px, 6vw, 48px);
-      font-weight: bold;
-      z-index: 100;
-      pointer-events: none;
-      animation: resultPop 1s ease-out forwards;
-      text-align: center;
-    }
-
-    @keyframes resultPop {
-      0% {
-        transform: translate(-50%, -50%) scale(0);
-        opacity: 0;
-      }
-      50% {
-        transform: translate(-50%, -50%) scale(1.5);
-        opacity: 1;
-      }
-      100% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 0;
-      }
-    }
-
-    .result-display.win {
-      color: #00ff00;
-      text-shadow: 0 0 30px #00ff00;
-    }
-
-    .result-display.lose {
-      color: #ff0000;
-      text-shadow: 0 0 30px #ff0000;
-    }
-
-    .result-display.draw {
-      color: #ffff00;
-      text-shadow: 0 0 30px #ffff00;
-    }
-
-    /* Integration Placeholder */
-    .integration-placeholder {
-      background: rgba(0, 0, 0, 0.95);
-      border: 3px solid #ff00ff;
-      padding: 30px;
-      max-width: 500px;
-      text-align: center;
-      box-shadow: 0 0 30px rgba(255, 0, 255, 0.5);
-    }
-
-    .integration-placeholder h2 {
-      color: #ff00ff;
-      margin-bottom: 20px;
-      font-size: clamp(16px, 4vw, 24px);
-      animation: integrationPulse 2s infinite;
-      text-align: center;
-    }
-
-    @keyframes integrationPulse {
-      0%,
-      100% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0.5;
-      }
-    }
-
-    .sound-toggle {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.8);
-      border: 2px solid #00ff00;
-      padding: 10px;
-      cursor: pointer;
-      font-size: 20px;
-      z-index: 100;
-    }
-
-    .choice-display {
-      position: absolute;
-      top: 200px;
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      opacity: 0;
-      transition: opacity 0.3s;
-      pointer-events: none;
-    }
-
-    .choice-display.show {
-      opacity: 1;
-    }
-
-    .choice-indicator {
-      padding: 20px;
-      background: rgba(0, 0, 0, 0.9);
-      border: 3px solid;
-      border-radius: 10px;
-      font-size: clamp(14px, 3.5vw, 20px);
-      text-transform: uppercase;
-      min-width: 120px;
-      text-align: center;
-    }
-
-    .choice-indicator.fire {
-      border-color: #ff0000;
-      color: #ff6600;
-      box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
-    }
-
-    .choice-indicator.water {
-      border-color: #0033ff;
-      color: #0099ff;
-      box-shadow: 0 0 20px rgba(0, 51, 255, 0.5);
-    }
-
-    .choice-indicator.earth {
-      border-color: #663300;
-      color: #996633;
-      box-shadow: 0 0 20px rgba(102, 51, 0, 0.5);
-    }
-
-    .choice-indicator.air {
-      border-color: #666666;
-      color: #cccccc;
-      box-shadow: 0 0 20px rgba(102, 102, 102, 0.5);
-    }
-
-    /* Debug panel */
-    .debug-panel {
-      position: absolute;
-      left: 20px;
-      bottom: 20px;
-      background: rgba(0, 0, 0, 0.85);
-      border: 2px dashed #00ffff;
-      padding: 10px;
-      font-size: 10px;
-      line-height: 1.6;
-      display: none;
-      z-index: 200;
-      min-width: 220px;
-    }
-    .debug-panel.show {
-      display: block;
-    }
-
-    /* Mobile responsiveness */
-    @media (max-width: 600px) {
-      .element-controls {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-      }
-
-      .arena {
-        margin: 100px 0 60px 0;
-      }
-
-      .fighter-sprite {
-        font-size: 60px;
-      }
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<title>Elemental Runner — 80s Mobile</title>
+<style>
+  html, body { margin:0; padding:0; background:#101018; height:100%; font-family:system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  #wrap { position:fixed; inset:0; display:flex; flex-direction:column; }
+  #hud {
+    height:48px; min-height:48px; color:#eee; background:#161626; display:flex; align-items:center; gap:12px; padding:0 12px;
+    font-weight:600; letter-spacing:.5px; user-select:none;
+  }
+  #hud .pill { padding:4px 10px; border-radius:8px; background:#23233a; }
+  #hud .hearts { letter-spacing:2px; }
+  #hud .score { margin-left:auto; }
+  #game { flex:1; position:relative; background:#0d0d16; }
+  canvas { width:100%; height:100%; image-rendering: pixelated; image-rendering: crisp-edges; }
+  #controls {
+    height:28vh; min-height:140px; background:linear-gradient(180deg,#141428,#0c0c18);
+    display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:12px; touch-action:none; user-select:none;
+  }
+  .cluster { display:flex; gap:12px; align-items:center; justify-content:center; }
+  .btn {
+    flex:1; padding:16px; border-radius:14px; background:#22223a; color:#eaeaff; font-size:18px; font-weight:700;
+    border:2px solid #2f2f52; box-shadow:0 6px 0 #121225; text-align:center;
+  }
+  .btn:active { transform:translateY(2px); box-shadow:0 4px 0 #121225; }
+  .btn.small { flex:0 0 46%; font-size:16px; padding:14px; }
+  .hint { position:absolute; bottom:30vh; left:50%; transform:translateX(-50%); color:#9aa; font-size:12px; opacity:.6; }
+  /* Element chips */
+  .chip { display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; background:#202038; }
+  .dot { width:12px; height:12px; border-radius:50%; display:inline-block; }
+</style>
 </head>
 <body>
-  <!-- Sound Toggle -->
-  <div class="sound-toggle" onclick="game.toggleSound()" id="soundToggle">🔊</div>
-
-  <!-- Title Screen -->
-  <div class="screen title-screen active" id="titleScreen">
-    <h1>ELEMENTAL DUEL</h1>
-    <div class="backstory">
-      <p>THE YEAR IS 2084.</p>
-      <p>THE ROBOT OVERLORD HAS CONQUERED EARTH.</p>
-      <p>YOU ARE THE LAST WARRIOR WITH MASTERY OF THE ELEMENTS.</p>
-      <p>DEFEAT THE ROBOT IN ELEMENTAL COMBAT TO SAVE HUMANITY!</p>
-    </div>
-    <button class="btn" onclick="game.showTutorial()">START GAME</button>
+<div id="wrap">
+  <div id="hud">
+    <span id="elemChip" class="chip">
+      <span class="dot" id="elemDot"></span>
+      <span id="elemName">FIRE</span>
+    </span>
+    <span class="pill">Rule: Fire→Earth→Air→Water→Fire</span>
+    <span class="pill hearts" id="hearts">❤❤❤</span>
+    <span class="pill score" id="score">0</span>
   </div>
-
-  <!-- Tutorial Screen -->
-  <div class="screen tutorial-screen" id="tutorialScreen">
-    <div class="tutorial-content">
-      <h2>HOW TO PLAY</h2>
-      <p>MASTER THE FOUR ELEMENTS TO DEFEAT YOUR ENEMY!</p>
-      <div class="element-chart">
-        <div class="element-rule">🔥 FIRE BEATS EARTH 🪨</div>
-        <div class="element-rule">🪨 EARTH BEATS AIR 💨</div>
-        <div class="element-rule">💨 AIR BEATS WATER 💧</div>
-        <div class="element-rule">💧 WATER BEATS FIRE 🔥</div>
-      </div>
-      <p>CHOOSE YOUR ELEMENT EACH TURN</p>
-      <p>COUNTER THE ROBOT'S ELEMENT TO DEAL DAMAGE</p>
-      <p>USE BUTTONS OR KEYBOARD SHORTCUTS (1–4)</p>
-      <button class="btn" onclick="game.startGame()">BEGIN DUEL</button>
+  <div id="game">
+    <canvas id="c"></canvas>
+    <div class="hint">Short-tap POWER to switch element • Hold POWER to cast</div>
+  </div>
+  <div id="controls">
+    <div class="cluster">
+      <button class="btn small" id="left">◀ LEFT</button>
+      <button class="btn small" id="right">RIGHT ▶</button>
+    </div>
+    <div class="cluster">
+      <button class="btn small" id="jump">JUMP ⤴</button>
+      <button class="btn small" id="power">POWER ✦</button>
     </div>
   </div>
+</div>
 
-  <!-- Game Screen -->
-  <div class="screen game-screen" id="gameScreen">
-    <div class="game-hud">
-      <div class="hud-section">
-        <div class="hud-label">WARRIOR</div>
-        <div class="hp-bar">
-          <div class="hp-fill" id="playerHp" style="width: 100%"></div>
-          <div class="hp-text" id="playerHpText">100/100</div>
-        </div>
-      </div>
-      <div
-        class="hud-section"
-        style="background: transparent; border: none; text-align: center"
-      >
-        <div style="color: #ffff00; font-size: 16px">
-          LEVEL <span id="currentLevel">1</span>
-        </div>
-      </div>
-      <div class="hud-section">
-        <div class="hud-label">ROBOT</div>
-        <div class="hp-bar">
-          <div
-            class="hp-fill"
-            id="enemyHp"
-            style="width: 100%; background: linear-gradient(90deg, #ff0000, #ff0000)"
-          ></div>
-          <div class="hp-text" id="enemyHpText">100/100</div>
-        </div>
-      </div>
-    </div>
+<script>
+(function(){
+  // --- Canvas & sizing ---
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  function resize(){ canvas.width = Math.floor(window.innerWidth / 2); canvas.height = Math.floor((window.innerHeight*0.72) / 2); }
+  window.addEventListener('resize', resize, {passive:true}); resize();
 
-    <div class="choice-display" id="choiceDisplay">
-      <div class="choice-indicator" id="playerChoice"></div>
-      <div class="vs-text">VS</div>
-      <div class="choice-indicator" id="enemyChoice"></div>
-    </div>
+  // --- Elements & colors ---
+  const ELEMENTS = [
+    {name:'FIRE',   key:'F', color:'#ff5b3a', beats:'EARTH'},
+    {name:'EARTH',  key:'E', color:'#8cc84b', beats:'AIR'},
+    {name:'AIR',    key:'A', color:'#e0e6ff', beats:'WATER'},
+    {name:'WATER',  key:'W', color:'#35a7ff', beats:'FIRE'},
+  ];
+  let elemIndex = 0;
+  const elemNameEl = document.getElementById('elemName');
+  const elemDotEl  = document.getElementById('elemDot');
+  function updateElemHUD(){
+    const e = ELEMENTS[elemIndex];
+    elemNameEl.textContent = e.name;
+    elemDotEl.style.background = e.color;
+  }
+  updateElemHUD();
 
-    <div class="arena">
-      <div class="fighter player" id="player">
-        <div class="fighter-sprite">⚔️</div>
-        <div class="fighter-name">WARRIOR</div>
-      </div>
-      <div class="vs-text">VS</div>
-      <div class="fighter enemy" id="enemy">
-        <div class="fighter-sprite">🤖</div>
-        <div class="fighter-name">ROBOT</div>
-      </div>
-    </div>
+  // --- HUD ---
+  const heartsEl = document.getElementById('hearts');
+  const scoreEl  = document.getElementById('score');
+  let score = 0;
+  let hearts = 3;
+  function updateHUD(){ heartsEl.textContent = '❤'.repeat(hearts); scoreEl.textContent = score; }
+  updateHUD();
 
-    <div class="element-controls">
-      <button class="element-btn fire" onclick="game.playerChoice('fire')">
-        <span>🔥 FIRE<span class="shortcut">[1]</span></span>
-      </button>
-      <button class="element-btn water" onclick="game.playerChoice('water')">
-        <span>💧 WATER<span class="shortcut">[2]</span></span>
-      </button>
-      <button class="element-btn earth" onclick="game.playerChoice('earth')">
-        <span>🪨 EARTH<span class="shortcut">[3]</span></span>
-      </button>
-      <button class="element-btn air" onclick="game.playerChoice('air')">
-        <span>💨 AIR<span class="shortcut">[4]</span></span>
-      </button>
-    </div>
-  </div>
+  // --- World ---
+  const GROUND_Y = () => canvas.height - 28;  // ground line
+  let t = 0; // time
+  let speed = 1.3; // world scroll speed baseline; grows slowly
+  // Player
+  const player = {
+    x: 24, y: GROUND_Y()-16, w: 14, h: 16, vx:0, vy:0, onGround:true, invul:0
+  };
+  // Input
+  const input = { left:false, right:false, jump:false, powerTap:false, powerHold:false };
+  // Buttons
+  function bindBtn(id, onDown, onUp){
+    const el = document.getElementById(id);
+    let touchId = null;
+    const down = (e)=>{ e.preventDefault(); onDown(); };
+    const up   = (e)=>{ e.preventDefault(); onUp(); };
+    el.addEventListener('touchstart', e=>{ if(touchId!==null) return; touchId = true; down(e); }, {passive:false});
+    el.addEventListener('touchend',   e=>{ touchId=null; up(e); }, {passive:false});
+    el.addEventListener('touchcancel',e=>{ touchId=null; up(e); }, {passive:false});
+    el.addEventListener('mousedown', down);
+    el.addEventListener('mouseup',   up);
+    el.addEventListener('mouseleave',()=>{ if(touchId===null) up(new Event('mouseup')); });
+  }
+  bindBtn('left', ()=>input.left=true,  ()=>input.left=false);
+  bindBtn('right',()=>input.right=true, ()=>input.right=false);
+  bindBtn('jump', ()=>{ input.jump=true; }, ()=>{ input.jump=false; });
 
-  <!-- Level Complete Screen -->
-  <div class="screen level-complete-screen" id="levelCompleteScreen">
-    <h2>LEVEL COMPLETE!</h2>
-    <div class="stats">
-      <div class="stat-row">
-        <span class="stat-label">ROUNDS:</span>
-        <span class="stat-value" id="roundsPlayed">0</span>
-      </div>
-      <div class="stat-row">
-        <span class="stat-label">WINS:</span>
-        <span class="stat-value" id="roundsWon">0</span>
-      </div>
-      <div class="stat-row">
-        <span class="stat-label">ACCURACY:</span>
-        <span class="stat-value" id="accuracy">0%</span>
-      </div>
-    </div>
-    <button class="btn" onclick="game.showIntegration()">CONTINUE</button>
-  </div>
+  // Power button: short tap cycles element; long press casts
+  let powerDownAt = 0, casting = false;
+  bindBtn('power',
+    ()=>{ powerDownAt = performance.now(); casting=false; },
+    ()=>{
+      const dt = performance.now() - powerDownAt;
+      if(dt >= 250){ casting = true; tryCast(); } else { cycleElement(); }
+    }
+  );
+  function cycleElement(){ elemIndex = (elemIndex+1) % ELEMENTS.length; updateElemHUD(); }
 
-  <!-- Integration Placeholder Screen -->
-  <div class="screen integration-screen" id="integrationScreen">
-    <div class="integration-placeholder">
-      <h2>CHALLENGE INCOMING...</h2>
-      <p style="color: #ff00ff; margin: 20px 0">PREPARING NEXT BATTLE</p>
-      <p style="color: #00ffff; font-size: 10px">[ Integration Hook Active ]</p>
-      <button class="btn" onclick="game.nextLevel()">PROCEED</button>
-    </div>
-  </div>
+  // Projectiles
+  const shots = []; // {x,y,vx,vy, from:'player'|'enemy', color}
+  function shoot(from, x,y, dir, color){
+    shots.push({x,y, vx: dir*2.4, vy:0, from, color});
+  }
 
-  <!-- Game Over Screen -->
-  <div class="screen game-over-screen" id="gameOverScreen">
-    <h2 style="color: #ff0000; font-size: 36px; margin-bottom: 30px">GAME OVER</h2>
-    <div class="stats">
-      <div class="stat-row">
-        <span class="stat-label">FINAL LEVEL:</span>
-        <span class="stat-value" id="finalLevel">1</span>
-      </div>
-      <div class="stat-row">
-        <span class="stat-label">TOTAL TIME:</span>
-        <span class="stat-value" id="totalTime">00:00</span>
-      </div>
-    </div>
-    <button class="btn" onclick="game.restart()">TRY AGAIN</button>
-  </div>
+  // Enemies
+  const robots = []; // {x,y,w,h, elem, speed, size}
+  let spawnTimer = 0;
+  function spawnRobot(){
+    const e = ELEMENTS[(Math.random()*ELEMENTS.length)|0];
+    const size = 1 + Math.min(1.2, score/120); // grows with score
+    const w=14*size, h=16*size;
+    robots.push({
+      x: canvas.width + 10, y: GROUND_Y()-h, w, h,
+      elem: e, speed: speed + Math.random()*0.6 + score/400, size
+    });
+  }
 
-  <!-- Victory Screen -->
-  <div class="screen victory-screen" id="victoryScreen">
-    <h2
-      style="
-        color: #00ff00;
-        font-size: 36px;
-        margin-bottom: 30px;
-        animation: victoryPulse 1s infinite;
-        text-align: center;
-      "
-    >
-      VICTORY!
-    </h2>
-    <div class="backstory">
-      <p>THE ROBOT OVERLORD HAS BEEN DEFEATED!</p>
-      <p>HUMANITY IS SAVED!</p>
-      <p>YOU ARE THE HERO OF EARTH!</p>
-    </div>
-    <div class="stats">
-      <div class="stat-row">
-        <span class="stat-label">TOTAL TIME:</span>
-        <span class="stat-value" id="victoryTime">00:00</span>
-      </div>
-      <div class="stat-row">
-        <span class="stat-label">OVERALL ACCURACY:</span>
-        <span class="stat-value" id="overallAccuracy">0%</span>
-      </div>
-    </div>
-    <button class="btn" onclick="game.restart()">PLAY AGAIN</button>
-  </div>
-
-  <!-- Debug Panel -->
-  <div class="debug-panel" id="debugPanel">
-    <div>DEBUG [toggle with D]</div>
-    <div>Level: <span id="dbgLevel">1</span></div>
-    <div>Player HP: <span id="dbgPhp">100</span></div>
-    <div>Enemy HP: <span id="dbgEhp">100</span></div>
-    <div>Last Player: <span id="dbgLastP">-</span></div>
-    <div>Last Enemy: <span id="dbgLastE">-</span></div>
-  </div>
-
-  <script>
-    // -------- Sound System --------
-    class SoundSystem {
-      constructor() {
-        this.enabled = true;
-        this.context = null;
-        this.initialized = false;
+  // Casting logic
+  function beats(aName, bName){ return ELEMENTS.find(e=>e.name===aName).beats === bName; }
+  function tryCast(){
+    // Find nearest robot in front within range
+    const range = 60;
+    const e = ELEMENTS[elemIndex];
+    let target = null, bestd = 9999;
+    for(const r of robots){
+      const dx = r.x - player.x;
+      if(dx >= -10 && dx <= range){
+        if(dx < bestd){ bestd = dx; target = r; }
       }
+    }
+    if(target){
+      if(beats(e.name, target.elem.name)){
+        // Good hit
+        score += Math.round(10 * target.size);
+        popText(target.x, target.y-8, '✔', '#8ef');
+        // Remove
+        robots.splice(robots.indexOf(target),1);
+      }else{
+        // Wrong: enemy shoots
+        enemyShoot(target);
+        popText(target.x, target.y-8, '✖', '#f88');
+      }
+    }else{
+      // No target: fire a short-range blast anyway (cosmetic)
+      shoot('player', player.x+player.w+2, player.y+player.h/2, 1, ELEMENTS[elemIndex].color);
+    }
+    updateHUD();
+  }
+  function enemyShoot(r){
+    shoot('enemy', r.x-2, r.y+r.h/2, -1, r.elem.color);
+  }
 
-      init() {
-        if (this.initialized) return;
-        try {
-          this.context = new (window.AudioContext || window.webkitAudioContext)();
-          this.initialized = true;
-        } catch (e) {
-          console.log("Web Audio API not supported");
+  // Pop text
+  const pops = []; // {x,y,txt,color,t}
+  function popText(x,y,txt,color){ pops.push({x,y,txt,color,t:0}); }
+
+  // Physics & game loop
+  function reset(){
+    robots.length = 0; shots.length = 0; pops.length = 0;
+    score=0; hearts=3; speed=1.3; t=0;
+    player.x=24; player.y=GROUND_Y()-player.h; player.vx=0; player.vy=0; player.onGround=true; player.invul=0;
+    updateHUD();
+  }
+
+  function step(){
+    t += 1/60;
+    ctx.imageSmoothingEnabled = false;
+
+    // Difficulty scaling
+    speed = 1.3 + Math.min(1.2, score/200);
+    spawnTimer -= 1/60;
+    if(spawnTimer <= 0){
+      spawnRobot();
+      const base = 1.6 - Math.min(1.0, score/250);
+      spawnTimer = base + Math.random()*0.8;
+    }
+
+    // Background
+    ctx.fillStyle = '#0d0d16'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    // Parallax stripes
+    ctx.fillStyle = '#0f0f1f'; for(let i=0;i<canvas.width;i+=24){ ctx.fillRect((i - (t*15)%24)|0, canvas.height-60, 6, 40); }
+    // Ground
+    ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, GROUND_Y(), canvas.width, 999);
+
+    // Input to velocity
+    const moveSpeed = 1.4;
+    player.vx = (input.right?moveSpeed:0) - (input.left?moveSpeed:0);
+    if(input.jump && player.onGround){ player.vy = -3.1; player.onGround=false; }
+
+    // Gravity
+    player.vy += 0.15;
+    player.y += player.vy;
+    if(player.y + player.h >= GROUND_Y()){ player.y = GROUND_Y()-player.h; player.vy=0; player.onGround=true; }
+
+    // Keep inside
+    if(player.x < 4) player.x = 4;
+    if(player.x > canvas.width*0.6) player.x = canvas.width*0.6;
+
+    // Draw player (shield + body + sword)
+    const flicker = player.invul>0 && ((t*30|0)%2===0);
+    if(!flicker){
+      // Shield (left)
+      ctx.fillStyle = '#b3b7ff'; ctx.fillRect(player.x-4, player.y+4, 4, 8);
+      // Body
+      ctx.fillStyle = '#ffd166'; ctx.fillRect(player.x, player.y, player.w, player.h);
+      // Helmet stripe
+      ctx.fillStyle = '#333'; ctx.fillRect(player.x+3, player.y+1, 8, 2);
+      // Sword
+      ctx.fillStyle = '#c0c4d8'; ctx.fillRect(player.x+player.w, player.y+6, 10, 2);
+    }
+
+    // Robots update & draw
+    for(let i=robots.length-1;i>=0;i--){
+      const r = robots[i];
+      r.x -= r.speed;
+      // Remove offscreen
+      if(r.x + r.w < -20){ robots.splice(i,1); continue; }
+      // Draw
+      ctx.fillStyle = '#23233a'; ctx.fillRect(r.x-2, r.y+r.h-3, r.w+4, 3); // shadow
+      ctx.fillStyle = r.elem.color; ctx.fillRect(r.x, r.y, r.w, r.h);
+      ctx.fillStyle = '#0b0b12'; ctx.fillRect(r.x+2, r.y+3, 4, 4); // eye
+      // Element letter
+      ctx.fillStyle = '#0b0b12'; ctx.font = '8px monospace'; ctx.fillText(r.elem.key, r.x+r.w-6, r.y+10);
+      // Contact: if robot touches player x-range, it stops to engage & may shoot occasionally
+      const inRange = (r.x - player.x) < 60 && (r.x - player.x) > -10;
+      if(inRange && Math.random()<0.005){ enemyShoot(r); }
+    }
+
+    // Shots
+    for(let i=shots.length-1;i>=0;i--){
+      const s = shots[i];
+      s.x += s.vx; s.y += s.vy;
+      // Draw
+      ctx.fillStyle = s.color; ctx.fillRect(s.x, s.y, 6, 2);
+      if(s.x < -20 || s.x > canvas.width+20){ shots.splice(i,1); continue; }
+      // Collisions
+      if(s.from==='player'){
+        for(let j=robots.length-1;j>=0;j--){
+          const r = robots[j];
+          if(s.x < r.x+r.w && s.x+6 > r.x && s.y < r.y+r.h && s.y+2 > r.y){
+            // Player bullet does small chip if wrong element (not instant kill here)
+            robots.splice(j,1);
+            score += 5;
+            shots.splice(i,1);
+            break;
+          }
         }
-      }
-
-      play(frequency, duration, type = "square") {
-        if (!this.enabled || !this.initialized) return;
-
-        try {
-          const oscillator = this.context.createOscillator();
-          const gainNode = this.context.createGain();
-
-          oscillator.connect(gainNode);
-          gainNode.connect(this.context.destination);
-
-          oscillator.frequency.value = frequency;
-          oscillator.type = type;
-
-          const now = this.context.currentTime;
-          gainNode.gain.setValueAtTime(0.25, now);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, now + duration);
-
-          oscillator.start(now);
-          oscillator.stop(now + duration);
-        } catch (e) {
-          console.log("Sound error:", e);
+      }else{
+        // Enemy hit player
+        if(s.x < player.x+player.w && s.x+6 > player.x && s.y < player.y+player.h && s.y+2 > player.y){
+          shots.splice(i,1);
+          if(player.invul<=0){
+            hearts -= 1; updateHUD();
+            player.invul = 1.4; // seconds
+            popText(player.x, player.y-6, '-1', '#f77');
+            if(hearts<=0){ gameOver(); return; }
+          }
         }
-      }
-
-      playHit() {
-        this.play(220, 0.12);
-        setTimeout(() => this.play(160, 0.08), 50);
-      }
-
-      playWin() {
-        this.play(420, 0.08);
-        setTimeout(() => this.play(640, 0.08), 90);
-        setTimeout(() => this.play(820, 0.18), 180);
-      }
-
-      playLose() {
-        this.play(320, 0.08);
-        setTimeout(() => this.play(260, 0.08), 90);
-        setTimeout(() => this.play(200, 0.22), 180);
-      }
-
-      playDraw() {
-        this.play(440, 0.06);
-        setTimeout(() => this.play(440, 0.06), 130);
-      }
-
-      playLevelComplete() {
-        for (let i = 0; i < 5; i++) {
-          setTimeout(() => this.play(440 + i * 100, 0.08), i * 100);
-        }
-      }
-
-      playGameOver() {
-        for (let i = 0; i < 4; i++) {
-          setTimeout(() => this.play(420 - i * 60, 0.18), i * 150);
-        }
-      }
-
-      toggle() {
-        this.enabled = !this.enabled;
-        return this.enabled;
       }
     }
 
-    // -------- Game --------
-    class ElementalDuel {
-      constructor() {
-        // Core state
-        this.sound = new SoundSystem();
-        this.currentScreen = "title";
-        this.level = 1;
-        this.maxLevel = 5;
-        this.playerMaxHp = 100;
-        this.enemyBaseHp = 100; // scales with level
-        this.resetHp();
-        this.roundsPlayed = 0;
-        this.roundsWon = 0;
-        this.totalRounds = 0;
-        this.totalWins = 0;
-        this.startTime = null;
-        this.isProcessing = false;
-        this.paused = false;
+    // Invulnerability timer
+    if(player.invul>0) player.invul -= 1/60;
 
-        // Elements
-        this.elements = ["fire", "water", "earth", "air"];
-        this.elementIcons = {
-          fire: "🔥",
-          water: "💧",
-          earth: "🪨",
-          air: "💨",
-        };
-        // Win chain per tutorial:
-        // fire > earth > air > water > fire
-        this.winConditions = {
-          fire: "earth",
-          earth: "air",
-          air: "water",
-          water: "fire",
-        };
-
-        // Tracking
-        this.lastPlayerChoice = null;
-        this.lastEnemyChoice = null;
-
-        // UI refs
-        this.refs = {
-          screens: Array.from(document.querySelectorAll(".screen")),
-          title: document.getElementById("titleScreen"),
-          tutorial: document.getElementById("tutorialScreen"),
-          game: document.getElementById("gameScreen"),
-          levelComplete: document.getElementById("levelCompleteScreen"),
-          integration: document.getElementById("integrationScreen"),
-          gameOver: document.getElementById("gameOverScreen"),
-          victory: document.getElementById("victoryScreen"),
-          soundToggle: document.getElementById("soundToggle"),
-
-          playerHpFill: document.getElementById("playerHp"),
-          enemyHpFill: document.getElementById("enemyHp"),
-          playerHpText: document.getElementById("playerHpText"),
-          enemyHpText: document.getElementById("enemyHpText"),
-          currentLevel: document.getElementById("currentLevel"),
-
-          choiceDisplay: document.getElementById("choiceDisplay"),
-          playerChoice: document.getElementById("playerChoice"),
-          enemyChoice: document.getElementById("enemyChoice"),
-
-          roundsPlayed: document.getElementById("roundsPlayed"),
-          roundsWon: document.getElementById("roundsWon"),
-          accuracy: document.getElementById("accuracy"),
-
-          finalLevel: document.getElementById("finalLevel"),
-          totalTime: document.getElementById("totalTime"),
-          victoryTime: document.getElementById("victoryTime"),
-          overallAccuracy: document.getElementById("overallAccuracy"),
-
-          player: document.getElementById("player"),
-          enemy: document.getElementById("enemy"),
-
-          dbg: {
-            panel: document.getElementById("debugPanel"),
-            lvl: document.getElementById("dbgLevel"),
-            php: document.getElementById("dbgPhp"),
-            ehp: document.getElementById("dbgEhp"),
-            lp: document.getElementById("dbgLastP"),
-            le: document.getElementById("dbgLastE"),
-          },
-        };
-
-        this.loadPrefs();
-        this.init();
-      }
-
-      // ----- Lifecycle & UI -----
-      init() {
-        // Initialize sound on first interaction
-        document.addEventListener(
-          "click",
-          () => {
-            this.sound.init();
-          },
-          { once: true }
-        );
-
-        // Keyboard controls
-        document.addEventListener("keydown", (e) => {
-          // Global hotkeys
-          if (e.key === "m" || e.key === "M") {
-            this.toggleSound();
-          }
-          if (e.key === "d" || e.key === "D") {
-            this.refs.dbg.panel.classList.toggle("show");
-          }
-
-          if (this.currentScreen !== "game" || this.isProcessing || this.paused)
-            return;
-
-          switch (e.key) {
-            case "1":
-              this.playerChoice("fire");
-              break;
-            case "2":
-              this.playerChoice("water");
-              break;
-            case "3":
-              this.playerChoice("earth");
-              break;
-            case "4":
-              this.playerChoice("air");
-              break;
-          }
-        });
-
-        this.updateHud();
-        this.updateSoundToggleUI();
-      }
-
-      showScreen(name) {
-        this.currentScreen = name;
-        this.refs.screens.forEach((s) => s.classList.remove("active"));
-        switch (name) {
-          case "title":
-            this.refs.title.classList.add("active");
-            break;
-          case "tutorial":
-            this.refs.tutorial.classList.add("active");
-            break;
-          case "game":
-            this.refs.game.classList.add("active");
-            break;
-          case "levelComplete":
-            this.refs.levelComplete.classList.add("active");
-            break;
-          case "integration":
-            this.refs.integration.classList.add("active");
-            break;
-          case "gameOver":
-            this.refs.gameOver.classList.add("active");
-            break;
-          case "victory":
-            this.refs.victory.classList.add("active");
-            break;
-        }
-      }
-
-      showTutorial() {
-        this.showScreen("tutorial");
-      }
-
-      startGame() {
-        this.level = 1;
-        this.totalRounds = 0;
-        this.totalWins = 0;
-        this.startTime = Date.now();
-        this.resetHp();
-        this.roundsPlayed = 0;
-        this.roundsWon = 0;
-        this.lastPlayerChoice = null;
-        this.lastEnemyChoice = null;
-        this.updateHud();
-        this.showScreen("game");
-      }
-
-      restart() {
-        this.showScreen("title");
-      }
-
-      // ----- Hooks for future math integration -----
-      onInterLevelChallengeStart(levelNumber) {
-        // no-op placeholder for integration
-        // You can pause the game or show UI here later
-        this.pauseGameLoop();
-      }
-      onInterLevelChallengeComplete(levelNumber) {
-        // no-op placeholder for integration
-        this.resumeGameLoop();
-      }
-      pauseGameLoop() {
-        this.paused = true;
-      }
-      resumeGameLoop() {
-        this.paused = false;
-      }
-
-      // ----- Core Combat -----
-      playerChoice(element) {
-        if (this.isProcessing || this.paused) return;
-        this.isProcessing = true;
-
-        const enemy = this.getEnemyChoice();
-
-        this.lastPlayerChoice = element;
-        this.lastEnemyChoice = enemy;
-
-        this.showChoices(element, enemy);
-
-        // Determine outcome
-        let outcome = "draw";
-        if (this.winConditions[element] === enemy) {
-          outcome = "win";
-        } else if (this.winConditions[enemy] === element) {
-          outcome = "lose";
-        }
-
-        // Apply damage
-        const HIT = 22;
-        const DRAW_DMG = 0; // minimal or zero damage on draw
-        if (outcome === "win") {
-          this.enemyHp = Math.max(0, this.enemyHp - HIT);
-          this.flashDamage(this.refs.enemy);
-          this.sound.playHit();
-          this.roundsWon++;
-          this.totalWins++;
-        } else if (outcome === "lose") {
-          this.playerHp = Math.max(0, this.playerHp - HIT);
-          this.flashDamage(this.refs.player);
-          this.sound.playHit();
-        } else {
-          if (DRAW_DMG > 0) {
-            this.playerHp = Math.max(0, this.playerHp - DRAW_DMG);
-            this.enemyHp = Math.max(0, this.enemyHp - DRAW_DMG);
-          }
-          this.sound.playDraw();
-        }
-
-        this.roundsPlayed++;
-        this.totalRounds++;
-        this.updateHud();
-        this.updateDebug();
-
-        // Show result text
-        this.showResult(outcome);
-
-        // End checks after brief delay to let UI breathe
-        setTimeout(() => {
-          // Death checks
-          if (this.playerHp <= 0) {
-            this.gameOver();
-          } else if (this.enemyHp <= 0) {
-            this.levelComplete();
-          }
-          this.isProcessing = false;
-        }, 700);
-      }
-
-      getEnemyChoice() {
-        // AI that gets smarter per level
-        const randElem = () =>
-          this.elements[Math.floor(Math.random() * this.elements.length)];
-
-        // Level 1–2: random
-        if (this.level <= 2 || !this.lastPlayerChoice) return randElem();
-
-        // Helper: element that beats X
-        const beats = (x) =>
-          Object.keys(this.winConditions).find(
-            (k) => this.winConditions[k] === x
-          );
-
-        // Level 3–4: bias to counter last player choice
-        if (this.level <= 4) {
-          const roll = Math.random();
-          if (roll < 0.35) return beats(this.lastPlayerChoice);
-          return randElem();
-        }
-
-        // Level 5+: stronger bias + anti-repeat punishment
-        const roll = Math.random();
-        if (roll < 0.55) return beats(this.lastPlayerChoice);
-
-        // If player repeated same 2+ times, counter it more aggressively
-        // (light heuristic; could be expanded)
-        if (roll < 0.8 && this.lastPlayerChoice) {
-          return beats(this.lastPlayerChoice);
-        }
-
-        return randElem();
-      }
-
-      // ----- Screens & Progression -----
-      levelComplete() {
-        this.sound.playLevelComplete();
-        // Save highest level reached
-        const highest = parseInt(localStorage.getItem("ed_highestLevel") || "0");
-        if (this.level > highest) {
-          localStorage.setItem("ed_highestLevel", String(this.level));
-        }
-
-        // Update per-level stats
-        this.refs.roundsPlayed.textContent = this.roundsPlayed;
-        this.refs.roundsWon.textContent = this.roundsWon;
-        const acc =
-          this.roundsPlayed > 0
-            ? Math.round((this.roundsWon / this.roundsPlayed) * 100)
-            : 0;
-        this.refs.accuracy.textContent = acc + "%";
-
-        this.showScreen("levelComplete");
-      }
-
-      showIntegration() {
-        // Hook entry (no-op)
-        this.onInterLevelChallengeStart(this.level);
-        this.showScreen("integration");
-      }
-
-      nextLevel() {
-        // Hook exit (no-op)
-        this.onInterLevelChallengeComplete(this.level);
-
-        if (this.level >= this.maxLevel) {
-          this.victory();
-          return;
-        }
-        this.level++;
-        this.roundsPlayed = 0;
-        this.roundsWon = 0;
-        this.resetHp();
-        this.updateHud();
-        this.showScreen("game");
-      }
-
-      gameOver() {
-        this.sound.playGameOver();
-        this.refs.finalLevel.textContent = this.level;
-        this.refs.totalTime.textContent = this.elapsedTime();
-        this.showScreen("gameOver");
-      }
-
-      victory() {
-        this.sound.playWin();
-        this.refs.victoryTime.textContent = this.elapsedTime();
-        const acc =
-          this.totalRounds > 0
-            ? Math.round((this.totalWins / this.totalRounds) * 100)
-            : 0;
-        this.refs.overallAccuracy.textContent = acc + "%";
-        this.showScreen("victory");
-      }
-
-      // ----- Helpers -----
-      resetHp() {
-        this.playerHp = this.playerMaxHp;
-        // Enemy gets tougher per level
-        this.enemyMaxHp = this.enemyBaseHp + (this.level - 1) * 15;
-        this.enemyHp = this.enemyMaxHp;
-      }
-
-      updateHud() {
-        const php = Math.max(0, this.playerHp);
-        const ehp = Math.max(0, this.enemyHp);
-        const pPct = Math.round((php / this.playerMaxHp) * 100);
-        const ePct = Math.round((ehp / this.enemyMaxHp) * 100);
-
-        this.refs.playerHpFill.style.width = pPct + "%";
-        this.refs.enemyHpFill.style.width = ePct + "%";
-        this.refs.playerHpText.textContent = `${php}/${this.playerMaxHp}`;
-        this.refs.enemyHpText.textContent = `${ehp}/${this.enemyMaxHp}`;
-        this.refs.currentLevel.textContent = this.level;
-      }
-
-      showChoices(p, e) {
-        const pc = this.refs.playerChoice;
-        const ec = this.refs.enemyChoice;
-
-        // Reset classes
-        pc.className = "choice-indicator";
-        ec.className = "choice-indicator";
-
-        pc.classList.add(p);
-        ec.classList.add(e);
-
-        pc.textContent = `${this.elementIcons[p]} ${p.toUpperCase()}`;
-        ec.textContent = `${this.elementIcons[e]} ${e.toUpperCase()}`;
-
-        this.refs.choiceDisplay.classList.add("show");
-        clearTimeout(this._choiceHideT);
-        this._choiceHideT = setTimeout(
-          () => this.refs.choiceDisplay.classList.remove("show"),
-          900
-        );
-      }
-
-      showResult(outcome) {
-        const div = document.createElement("div");
-        div.className = `result-display ${outcome}`;
-        div.textContent =
-          outcome === "win" ? "HIT!" : outcome === "lose" ? "OUCH!" : "CLANG!";
-        document.body.appendChild(div);
-        setTimeout(() => div.remove(), 1000);
-
-        if (outcome === "win") this.sound.playWin();
-        else if (outcome === "lose") this.sound.playLose();
-      }
-
-      flashDamage(node) {
-        node.classList.remove("damage");
-        // force reflow
-        void node.offsetWidth;
-        node.classList.add("damage");
-      }
-
-      elapsedTime() {
-        if (!this.startTime) return "00:00";
-        const secs = Math.floor((Date.now() - this.startTime) / 1000);
-        const m = String(Math.floor(secs / 60)).padStart(2, "0");
-        const s = String(secs % 60).padStart(2, "0");
-        return `${m}:${s}`;
-      }
-
-      toggleSound() {
-        const on = this.sound.toggle();
-        this.updateSoundToggleUI();
-        if (on) {
-          this.sound.init();
-          this.sound.play(660, 0.08);
-        }
-      }
-
-      updateSoundToggleUI() {
-        this.refs.soundToggle.textContent = this.sound.enabled ? "🔊" : "🔇";
-        localStorage.setItem("ed_sound", this.sound.enabled ? "1" : "0");
-      }
-
-      loadPrefs() {
-        const s = localStorage.getItem("ed_sound");
-        if (s === "0") this.sound.enabled = false;
-      }
-
-      updateDebug() {
-        this.refs.dbg.lvl.textContent = this.level;
-        this.refs.dbg.php.textContent = `${this.playerHp}/${this.playerMaxHp}`;
-        this.refs.dbg.ehp.textContent = `${this.enemyHp}/${this.enemyMaxHp}`;
-        this.refs.dbg.lp.textContent = this.lastPlayerChoice || "-";
-        this.refs.dbg.le.textContent = this.lastEnemyChoice || "-";
-      }
+    // Pops
+    for(let i=pops.length-1;i>=0;i--){
+      const p = pops[i]; p.t += 1/60; p.y -= 0.2;
+      ctx.fillStyle = p.color; ctx.font = '10px monospace'; ctx.fillText(p.txt, p.x, p.y);
+      if(p.t>0.8) pops.splice(i,1);
     }
 
-    // Expose game
-    const game = new ElementalDuel();
-    window.game = game;
-  </script>
+    // Foreground scanline
+    ctx.fillStyle='rgba(255,255,255,0.03)'; for(let y=0;y<canvas.height;y+=3){ ctx.fillRect(0,y,canvas.width,1); }
+
+    requestAnimationFrame(step);
+  }
+
+  function gameOver(){
+    // Overlay
+    ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#fff'; ctx.font='16px monospace';
+    ctx.fillText('GAME OVER', canvas.width/2-42, canvas.height/2-8);
+    ctx.fillText('Score: '+score, canvas.width/2-36, canvas.height/2+12);
+    setTimeout(reset, 1200);
+  }
+
+  // Start
+  reset(); step();
+
+  // Optional: keyboard for desktop testing
+  window.addEventListener('keydown', (e)=>{
+    if(e.code==='ArrowLeft') input.left=true;
+    if(e.code==='ArrowRight') input.right=true;
+    if(e.code==='Space' || e.code==='ArrowUp') input.jump=true;
+    if(e.code==='KeyQ'){ cycleElement(); }
+    if(e.code==='KeyE'){ tryCast(); }
+  });
+  window.addEventListener('keyup', (e)=>{
+    if(e.code==='ArrowLeft') input.left=false;
+    if(e.code==='ArrowRight') input.right=false;
+    if(e.code==='Space' || e.code==='ArrowUp') input.jump=false;
+  });
+})();
+</script>
 </body>
 </html>
