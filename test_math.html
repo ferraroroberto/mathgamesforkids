@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Tests Module Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            width: 100px;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Math Tests Module Test</h1>
+    
+    <div class="test-section">
+        <h2>Module Loading Test</h2>
+        <p id="moduleStatus">Checking module status...</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>Problem Generation Test</h2>
+        <button onclick="testProblemGeneration()">Generate Problems for All Difficulties</button>
+        <div id="problemResults"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Math Session Test</h2>
+        <button onclick="startTestSession()">Start Test Session (Grade 3)</button>
+        <div id="sessionInfo"></div>
+        <div id="currentProblem"></div>
+        <input type="number" id="userAnswer" placeholder="Enter answer">
+        <button onclick="submitTestAnswer()">Submit Answer</button>
+        <div id="answerResult"></div>
+        <div id="sessionProgress"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Module Statistics</h2>
+        <button onclick="showStats()">Show Current Stats</button>
+        <div id="statsDisplay"></div>
+    </div>
+
+    <script src="mathTests.js"></script>
+    <script>
+        let mathTests;
+        
+        // Test module loading
+        function checkModule() {
+            if (typeof MathTests !== 'undefined') {
+                mathTests = new MathTests();
+                document.getElementById('moduleStatus').innerHTML = 
+                    '<span style="color: green;">✅ MathTests module loaded successfully!</span>';
+                return true;
+            } else {
+                document.getElementById('moduleStatus').innerHTML = 
+                    '<span style="color: red;">❌ MathTests module failed to load!</span>';
+                return false;
+            }
+        }
+        
+        // Test problem generation
+        function testProblemGeneration() {
+            if (!mathTests) {
+                alert('Please wait for module to load');
+                return;
+            }
+            
+            let results = '<h3>Generated Problems:</h3>';
+            for (let difficulty = 1; difficulty <= 5; difficulty++) {
+                const problem = mathTests.generateMathProblem(difficulty);
+                results += `<p><strong>Grade ${difficulty}:</strong> ${problem.problem} = ${problem.answer}</p>`;
+            }
+            document.getElementById('problemResults').innerHTML = results;
+        }
+        
+        // Test math session
+        function startTestSession() {
+            if (!mathTests) {
+                alert('Please wait for module to load');
+                return;
+            }
+            
+            const problem = mathTests.startMathExercise(3, 3); // Grade 3, 3 exercises
+            document.getElementById('currentProblem').innerHTML = 
+                `<h3>Current Problem: ${problem.problem}</h3>`;
+            document.getElementById('sessionInfo').innerHTML = 
+                '<p>Session started! Solve 3 problems.</p>';
+            document.getElementById('userAnswer').value = '';
+            document.getElementById('answerResult').innerHTML = '';
+            document.getElementById('sessionProgress').innerHTML = 'Progress: 0/3';
+        }
+        
+        // Submit answer for test session
+        function submitTestAnswer() {
+            if (!mathTests) {
+                alert('Please wait for module to load');
+                return;
+            }
+            
+            const userAnswer = parseInt(document.getElementById('userAnswer').value);
+            if (isNaN(userAnswer)) {
+                alert('Please enter a valid number');
+                return;
+            }
+            
+            const result = mathTests.submitMathAnswer(userAnswer);
+            
+            // Show result
+            if (result.isCorrect) {
+                document.getElementById('answerResult').innerHTML = 
+                    '<div class="result correct">✅ Correct! Well done!</div>';
+            } else {
+                document.getElementById('answerResult').innerHTML = 
+                    `<div class="result incorrect">❌ Wrong! The answer was ${result.correctAnswer}</div>`;
+            }
+            
+            // Update progress
+            document.getElementById('sessionProgress').innerHTML = 
+                `Progress: ${result.exerciseCount}/${result.totalExercises}`;
+            
+            // Show next problem or session complete
+            if (!result.isSessionComplete) {
+                setTimeout(() => {
+                    document.getElementById('currentProblem').innerHTML = 
+                        `<h3>Next Problem: ${result.nextProblem.problem}</h3>`;
+                    document.getElementById('userAnswer').value = '';
+                    document.getElementById('answerResult').innerHTML = '';
+                }, 1500);
+            } else {
+                setTimeout(() => {
+                    const summary = mathTests.finishMathSession();
+                    document.getElementById('currentProblem').innerHTML = 
+                        '<h3>Session Complete!</h3>';
+                    document.getElementById('sessionInfo').innerHTML = 
+                        `<p>Final Score: ${summary.correctAnswers}/${summary.totalExercises} (${summary.accuracy.toFixed(1)}%)</p>`;
+                }, 1500);
+            }
+        }
+        
+        // Show module statistics
+        function showStats() {
+            if (!mathTests) {
+                alert('Please wait for module to load');
+                return;
+            }
+            
+            const stats = mathTests.getSessionStats();
+            document.getElementById('statsDisplay').innerHTML = `
+                <h3>Current Statistics:</h3>
+                <p><strong>Session Active:</strong> ${stats.sessionActive}</p>
+                <p><strong>Exercise Count:</strong> ${stats.exerciseCount}</p>
+                <p><strong>Correct Answers:</strong> ${stats.correctAnswers}</p>
+                <p><strong>Total Problems Solved:</strong> ${stats.problemsSolved}</p>
+                <p><strong>Selected Difficulty:</strong> ${stats.selectedDifficulty}</p>
+                <p><strong>Difficulty Description:</strong> ${mathTests.getDifficultyDescription(stats.selectedDifficulty)}</p>
+            `;
+        }
+        
+        // Initialize when page loads
+        window.addEventListener('load', function() {
+            setTimeout(checkModule, 100);
+        });
+    </script>
+</body>
+</html>
