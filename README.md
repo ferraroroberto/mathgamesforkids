@@ -42,14 +42,18 @@ This combination makes learning fun by rewarding mathematical accuracy with game
 ### Technology Stack
 - **Frontend**: HTML5, CSS3, JavaScript (ES6+)
 - **Graphics**: HTML5 Canvas API
+- **Modular Design**: External math module for reusability
 - **No External Libraries**: Pure vanilla JavaScript for performance and learning
 
 ### File Structure
 ```
-mountain_dung_dodger.html  # Single HTML file containing everything
+mountain_dung_dodger.html  # Main game file with external math module
+mathTests.js               # Reusable math testing module
+test_math.html            # Math module testing interface
 ├── HTML Structure         # Game container and UI elements
 ├── CSS Styling           # Visual design and layout
-└── JavaScript Logic      # Game engine and mechanics
+├── JavaScript Logic      # Game engine and mechanics
+└── Math Module           # External educational content
 ```
 
 ## 🔧 Technical Implementation
@@ -126,6 +130,70 @@ function generateMathProblem(difficulty) {
 - **Input Sanitization**: Ensures only numbers are accepted
 - **Immediate Feedback**: Shows correct/incorrect status
 - **Progress Tracking**: Visual progress bar through 3 problems
+
+## 🧮 Math Module Architecture
+
+### Modular Design Benefits
+The game now uses an external `mathTests.js` module that provides:
+- **Reusability**: Can be imported into other educational games
+- **Maintainability**: Math logic centralized in one place
+- **Scalability**: Easy to add new difficulty levels or operations
+- **Testing**: Can test math functionality independently
+
+### Core Math Module Features
+
+#### `MathTests` Class
+```javascript
+const mathTests = new MathTests();
+```
+
+#### Key Functions
+- **`generateMathProblem(difficulty)`**: Creates grade-appropriate problems
+- **`startMathExercise(difficulty, exercisesPerSession)`**: Begins math session
+- **`submitMathAnswer(userAnswer)`**: Processes answers and tracks progress
+- **`finishMathSession()`**: Completes session and returns performance summary
+
+#### Session Management
+- **Progress Tracking**: Monitors exercise count and correct answers
+- **Performance Analytics**: Calculates accuracy and success rates
+- **State Persistence**: Maintains session data across game states
+- **Reset Capability**: Clears session data for new games
+
+### Integration Example
+```javascript
+// Start math exercise
+const problem = mathTests.startMathExercise(selectedDifficulty, 3);
+
+// Submit answer
+const result = mathTests.submitMathAnswer(userAnswer);
+
+// Check if session complete
+if (result.isSessionComplete) {
+    const summary = mathTests.finishMathSession();
+    // Handle session completion
+}
+```
+
+### Difficulty Levels (Math Module)
+| Level | Grade | Description |
+|-------|-------|-------------|
+| 1 | Grade 1 | Addition up to 10 |
+| 2 | Grade 2 | Addition up to 20, subtraction up to 10 |
+| 3 | Grade 3 | Addition up to 50, subtraction up to 20, simple multiplication |
+| 4 | Grade 4 | Addition up to 100, subtraction up to 50, multiplication tables 1-6 |
+| 5 | Grade 5 | Addition up to 200, subtraction up to 100, multiplication tables 1-10 |
+
+### Utility Functions
+- **`getSessionStats()`**: Returns current session information
+- **`setDifficulty(difficulty)`**: Sets difficulty level
+- **`getDifficultyDescription(difficulty)`**: Gets human-readable descriptions
+- **`reset()`**: Resets module to initial state
+
+### Browser Compatibility
+- Modern browsers (ES6+)
+- Node.js environments  
+- Mobile browsers
+- No external dependencies
 
 ## 🎨 Visual Design
 
@@ -292,13 +360,36 @@ This game demonstrates several important programming concepts:
 - **Canvas Graphics**: Drawing and animating on web pages
 - **Mobile Development**: Touch interfaces and responsive design
 
+## 🧪 Testing the Math Module
+
+### Standalone Testing
+Use `test_math.html` to test the math module independently:
+1. **Open** `test_math.html` in your browser
+2. **Verify** module loading and functionality
+3. **Test** problem generation for all difficulty levels
+4. **Simulate** complete math sessions
+5. **Check** statistics and performance tracking
+
+### Integration Testing
+The math module is automatically tested when running the main game:
+- Math problems appear every 2 levels
+- Session management works seamlessly
+- Performance tracking updates correctly
+- Difficulty scaling functions properly
+
 ## 🚀 Getting Started
 
-1. **Download** the HTML file
-2. **Open** in any modern web browser
-3. **Select** your grade level
-4. **Solve** math problems to begin
+1. **Download** the game files (`mountain_dung_dodger.html` and `mathTests.js`)
+2. **Open** `mountain_dung_dodger.html` in any modern web browser
+3. **Select** your grade level (1-5)
+4. **Solve** math problems to begin the game
 5. **Enjoy** learning through play!
+
+### For Developers
+1. **Study** the `mathTests.js` module structure
+2. **Test** with `test_math.html` for validation
+3. **Integrate** into your own educational games
+4. **Customize** difficulty levels and problem types
 
 ---
 
