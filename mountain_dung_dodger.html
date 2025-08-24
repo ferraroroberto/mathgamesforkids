@@ -246,7 +246,7 @@
 <body>
     <div id="gameContainer">
         <canvas id="gameCanvas"></canvas>
-
+        
         <div id="hud">
             <div>LIVES: <span id="lives">3</span></div>
             <div>LEVEL: <span id="level">1</span></div>
@@ -305,6 +305,7 @@
         </div>
     </div>
 
+    <script src="mathTests.js"></script>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -317,13 +318,9 @@
         let score = 0;
         let camera = { x: 0, y: 0 };
         let selectedDifficulty = 0;
-        let mathProblemsSolved = 0;
         
-        // Math exercise variables
-        let currentMathProblem = null;
-        let mathExerciseCount = 0;
-        let mathCorrectAnswers = 0;
-        let mathSessionActive = false;
+        // Math tests module instance
+        const mathTests = new MathTests();
         
         // Player
         let player = {
@@ -351,112 +348,15 @@
         let keys = {};
         let touchControls = { left: false, right: false, jump: false };
         
-        // Math problem generator
-        function generateMathProblem(difficulty) {
-            let problem, answer;
-            
-            // Default to grade 1 if difficulty is invalid
-            if (!difficulty || difficulty < 1 || difficulty > 5) {
-                difficulty = 1;
-            }
-            
-            switch(difficulty) {
-                case 1: // Grade 1: Addition up to 10
-                    const num1 = Math.floor(Math.random() * 10) + 1;
-                    const num2 = Math.floor(Math.random() * (10 - num1)) + 1;
-                    problem = `${num1} + ${num2} = ?`;
-                    answer = num1 + num2;
-                    break;
-                    
-                case 2: // Grade 2: Addition up to 20, subtraction up to 10
-                    if (Math.random() < 0.7) {
-                        const num1 = Math.floor(Math.random() * 15) + 1;
-                        const num2 = Math.floor(Math.random() * (20 - num1)) + 1;
-                        problem = `${num1} + ${num2} = ?`;
-                        answer = num1 + num2;
-                    } else {
-                        const num1 = Math.floor(Math.random() * 10) + 1;
-                        const num2 = Math.floor(Math.random() * num1) + 1;
-                        problem = `${num1} - ${num2} = ?`;
-                        answer = num1 - num2;
-                    }
-                    break;
-                    
-                case 3: // Grade 3: Addition up to 50, subtraction up to 20, simple multiplication
-                    const operation = Math.random();
-                    if (operation < 0.5) {
-                        const num1 = Math.floor(Math.random() * 30) + 1;
-                        const num2 = Math.floor(Math.random() * (50 - num1)) + 1;
-                        problem = `${num1} + ${num2} = ?`;
-                        answer = num1 + num2;
-                    } else if (operation < 0.8) {
-                        const num1 = Math.floor(Math.random() * 20) + 1;
-                        const num2 = Math.floor(Math.random() * num1) + 1;
-                        problem = `${num1} - ${num2} = ?`;
-                        answer = num1 - num2;
-                    } else {
-                        const num1 = Math.floor(Math.random() * 5) + 1;
-                        const num2 = Math.floor(Math.random() * 5) + 1;
-                        problem = `${num1} × ${num2} = ?`;
-                        answer = num1 * num2;
-                    }
-                    break;
-                    
-                case 4: // Grade 4: Addition up to 100, subtraction up to 50, multiplication tables 1-6
-                    const op = Math.random();
-                    if (op < 0.4) {
-                        const num1 = Math.floor(Math.random() * 60) + 1;
-                        const num2 = Math.floor(Math.random() * (100 - num1)) + 1;
-                        problem = `${num1} + ${num2} = ?`;
-                        answer = num1 + num2;
-                    } else if (op < 0.7) {
-                        const num1 = Math.floor(Math.random() * 50) + 1;
-                        const num2 = Math.floor(Math.random() * num1) + 1;
-                        problem = `${num1} - ${num2} = ?`;
-                        answer = num1 - num2;
-                    } else {
-                        const num1 = Math.floor(Math.random() * 6) + 1;
-                        const num2 = Math.floor(Math.random() * 6) + 1;
-                        problem = `${num1} × ${num2} = ?`;
-                        answer = num1 * num2;
-                    }
-                    break;
-                    
-                case 5: // Grade 5: Addition up to 200, subtraction up to 100, multiplication tables 1-10
-                    const op5 = Math.random();
-                    if (op5 < 0.3) {
-                        const num1 = Math.floor(Math.random() * 120) + 1;
-                        const num2 = Math.floor(Math.random() * (200 - num1)) + 1;
-                        problem = `${num1} + ${num2} = ?`;
-                        answer = num1 + num2;
-                    } else if (op5 < 0.6) {
-                        const num1 = Math.floor(Math.random() * 100) + 1;
-                        const num2 = Math.floor(Math.random() * num1) + 1;
-                        problem = `${num1} - ${num2} = ?`;
-                        answer = num1 - num2;
-                    } else {
-                        const num1 = Math.floor(Math.random() * 10) + 1;
-                        const num2 = Math.floor(Math.random() * 10) + 1;
-                        problem = `${num1} × ${num2} = ?`;
-                        answer = num1 * num2;
-                    }
-                    break;
-            }
-            
-            return { problem, answer };
-        }
+        // Math problem generator - now handled by MathTests module
         
         function startMathExercise() {
-            mathSessionActive = true;
-            mathExerciseCount = 0;
-            mathCorrectAnswers = 0;
-            
-            currentMathProblem = generateMathProblem(selectedDifficulty);
-            document.getElementById('mathProblem').textContent = currentMathProblem.problem;
+            const problem = mathTests.startMathExercise(selectedDifficulty, 3);
+            document.getElementById('mathProblem').textContent = problem.problem;
             
             document.getElementById('mathAnswer').value = '';
             document.getElementById('mathResult').innerHTML = '';
-            document.getElementById('mathInstructions').textContent = `Solve the math problem to continue! (${mathExerciseCount + 1}/3)`;
+            document.getElementById('mathInstructions').textContent = `Solve the math problem to continue! (1/3)`;
             document.getElementById('mathProgress').style.width = '0%';
             
             document.getElementById('mathScreen').classList.remove('hidden');
@@ -465,25 +365,22 @@
         
         function submitMathAnswer() {
             const userAnswer = parseInt(document.getElementById('mathAnswer').value);
-            const correctAnswer = currentMathProblem.answer;
+            const result = mathTests.submitMathAnswer(userAnswer);
             
-            if (userAnswer === correctAnswer) {
-                mathCorrectAnswers++;
+            if (result.isCorrect) {
                 document.getElementById('mathResult').innerHTML = '<div class="mathResult correct">✅ Correct! Well done!</div>';
             } else {
-                document.getElementById('mathResult').innerHTML = `<div class="mathResult incorrect">❌ Wrong! The answer was ${correctAnswer}</div>`;
+                document.getElementById('mathResult').innerHTML = `<div class="mathResult incorrect">❌ Wrong! The answer was ${result.correctAnswer}</div>`;
             }
             
-            mathExerciseCount++;
-            document.getElementById('mathProgress').style.width = `${(mathExerciseCount / 3) * 100}%`;
+            document.getElementById('mathProgress').style.width = `${(result.exerciseCount / 3) * 100}%`;
             
-            if (mathExerciseCount < 3) {
+            if (!result.isSessionComplete) {
                 setTimeout(() => {
-                    currentMathProblem = generateMathProblem(selectedDifficulty);
-                    document.getElementById('mathProblem').textContent = currentMathProblem.problem;
+                    document.getElementById('mathProblem').textContent = result.nextProblem.problem;
                     document.getElementById('mathAnswer').value = '';
                     document.getElementById('mathResult').innerHTML = '';
-                    document.getElementById('mathInstructions').textContent = `Solve the math problem to continue! (${mathExerciseCount + 1}/3)`;
+                    document.getElementById('mathInstructions').textContent = `Solve the math problem to continue! (${result.exerciseCount + 1}/3)`;
                 }, 1500);
             } else {
                 setTimeout(() => {
@@ -493,55 +390,29 @@
         }
         
         function finishMathSession() {
-            mathSessionActive = false;
+            const sessionSummary = mathTests.finishMathSession();
             document.getElementById('mathScreen').classList.add('hidden');
             
             // Determine life change based on performance
-            if (mathCorrectAnswers === 3) {
+            if (sessionSummary.correctAnswers === 3) {
                 player.lives = Math.min(player.lives + 1, 5); // Max 5 lives
-                showMessage("🎉 Perfect! You gained a life! 🎉", 3000);
-            } else if (mathCorrectAnswers === 2) {
-                showMessage("👍 Good job! You kept your lives!", 2000);
-            } else if (mathCorrectAnswers === 1) {
-                showMessage("😐 Not bad, but you lost a life.", 2000);
+            } else if (sessionSummary.correctAnswers === 2) {
+                // Keep current lives
+            } else if (sessionSummary.correctAnswers === 1) {
                 player.lives = Math.max(player.lives - 1, 1);
             } else {
-                showMessage("💔 Oh no! You lost a life!", 2000);
                 player.lives = Math.max(player.lives - 1, 1);
             }
             
-            mathProblemsSolved += mathCorrectAnswers;
             updateHUD();
             
             if (gameState === 'math') {
                 gameState = 'playing';
-                // Generate new level with increased difficulty
                 generateLevel(level);
             }
         }
         
-        function showMessage(message, duration) {
-            const messageDiv = document.createElement('div');
-            messageDiv.style.cssText = `
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(0,0,0,0.8);
-                color: white;
-                padding: 20px;
-                border-radius: 10px;
-                font-size: 18px;
-                z-index: 1000;
-                text-align: center;
-            `;
-            messageDiv.textContent = message;
-            document.getElementById('gameContainer').appendChild(messageDiv);
-            
-            setTimeout(() => {
-                messageDiv.remove();
-            }, duration);
-        }
+        // showMessage function removed - not in original
         
         function showDifficultyScreen() {
             document.getElementById('startScreen').classList.add('hidden');
@@ -550,11 +421,7 @@
         
         function selectDifficulty(difficulty) {
             selectedDifficulty = difficulty;
-            document.getElementById('difficultyScreen').classList.add('hidden');
-            // First start the game to generate the level and platforms
             startGame();
-            // Then start the math exercise
-            startMathExercise();
         }
         
         // Generate level
@@ -653,26 +520,22 @@
             player.x += player.vx;
             player.y += player.vy;
             
-
-            
             // Platform collision
             player.onGround = false;
-            for (let plat of platforms) {
-                if (player.x < plat.x + plat.width &&
-                    player.x + player.width > plat.x &&
-                    player.y < plat.y + plat.height &&
-                    player.y + player.height > plat.y) {
+            for (let platform of platforms) {
+                if (player.x < platform.x + platform.width &&
+                    player.x + player.width > platform.x &&
+                    player.y < platform.y + platform.height &&
+                    player.y + player.height > platform.y) {
                     
                     // Top collision
-                    if (player.vy > 0 && player.y < plat.y) {
-                        player.y = plat.y - player.height;
+                    if (player.vy > 0 && player.y < platform.y) {
+                        player.y = platform.y - player.height;
                         player.vy = 0;
                         player.onGround = true;
                     }
                 }
             }
-            
-
             
             // Dung collision
             if (player.invulnerable <= 0) {
@@ -773,16 +636,16 @@
             ctx.translate(-camera.x, -camera.y);
             
             // Platforms
-            for (let plat of platforms) {
-                if (plat.type === 'platform') {
+            for (let platform of platforms) {
+                if (platform.type === 'platform') {
                     ctx.fillStyle = '#654321';
-                    ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
+                    ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
                     // Grass
                     ctx.fillStyle = '#228B22';
-                    ctx.fillRect(plat.x, plat.y, plat.width, 4);
+                    ctx.fillRect(platform.x, platform.y, platform.width, 4);
                 } else {
                     ctx.fillStyle = '#4A3C28';
-                    ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
+                    ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
                 }
             }
             
@@ -838,9 +701,9 @@
             }
             
             // Particles
-            for (let p of particles) {
-                ctx.fillStyle = p.color;
-                ctx.fillRect(p.x, p.y, 3, 3);
+            for (let particle of particles) {
+                ctx.fillStyle = particle.color || '#FF0000';
+                ctx.fillRect(particle.x, particle.y, 3, 3);
             }
             
             ctx.restore();
@@ -859,15 +722,17 @@
             document.getElementById('lives').textContent = player.lives;
             document.getElementById('level').textContent = level;
             document.getElementById('score').textContent = score;
+            document.getElementById('mathProblemsSolved').textContent = mathTests.problemsSolved;
         }
         
         function startGame() {
             document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('difficultyScreen').classList.add('hidden');
             gameState = 'playing';
             level = 1;
             score = 0;
             player.lives = 3;
-            mathProblemsSolved = 0;
+            mathTests.reset();
             updateHUD();
             generateLevel(level);
         }
@@ -876,14 +741,12 @@
             gameState = 'gameover';
             document.getElementById('finalScore').textContent = score;
             document.getElementById('finalLevel').textContent = level;
-            document.getElementById('mathProblemsSolved').textContent = mathProblemsSolved;
+            document.getElementById('mathProblemsSolved').textContent = mathTests.problemsSolved;
             document.getElementById('gameOverScreen').classList.remove('hidden');
         }
         
         function resetGame() {
             document.getElementById('gameOverScreen').classList.add('hidden');
-            // Don't reset difficulty when restarting - keep the same difficulty
-            // selectedDifficulty = 0;
             startGame();
         }
         
