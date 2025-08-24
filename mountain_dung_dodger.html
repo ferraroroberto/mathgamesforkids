@@ -98,128 +98,148 @@
             right: 0;
             bottom: 0;
             background: rgba(0,0,0,0.9);
-            color: white;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            color: white;
             text-align: center;
-            z-index: 100;
+            padding: 20px;
+        }
+        
+        #startScreen h1 {
+            font-size: 28px;
+            color: #FFD700;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 0 #000;
+        }
+        
+        #startScreen p, #gameOverScreen p, #difficultyScreen p {
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .playBtn {
+            margin-top: 20px;
+            padding: 15px 30px;
+            background: #4CAF50;
+            border: none;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            box-shadow: 0 4px 0 #2E7D32;
+        }
+        
+        .playBtn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #2E7D32;
+        }
+        
+        .difficultyBtn {
+            margin: 10px;
+            padding: 12px 24px;
+            background: #2196F3;
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            box-shadow: 0 3px 0 #1976D2;
+        }
+        
+        .difficultyBtn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #1976D2;
+        }
+        
+        #gameOverScreen h2 {
+            color: #FF6B6B;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        
+        #mathScreen {
+            background: rgba(0,0,0,0.95);
+        }
+        
+        .mathProblem {
+            font-size: 32px;
+            margin: 20px 0;
+            color: #FFD700;
+            text-shadow: 2px 2px 0 #000;
+        }
+        
+        .mathInput {
+            width: 80px;
+            height: 50px;
+            font-size: 24px;
+            text-align: center;
+            border: 3px solid #4CAF50;
+            border-radius: 5px;
+            background: #fff;
+            color: #000;
+            margin: 10px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .mathSubmit {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: #FF9800;
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            box-shadow: 0 3px 0 #F57C00;
+        }
+        
+        .mathSubmit:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #F57C00;
+        }
+        
+        .mathResult {
+            font-size: 18px;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .correct {
+            background: rgba(76, 175, 80, 0.3);
+            color: #4CAF50;
+        }
+        
+        .incorrect {
+            background: rgba(244, 67, 54, 0.3);
+            color: #F44336;
         }
         
         .hidden {
             display: none !important;
         }
         
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: #FFD700;
-        }
-        
-        h2 {
-            font-size: 20px;
-            margin-bottom: 15px;
-            color: #FFD700;
-        }
-        
-        .playBtn, .difficultyBtn {
-            background: #3498DB;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 18px;
-            border-radius: 10px;
-            cursor: pointer;
-            margin: 10px;
-            transition: background 0.3s;
-        }
-        
-        .playBtn:hover, .difficultyBtn:hover {
-            background: #2980B9;
-        }
-        
-        .difficultyBtn {
-            font-size: 16px;
-            padding: 12px 24px;
-        }
-        
-        #mathScreen {
-            padding: 20px;
-        }
-        
-        .mathProblem {
-            font-size: 24px;
-            margin: 20px 0;
-            color: #FFD700;
-        }
-        
-        .mathInput {
-            width: 100px;
-            padding: 10px;
-            font-size: 18px;
-            text-align: center;
-            border: none;
-            border-radius: 5px;
-            margin: 10px;
-        }
-        
-        .mathSubmit {
-            background: #27AE60;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 10px;
-        }
-        
-        .mathSubmit:hover {
-            background: #229954;
-        }
-        
-        .mathResult {
-            margin: 15px 0;
-            padding: 10px;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        
-        .correct {
-            background: #D4EDDA;
-            color: #155724;
-        }
-        
-        .incorrect {
-            background: #F8D7DA;
-            color: #721C24;
-        }
-        
         .progressBar {
             width: 100%;
             height: 20px;
-            background: #34495E;
+            background: #333;
             border-radius: 10px;
+            margin: 10px 0;
             overflow: hidden;
-            margin: 15px 0;
         }
         
         .progressFill {
             height: 100%;
-            background: #27AE60;
-            width: 0%;
-            transition: width 0.3s;
-        }
-        
-        #mathInstructions {
-            margin: 15px 0;
-            font-size: 16px;
-        }
-        
-        p {
-            margin: 10px 0;
-            font-size: 16px;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.3s ease;
         }
     </style>
 </head>
@@ -228,29 +248,35 @@
         <canvas id="gameCanvas"></canvas>
         
         <div id="hud">
-            <span>❤️ <span id="lives">3</span></span>
-            <span>🏁 Level <span id="level">1</span></span>
-            <span>⭐ <span id="score">0</span></span>
+            <div>LIVES: <span id="lives">3</span></div>
+            <div>LEVEL: <span id="level">1</span></div>
+            <div>SCORE: <span id="score">0</span></div>
         </div>
         
         <div id="mobileControls">
             <div class="controlGroup">
-                <div class="btn" data-action="left">⬅️</div>
-                <div class="btn" data-action="jump">⬆️</div>
-                <div class="btn" data-action="right">➡️</div>
+                <div class="btn" data-action="left">←</div>
+                <div class="btn" data-action="right">→</div>
+            </div>
+            <div class="controlGroup">
+                <div class="btn" data-action="jump">↑</div>
             </div>
         </div>
         
         <div id="startScreen">
-            <h1>🏔️ Mountain Dung Dodger 🏔️</h1>
-            <h2>Math Edition</h2>
-            <p>Dodge the dung and solve math problems!</p>
+            <h1>🏔️ MOUNTAIN DUNG DODGER 🏔️</h1>
+            <p>Math Edition - Learn While You Play!</p>
+            <p>Help the child climb the mountain!</p>
+            <p>Avoid stepping on cow dung 💩</p>
+            <p>Solve math problems to gain lives!</p>
+            <p>Use arrows to move, up to jump</p>
+            <p>Reach the flag to win each level! 🚩</p>
             <button class="playBtn" onclick="showDifficultyScreen()">START GAME</button>
         </div>
         
         <div id="difficultyScreen" class="hidden">
-            <h2>Select Difficulty</h2>
-            <p>Choose your math grade level:</p>
+            <h1>📚 Select Your Grade Level 📚</h1>
+            <p>Choose the difficulty that matches your math skills!</p>
             <button class="difficultyBtn" onclick="selectDifficulty(1)">Grade 1</button>
             <button class="difficultyBtn" onclick="selectDifficulty(2)">Grade 2</button>
             <button class="difficultyBtn" onclick="selectDifficulty(3)">Grade 3</button>
@@ -370,14 +396,11 @@
             // Determine life change based on performance
             if (sessionSummary.correctAnswers === 3) {
                 player.lives = Math.min(player.lives + 1, 5); // Max 5 lives
-                showMessage("🎉 Perfect! You gained a life! 🎉", 3000);
             } else if (sessionSummary.correctAnswers === 2) {
-                showMessage("👍 Good job! You kept your lives!", 2000);
+                // Keep current lives
             } else if (sessionSummary.correctAnswers === 1) {
-                showMessage("😐 Not bad, but you lost a life.", 2000);
                 player.lives = Math.max(player.lives - 1, 1);
             } else {
-                showMessage("💔 Oh no! You lost a life!", 2000);
                 player.lives = Math.max(player.lives - 1, 1);
             }
             
@@ -385,33 +408,11 @@
             
             if (gameState === 'math') {
                 gameState = 'playing';
-                // Generate new level with increased difficulty
                 generateLevel(level);
             }
         }
         
-        function showMessage(message, duration) {
-            const messageDiv = document.createElement('div');
-            messageDiv.style.cssText = `
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(0,0,0,0.8);
-                color: white;
-                padding: 20px;
-                border-radius: 10px;
-                font-size: 18px;
-                z-index: 1000;
-                text-align: center;
-            `;
-            messageDiv.textContent = message;
-            document.getElementById('gameContainer').appendChild(messageDiv);
-            
-            setTimeout(() => {
-                messageDiv.remove();
-            }, duration);
-        }
+        // showMessage function removed - not in original
         
         function showDifficultyScreen() {
             document.getElementById('startScreen').classList.add('hidden');
@@ -527,157 +528,182 @@
                     player.y < platform.y + platform.height &&
                     player.y + player.height > platform.y) {
                     
-                    if (platform.type === 'ground') {
+                    // Top collision
+                    if (player.vy > 0 && player.y < platform.y) {
                         player.y = platform.y - player.height;
                         player.vy = 0;
                         player.onGround = true;
-                    } else if (platform.type === 'platform') {
-                        if (player.vy > 0) {
-                            player.y = platform.y - player.height;
-                            player.vy = 0;
-                            player.onGround = true;
-                        }
                     }
                 }
             }
             
             // Dung collision
-            for (let dung of dungs) {
-                if (!dung.hit && player.x < dung.x + dung.width &&
-                    player.x + player.width > dung.x &&
-                    player.y < dung.y + dung.height &&
-                    player.y + player.height > dung.y) {
-                    
-                    if (player.invulnerable <= 0) {
-                        player.lives--;
-                        player.invulnerable = 120; // 2 seconds at 60fps
+            if (player.invulnerable <= 0) {
+                for (let dung of dungs) {
+                    if (!dung.hit &&
+                        player.x < dung.x + dung.width &&
+                        player.x + player.width > dung.x &&
+                        player.y < dung.y + dung.height &&
+                        player.y + player.height > dung.y) {
+                        
                         dung.hit = true;
+                        player.lives--;
+                        player.invulnerable = 120;
+                        score = Math.max(0, score - 50);
                         
                         // Create particles
-                        for (let i = 0; i < 8; i++) {
+                        for (let i = 0; i < 10; i++) {
                             particles.push({
-                                x: player.x + player.width/2,
-                                y: player.y + player.height/2,
+                                x: dung.x + dung.width/2,
+                                y: dung.y,
                                 vx: (Math.random() - 0.5) * 4,
-                                vy: (Math.random() - 0.5) * 4,
-                                life: 30
+                                vy: -Math.random() * 5,
+                                life: 30,
+                                color: '#8B4513'
                             });
                         }
                         
+                        updateHUD();
+                        
                         if (player.lives <= 0) {
                             gameOver();
-                            return;
                         }
                     }
                 }
+            } else {
+                player.invulnerable--;
             }
             
             // Goal collision
-            if (goal && player.x < goal.x + goal.width &&
+            if (goal &&
+                player.x < goal.x + goal.width &&
                 player.x + player.width > goal.x &&
                 player.y < goal.y + goal.height &&
                 player.y + player.height > goal.y) {
                 
+                score += 100 * level;
                 level++;
-                score += level * 100;
-                showMessage(`🎉 Level ${level-1} Complete! 🎉`, 2000);
-                
-                // Start math exercise every 2 levels
-                if (level % 2 === 0) {
-                    startMathExercise();
-                    return;
-                }
-                
-                generateLevel(level);
                 updateHUD();
+                
+                // Start math exercise between levels
+                gameState = 'math';
+                startMathExercise();
             }
-            
-            // Camera follow player
-            camera.x = player.x - 160;
-            camera.x = Math.max(0, camera.x);
             
             // Update particles
-            for (let i = particles.length - 1; i >= 0; i--) {
-                particles[i].x += particles[i].vx;
-                particles[i].y += particles[i].vy;
-                particles[i].life--;
-                
-                if (particles[i].life <= 0) {
-                    particles.splice(i, 1);
-                }
-            }
+            particles = particles.filter(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.3;
+                p.life--;
+                return p.life > 0;
+            });
             
-            // Update invulnerability
-            if (player.invulnerable > 0) {
-                player.invulnerable--;
+            // Camera follow
+            camera.x = Math.max(0, player.x - canvas.width / 2);
+            camera.y = Math.max(0, Math.min(player.y - canvas.height / 2, 100));
+            
+            // Fall death
+            if (player.y > 600) {
+                player.lives--;
+                updateHUD();
+                if (player.lives <= 0) {
+                    gameOver();
+                } else {
+                    player.x = 50;
+                    player.y = 355;
+                    player.vx = 0;
+                    player.vy = 0;
+                    player.onGround = false;
+                }
             }
         }
         
-        // Draw game
+        // Draw everything
         function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Sky
+            ctx.fillStyle = '#87CEEB';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Save context for camera
+            // Mountains background
+            ctx.fillStyle = '#8B7B8B';
+            for (let i = 0; i < 5; i++) {
+                let mx = i * 150 - camera.x * 0.3;
+                drawTriangle(mx, 300, 150, 200);
+            }
+            
             ctx.save();
             ctx.translate(-camera.x, -camera.y);
             
-            // Draw background
-            ctx.fillStyle = '#87CEEB';
-            ctx.fillRect(0, 0, canvas.width + camera.x + 1000, canvas.height);
-            
-            // Draw platforms
+            // Platforms
             for (let platform of platforms) {
-                if (platform.type === 'ground') {
-                    ctx.fillStyle = '#8B4513';
-                } else {
+                if (platform.type === 'platform') {
                     ctx.fillStyle = '#654321';
+                    ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                    // Grass
+                    ctx.fillStyle = '#228B22';
+                    ctx.fillRect(platform.x, platform.y, platform.width, 4);
+                } else {
+                    ctx.fillStyle = '#4A3C28';
+                    ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
                 }
-                ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
             }
             
-            // Draw dungs
+            // Dungs
             for (let dung of dungs) {
                 if (!dung.hit) {
-                    ctx.fillStyle = '#8B4513';
-                    ctx.fillRect(dung.x, dung.y, dung.width, dung.height);
-                    
-                    // Draw dung details
+                    // Draw pixelated poop
                     ctx.fillStyle = '#654321';
-                    ctx.fillRect(dung.x + 2, dung.y + 2, 4, 4);
-                    ctx.fillRect(dung.x + 6, dung.y + 6, 4, 4);
+                    ctx.fillRect(dung.x + 2, dung.y + 6, 8, 4);
+                    ctx.fillRect(dung.x + 3, dung.y + 3, 6, 3);
+                    ctx.fillRect(dung.x + 4, dung.y, 4, 3);
                 }
             }
             
-            // Draw goal
+            // Goal flag
             if (goal) {
+                // Pole
+                ctx.fillStyle = '#8B4513';
+                ctx.fillRect(goal.x + 13, goal.y, 4, goal.height);
+                // Flag
                 ctx.fillStyle = '#FF0000';
-                ctx.fillRect(goal.x, goal.y, goal.width, goal.height);
+                ctx.fillRect(goal.x + 17, goal.y, 20, 15);
+                ctx.fillStyle = '#FFFF00';
+                ctx.fillRect(goal.x + 17, goal.y + 5, 20, 5);
+            }
+            
+            // Player
+            if (player.invulnerable % 10 < 5) {
+                // Head
+                ctx.fillStyle = '#FDBCB4';
+                ctx.fillRect(player.x + 4, player.y, 8, 8);
                 
-                // Draw flag
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fillRect(goal.x + 20, goal.y, 10, 20);
-                ctx.fillStyle = '#FF0000';
-                drawTriangle(goal.x + 30, goal.y, 15, 15);
+                // Hair
+                ctx.fillStyle = '#8B4513';
+                ctx.fillRect(player.x + 4, player.y, 8, 3);
+                
+                // Body
+                ctx.fillStyle = '#FF6B6B';
+                ctx.fillRect(player.x + 3, player.y + 8, 10, 10);
+                
+                // Legs
+                ctx.fillStyle = '#4169E1';
+                ctx.fillRect(player.x + 4, player.y + 18, 3, 6);
+                ctx.fillRect(player.x + 9, player.y + 18, 3, 6);
+                
+                // Eye
+                ctx.fillStyle = '#000';
+                if (player.facing > 0) {
+                    ctx.fillRect(player.x + 9, player.y + 3, 2, 2);
+                } else {
+                    ctx.fillRect(player.x + 5, player.y + 3, 2, 2);
+                }
             }
             
-            // Draw player
-            if (player.invulnerable > 0 && Math.floor(player.invulnerable / 10) % 2 === 0) {
-                // Flash when invulnerable
-                return;
-            }
-            
-            ctx.fillStyle = '#3498DB';
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-            
-            // Draw player details
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(player.x + 2, player.y + 2, 4, 4); // Eye
-            ctx.fillRect(player.x + 10, player.y + 2, 4, 4); // Eye
-            
-            // Draw particles
+            // Particles
             for (let particle of particles) {
-                ctx.fillStyle = `rgba(255, 0, 0, ${particle.life / 30})`;
-                ctx.fillRect(particle.x, particle.y, 4, 4);
+                ctx.fillStyle = particle.color || '#FF0000';
+                ctx.fillRect(particle.x, particle.y, 3, 3);
             }
             
             ctx.restore();
