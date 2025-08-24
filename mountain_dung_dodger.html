@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Mountain Dung Dodger - Math Edition</title>
     <style>
         * {
@@ -16,28 +16,40 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            height: 100vh;
+            width: 100vw;
             background: #2C3E50;
             font-family: 'Courier New', monospace;
             touch-action: none;
             overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
         }
         
         #gameContainer {
             position: relative;
-            width: 100%;
-            max-width: 400px;
-            aspect-ratio: 2/3;
+            width: 100vw;
+            height: 100vh;
+            max-width: 100vw;
+            max-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
         
         canvas {
             width: 100%;
             height: 100%;
+            max-width: 400px;
+            max-height: 600px;
             image-rendering: pixelated;
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
             border: 4px solid #000;
             background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 100%);
+            object-fit: contain;
         }
         
         #hud {
@@ -56,14 +68,15 @@
         
         #mobileControls {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
             height: 120px;
             display: flex;
             justify-content: space-between;
             padding: 10px;
             pointer-events: auto;
+            max-width: calc(100vw - 20px);
         }
         
         .controlGroup {
@@ -105,6 +118,11 @@
             color: white;
             text-align: center;
             padding: 20px;
+            width: 100vw;
+            height: 100vh;
+            max-width: 100vw;
+            max-height: 100vh;
+            overflow: hidden;
         }
         
         #startScreen h1 {
@@ -225,6 +243,30 @@
         
         .hidden {
             display: none !important;
+        }
+        
+        /* Ensure no scrolling anywhere */
+        html, body {
+            overflow: hidden !important;
+            position: fixed !important;
+            width: 100vw !important;
+            height: 100vh !important;
+        }
+        
+        /* Prevent any potential scrolling on the game container */
+        #gameContainer * {
+            max-width: 100vw;
+            max-height: 100vh;
+        }
+        
+        /* Handle safe areas for devices with notches */
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: max(0px, env(safe-area-inset-left));
+                padding-right: max(0px, env(safe-area-inset-right));
+                padding-top: max(0px, env(safe-area-inset-top));
+                padding-bottom: max(0px, env(safe-area-inset-bottom));
+            }
         }
         
         .progressBar {
@@ -935,6 +977,25 @@
         
         // Prevent scrolling on mobile
         document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+        
+        // Additional scroll prevention
+        document.addEventListener('scroll', e => e.preventDefault(), { passive: false });
+        document.addEventListener('wheel', e => e.preventDefault(), { passive: false });
+        
+        // Ensure full screen on load
+        function ensureFullScreen() {
+            document.documentElement.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden';
+            document.documentElement.style.height = '100vh';
+            document.body.style.height = '100vh';
+            document.documentElement.style.width = '100vw';
+            document.body.style.width = '100vw';
+        }
+        
+        // Call on load and resize
+        ensureFullScreen();
+        window.addEventListener('resize', ensureFullScreen);
+        window.addEventListener('orientationchange', ensureFullScreen);
         
         // Start game loop
         gameLoop();
