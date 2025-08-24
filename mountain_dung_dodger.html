@@ -290,7 +290,7 @@
                 <div class="progressFill" id="mathProgress"></div>
             </div>
             <p id="mathInstructions">Solve the math problem to continue!</p>
-            <div class="mathProblem" id="mathProblem">5 + 3 = ?</div>
+            <div class="mathProblem" id="mathProblem"></div>
             <input type="number" class="mathInput" id="mathAnswer" placeholder="?" min="0" max="999">
             <button class="mathSubmit" onclick="submitMathAnswer()">Submit Answer</button>
             <div id="mathResult"></div>
@@ -354,6 +354,11 @@
         // Math problem generator
         function generateMathProblem(difficulty) {
             let problem, answer;
+            
+            // Default to grade 1 if difficulty is invalid
+            if (!difficulty || difficulty < 1 || difficulty > 5) {
+                difficulty = 1;
+            }
             
             switch(difficulty) {
                 case 1: // Grade 1: Addition up to 10
@@ -445,9 +450,10 @@
             mathSessionActive = true;
             mathExerciseCount = 0;
             mathCorrectAnswers = 0;
-            currentMathProblem = generateMathProblem(selectedDifficulty);
             
+            currentMathProblem = generateMathProblem(selectedDifficulty);
             document.getElementById('mathProblem').textContent = currentMathProblem.problem;
+            
             document.getElementById('mathAnswer').value = '';
             document.getElementById('mathResult').innerHTML = '';
             document.getElementById('mathInstructions').textContent = `Solve the math problem to continue! (${mathExerciseCount + 1}/3)`;
@@ -509,6 +515,12 @@
             
             if (gameState === 'math') {
                 gameState = 'playing';
+                // Reset player position to safe ground after math session
+                player.x = 50;
+                player.y = 350;
+                player.vx = 0;
+                player.vy = 0;
+                player.onGround = false;
             }
         }
         
@@ -543,6 +555,9 @@
         function selectDifficulty(difficulty) {
             selectedDifficulty = difficulty;
             document.getElementById('difficultyScreen').classList.add('hidden');
+            // First start the game to generate the level and platforms
+            startGame();
+            // Then start the math exercise
             startMathExercise();
         }
         
@@ -610,7 +625,7 @@
             
             // Reset player
             player.x = 50;
-            player.y = 300;
+            player.y = 350;
             player.vx = 0;
             player.vy = 0;
             player.onGround = false;
@@ -642,6 +657,8 @@
             player.x += player.vx;
             player.y += player.vy;
             
+
+            
             // Platform collision
             player.onGround = false;
             for (let plat of platforms) {
@@ -658,6 +675,8 @@
                     }
                 }
             }
+            
+
             
             // Dung collision
             if (player.invulnerable <= 0) {
@@ -733,9 +752,10 @@
                     gameOver();
                 } else {
                     player.x = 50;
-                    player.y = 300;
+                    player.y = 350;
                     player.vx = 0;
                     player.vy = 0;
+                    player.onGround = false;
                 }
             }
         }
@@ -866,7 +886,8 @@
         
         function resetGame() {
             document.getElementById('gameOverScreen').classList.add('hidden');
-            selectedDifficulty = 0;
+            // Don't reset difficulty when restarting - keep the same difficulty
+            // selectedDifficulty = 0;
             startGame();
         }
         
