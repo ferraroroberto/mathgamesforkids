@@ -290,7 +290,7 @@
                 <div class="progressFill" id="mathProgress"></div>
             </div>
             <p id="mathInstructions">Solve the math problem to continue!</p>
-            <div class="mathProblem" id="mathProblem">5 + 3 = ?</div>
+            <div class="mathProblem" id="mathProblem"></div>
             <input type="number" class="mathInput" id="mathAnswer" placeholder="?" min="0" max="999">
             <button class="mathSubmit" onclick="submitMathAnswer()">Submit Answer</button>
             <div id="mathResult"></div>
@@ -354,6 +354,11 @@
         // Math problem generator
         function generateMathProblem(difficulty) {
             let problem, answer;
+            
+            // Ensure difficulty is valid
+            if (!difficulty || difficulty < 1 || difficulty > 5) {
+                difficulty = 1; // Default to grade 1
+            }
             
             switch(difficulty) {
                 case 1: // Grade 1: Addition up to 10
@@ -445,9 +450,23 @@
             mathSessionActive = true;
             mathExerciseCount = 0;
             mathCorrectAnswers = 0;
+            
+            // Debug logging
+            console.log('Starting math exercise with difficulty:', selectedDifficulty);
+            
             currentMathProblem = generateMathProblem(selectedDifficulty);
             
-            document.getElementById('mathProblem').textContent = currentMathProblem.problem;
+            // Ensure the math problem is properly displayed
+            if (currentMathProblem && currentMathProblem.problem) {
+                document.getElementById('mathProblem').textContent = currentMathProblem.problem;
+                console.log('Math problem set:', currentMathProblem.problem);
+            } else {
+                // Fallback if problem generation fails
+                currentMathProblem = { problem: "5 + 3 = ?", answer: 8 };
+                document.getElementById('mathProblem').textContent = currentMathProblem.problem;
+                console.log('Fallback math problem set:', currentMathProblem.problem);
+            }
+            
             document.getElementById('mathAnswer').value = '';
             document.getElementById('mathResult').innerHTML = '';
             document.getElementById('mathInstructions').textContent = `Solve the math problem to continue! (${mathExerciseCount + 1}/3)`;
@@ -474,7 +493,14 @@
             if (mathExerciseCount < 3) {
                 setTimeout(() => {
                     currentMathProblem = generateMathProblem(selectedDifficulty);
-                    document.getElementById('mathProblem').textContent = currentMathProblem.problem;
+                    // Ensure the math problem is properly displayed
+                    if (currentMathProblem && currentMathProblem.problem) {
+                        document.getElementById('mathProblem').textContent = currentMathProblem.problem;
+                    } else {
+                        // Fallback if problem generation fails
+                        currentMathProblem = { problem: "5 + 3 = ?", answer: 8 };
+                        document.getElementById('mathProblem').textContent = currentMathProblem.problem;
+                    }
                     document.getElementById('mathAnswer').value = '';
                     document.getElementById('mathResult').innerHTML = '';
                     document.getElementById('mathInstructions').textContent = `Solve the math problem to continue! (${mathExerciseCount + 1}/3)`;
@@ -509,6 +535,15 @@
             
             if (gameState === 'math') {
                 gameState = 'playing';
+                // Reset player position to safe ground after math session
+                player.x = 50;
+                player.y = 300;
+                player.vx = 0;
+                player.vy = 0;
+                player.onGround = false;
+                
+                // Debug logging
+                console.log('Player position reset after math session:', player.x, player.y);
             }
         }
         
@@ -709,6 +744,10 @@
                 
                 // Start math exercise between levels
                 gameState = 'math';
+                // Ensure difficulty is set before starting math
+                if (selectedDifficulty === 0) {
+                    selectedDifficulty = 1; // Default to grade 1 if not set
+                }
                 startMathExercise();
             }
             
@@ -854,6 +893,11 @@
             mathProblemsSolved = 0;
             updateHUD();
             generateLevel(level);
+            
+            // Ensure difficulty is set for new games
+            if (selectedDifficulty === 0) {
+                selectedDifficulty = 1; // Default to grade 1
+            }
         }
         
         function gameOver() {
@@ -866,7 +910,8 @@
         
         function resetGame() {
             document.getElementById('gameOverScreen').classList.add('hidden');
-            selectedDifficulty = 0;
+            // Don't reset difficulty when restarting - keep the same difficulty
+            // selectedDifficulty = 0;
             startGame();
         }
         
