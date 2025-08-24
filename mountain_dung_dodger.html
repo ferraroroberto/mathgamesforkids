@@ -328,7 +328,7 @@
         // Player
         let player = {
             x: 50,
-            y: 300,
+            y: 355,
             width: 16,
             height: 24,
             vx: 0,
@@ -516,8 +516,9 @@
             if (gameState === 'math') {
                 gameState = 'playing';
                 // Reset player position to safe ground after math session
+                // The level has already been generated, so position player on the starting platform
                 player.x = 50;
-                player.y = 350;
+                player.y = 355;
                 player.vx = 0;
                 player.vy = 0;
                 player.onGround = false;
@@ -567,22 +568,29 @@
             dungs = [];
             particles = [];
             
-            // Create mountain path
+            // Create mountain path with increasing difficulty
             let x = 0;
             let y = 350;
-            let levelLength = 100 + levelNum * 50;
+            let levelLength = 120 + levelNum * 60; // Longer levels for higher difficulty
+            let platformSpacing = Math.max(8, 12 - levelNum); // Closer platforms for higher difficulty
             
-            // Starting platform
-            platforms.push({ x: 0, y: 380, width: 100, height: 100, type: 'ground' });
+            // Starting platform - solid ground for player to start on
+            platforms.push({ x: 0, y: 380, width: 120, height: 100, type: 'ground' });
             
-            // Generate winding mountain path
+            // Generate winding mountain path with varied terrain
             for (let i = 0; i < levelLength; i++) {
-                // Randomly go up or down
-                if (i % 10 === 0) {
-                    y += (Math.random() - 0.5) * 60;
-                    y = Math.max(150, Math.min(380, y));
+                if (i % platformSpacing === 0) {
+                    // More dramatic height changes for higher levels
+                    let heightVariation = 40 + levelNum * 10;
+                    y += (Math.random() - 0.5) * heightVariation;
+                    y = Math.max(120, Math.min(380, y)); // Keep platforms in reasonable range
                     
-                    let w = 60 + Math.random() * 40;
+                    // Platform width varies with level difficulty
+                    let minWidth = Math.max(40, 60 - levelNum * 2);
+                    let maxWidth = Math.max(60, 80 - levelNum * 3);
+                    let w = minWidth + Math.random() * (maxWidth - minWidth);
+                    
+                    // Add main platform
                     platforms.push({
                         x: x,
                         y: y,
@@ -591,7 +599,7 @@
                         type: 'platform'
                     });
                     
-                    // Add ground below
+                    // Add ground below for safety
                     platforms.push({
                         x: x,
                         y: y + 20,
@@ -600,8 +608,9 @@
                         type: 'ground'
                     });
                     
-                    // Place dung randomly
-                    if (Math.random() < 0.3 + levelNum * 0.05) {
+                    // Place dung with increasing frequency for higher levels
+                    let dungChance = 0.2 + levelNum * 0.08;
+                    if (Math.random() < dungChance) {
                         dungs.push({
                             x: x + Math.random() * (w - 16),
                             y: y - 12,
@@ -611,7 +620,20 @@
                         });
                     }
                     
-                    x += w - 5;
+                    // Add some floating platforms for higher levels
+                    if (levelNum > 2 && Math.random() < 0.3) {
+                        let floatingY = y - 60 - Math.random() * 40;
+                        let floatingW = 30 + Math.random() * 20;
+                        platforms.push({
+                            x: x + Math.random() * (w - floatingW),
+                            y: floatingY,
+                            width: floatingW,
+                            height: 15,
+                            type: 'platform'
+                        });
+                    }
+                    
+                    x += w - 3; // Slightly closer spacing for challenge
                 }
             }
             
@@ -623,9 +645,9 @@
                 height: 40
             };
             
-            // Reset player
+            // Reset player to starting position above the ground
             player.x = 50;
-            player.y = 350;
+            player.y = 355;
             player.vx = 0;
             player.vy = 0;
             player.onGround = false;
@@ -667,11 +689,26 @@
                     player.y < plat.y + plat.height &&
                     player.y + player.height > plat.y) {
                     
-                    // Top collision
-                    if (player.vy > 0 && player.y < plat.y - player.height + 10) {
+                    // Top collision (landing on platform)
+                    if (player.vy > 0 && player.y < plat.y - player.height + 15) {
                         player.y = plat.y - player.height;
                         player.vy = 0;
                         player.onGround = true;
+                    }
+                    // Left collision
+                    else if (player.vx > 0 && player.x < plat.x) {
+                        player.x = plat.x - player.width;
+                        player.vx = 0;
+                    }
+                    // Right collision
+                    else if (player.vx < 0 && player.x + player.width > plat.x + plat.width) {
+                        player.x = plat.x + plat.width;
+                        player.vx = 0;
+                    }
+                    // Bottom collision (hitting head)
+                    else if (player.vy < 0 && player.y + player.height > plat.y) {
+                        player.y = plat.y + plat.height;
+                        player.vy = 0;
                     }
                 }
             }
@@ -726,6 +763,12 @@
                 level++;
                 updateHUD();
                 
+                // Generate new level with increased difficulty
+                generateLevel(level);
+                
+                // Show level transition message
+                showMessage(`🎉 Level ${level - 1} Complete! 🎉`, 2000);
+                
                 // Start math exercise between levels
                 gameState = 'math';
                 startMathExercise();
@@ -752,7 +795,7 @@
                     gameOver();
                 } else {
                     player.x = 50;
-                    player.y = 350;
+                    player.y = 355;
                     player.vx = 0;
                     player.vy = 0;
                     player.onGround = false;
