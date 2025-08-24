@@ -536,14 +536,15 @@
             if (gameState === 'math') {
                 gameState = 'playing';
                 // Reset player position to safe ground after math session
+                // Position player slightly above the starting platform so collision detection can catch them
                 player.x = 50;
-                player.y = 300;
+                player.y = 350; // Slightly above the platform so collision detection works
                 player.vx = 0;
                 player.vy = 0;
-                player.onGround = false;
+                player.onGround = false; // Let collision detection set this
                 
                 // Debug logging
-                console.log('Player position reset after math session:', player.x, player.y);
+                console.log('Player position reset after math session:', player.x, player.y, 'onGround:', player.onGround);
             }
         }
         
@@ -645,10 +646,10 @@
             
             // Reset player
             player.x = 50;
-            player.y = 300;
+            player.y = 350; // Slightly above the platform so collision detection works
             player.vx = 0;
             player.vy = 0;
-            player.onGround = false;
+            player.onGround = false; // Let collision detection set this
             player.invulnerable = 0;
         }
         
@@ -677,6 +678,8 @@
             player.x += player.vx;
             player.y += player.vy;
             
+
+            
             // Platform collision
             player.onGround = false;
             for (let plat of platforms) {
@@ -693,6 +696,8 @@
                     }
                 }
             }
+            
+
             
             // Dung collision
             if (player.invulnerable <= 0) {
@@ -772,9 +777,10 @@
                     gameOver();
                 } else {
                     player.x = 50;
-                    player.y = 300;
+                    player.y = 350; // Slightly above the platform so collision detection works
                     player.vx = 0;
                     player.vy = 0;
+                    player.onGround = false; // Let collision detection set this
                 }
             }
         }
