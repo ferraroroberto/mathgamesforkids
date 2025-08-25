@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>15 Puzzle Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4A90E2;
+        }
+
+        .puzzle-board {
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%;
+            background: #4A90E2;
+            border-radius: 15px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .puzzle-grid {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .tile {
+            background: #FFF8E1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: calc(100vw / 12);
+            max-font-size: 32px;
+            font-weight: bold;
+            color: #E74C3C;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+
+        .tile:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .tile:active {
+            transform: scale(0.98);
+        }
+
+        .tile.moving {
+            z-index: 10;
+            transition: all 0.2s ease-out;
+        }
+
+        .empty {
+            background: transparent;
+            box-shadow: none;
+            cursor: default;
+        }
+
+        .empty:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .btn-shuffle {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .btn-shuffle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-solve {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-solve:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .win-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .win-message.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .win-message h2 {
+            color: #4CAF50;
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .win-message p {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 999;
+        }
+
+        .overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        @media (max-width: 480px) {
+            .tile {
+                font-size: 24px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .stats {
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>15 Puzzle</h1>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">Moves</div>
+                <div class="stat-value" id="moves">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Time</div>
+                <div class="stat-value" id="timer">0:00</div>
+            </div>
+        </div>
+        
+        <div class="puzzle-board">
+            <div class="puzzle-grid" id="puzzleGrid"></div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn-shuffle" onclick="shufflePuzzle()">Shuffle</button>
+            <button class="btn-solve" onclick="showSolution()">Hint</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="win-message" id="winMessage">
+        <h2>🎉 Congratulations!</h2>
+        <p>You solved the puzzle in <span id="finalMoves">0</span> moves!</p>
+        <p>Time: <span id="finalTime">0:00</span></p>
+        <button class="btn-shuffle" onclick="newGame()">Play Again</button>
+    </div>
+
+    <script>
+        let tiles = [];
+        let emptyPos = 15;
+        let moves = 0;
+        let startTime = null;
+        let timerInterval = null;
+        let isWon = false;
+
+        function initPuzzle() {
+            const grid = document.getElementById('puzzleGrid');
+            grid.innerHTML = '';
+            tiles = [];
+            
+            for (let i = 0; i < 16; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                
+                if (i < 15) {
+                    tile.textContent = i + 1;
+                    tile.dataset.value = i + 1;
+                } else {
+                    tile.className = 'tile empty';
+                    tile.dataset.value = 0;
+                    emptyPos = i;
+                }
+                
+                tile.dataset.position = i;
+                tile.onclick = () => moveTile(i);
+                tiles.push(tile);
+                grid.appendChild(tile);
+            }
+        }
+
+        function moveTile(position) {
+            if (isWon) return;
+            
+            const row = Math.floor(position / 4);
+            const col = position % 4;
+            const emptyRow = Math.floor(emptyPos / 4);
+            const emptyCol = emptyPos % 4;
+            
+            // Check if tile is adjacent to empty space
+            if ((Math.abs(row - emptyRow) === 1 && col === emptyCol) ||
+                (Math.abs(col - emptyCol) === 1 && row === emptyRow)) {
+                
+                // Swap tiles
+                const tile = tiles[position];
+                const emptyTile = tiles[emptyPos];
+                
+                tile.classList.add('moving');
+                
+                // Swap content and data
+                const tempContent = tile.textContent;
+                const tempValue = tile.dataset.value;
+                
+                tile.textContent = emptyTile.textContent;
+                tile.dataset.value = emptyTile.dataset.value;
+                tile.className = 'tile empty';
+                
+                emptyTile.textContent = tempContent;
+                emptyTile.dataset.value = tempValue;
+                emptyTile.className = 'tile moving';
+                
+                setTimeout(() => {
+                    emptyTile.classList.remove('moving');
+                }, 200);
+                
+                emptyPos = position;
+                moves++;
+                updateMoves();
+                
+                if (!startTime) {
+                    startTimer();
+                }
+                
+                checkWin();
+            }
+        }
+
+        function shufflePuzzle() {
+            resetGame();
+            
+            // Perform 100 random valid moves
+            let lastMove = -1;
+            for (let i = 0; i < 100; i++) {
+                const validMoves = getValidMoves();
+                // Filter out the last move to avoid back-and-forth
+                const filteredMoves = validMoves.filter(m => m !== lastMove);
+                const randomMove = filteredMoves[Math.floor(Math.random() * filteredMoves.length)];
+                
+                if (randomMove !== undefined) {
+                    swapTilesForShuffle(randomMove, emptyPos);
+                    lastMove = emptyPos;
+                    emptyPos = randomMove;
+                }
+            }
+            
+            moves = 0;
+            updateMoves();
+        }
+
+        function swapTilesForShuffle(pos1, pos2) {
+            const tile1 = tiles[pos1];
+            const tile2 = tiles[pos2];
+            
+            const tempContent = tile1.textContent;
+            const tempValue = tile1.dataset.value;
+            const tempClass = tile1.className;
+            
+            tile1.textContent = tile2.textContent;
+            tile1.dataset.value = tile2.dataset.value;
+            tile1.className = tile2.className;
+            
+            tile2.textContent = tempContent;
+            tile2.dataset.value = tempValue;
+            tile2.className = tempClass;
+        }
+
+        function getValidMoves() {
+            const moves = [];
+            const row = Math.floor(emptyPos / 4);
+            const col = emptyPos % 4;
+            
+            if (row > 0) moves.push(emptyPos - 4); // Up
+            if (row < 3) moves.push(emptyPos + 4); // Down
+            if (col > 0) moves.push(emptyPos - 1); // Left
+            if (col < 3) moves.push(emptyPos + 1); // Right
+            
+            return moves;
+        }
+
+        function checkWin() {
+            for (let i = 0; i < 15; i++) {
+                if (tiles[i].dataset.value != i + 1) {
+                    return false;
+                }
+            }
+            
+            isWon = true;
+            stopTimer();
+            showWinMessage();
+            return true;
+        }
+
+        function showWinMessage() {
+            document.getElementById('finalMoves').textContent = moves;
+            document.getElementById('finalTime').textContent = document.getElementById('timer').textContent;
+            document.getElementById('overlay').classList.add('show');
+            document.getElementById('winMessage').classList.add('show');
+        }
+
+        function newGame() {
+            document.getElementById('overlay').classList.remove('show');
+            document.getElementById('winMessage').classList.remove('show');
+            resetGame();
+            shufflePuzzle();
+        }
+
+        function resetGame() {
+            moves = 0;
+            updateMoves();
+            stopTimer();
+            startTime = null;
+            document.getElementById('timer').textContent = '0:00';
+            isWon = false;
+        }
+
+        function updateMoves() {
+            document.getElementById('moves').textContent = moves;
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function updateTimer() {
+            if (!startTime) return;
+            
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function showSolution() {
+            // Flash the tiles that are out of place
+            for (let i = 0; i < 15; i++) {
+                if (tiles[i].dataset.value != i + 1) {
+                    tiles[i].style.background = '#ffcccc';
+                    setTimeout(() => {
+                        tiles[i].style.background = '#FFF8E1';
+                    }, 1000);
+                }
+            }
+        }
+
+        // Initialize the game
+        initPuzzle();
+        shufflePuzzle();
+    </script>
+</body>
+</html>
