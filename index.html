@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Educational Games Hub</title>
+    <title>Retro 80s Game Collection</title>
     <style>
         * {
             margin: 0;
@@ -53,15 +53,15 @@
             line-height: 1.6;
         }
 
-        /* Directory Navigation */
-        .directory-grid {
+        /* Game Grid */
+        .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 30px;
             margin-top: 40px;
         }
 
-        .directory-card {
+        .game-card {
             background: rgba(0, 0, 0, 0.7);
             border: 4px solid #4CAF50;
             border-radius: 15px;
@@ -73,7 +73,7 @@
             overflow: hidden;
         }
 
-        .directory-card::before {
+        .game-card::before {
             content: '';
             position: absolute;
             top: 0;
@@ -84,17 +84,17 @@
             transition: left 0.5s ease;
         }
 
-        .directory-card:hover::before {
+        .game-card:hover::before {
             left: 100%;
         }
 
-        .directory-card:hover {
+        .game-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 0 #2E7D32, 0 0 30px rgba(76, 175, 80, 0.3);
             border-color: #66BB6A;
         }
 
-        .directory-icon {
+        .game-icon {
             width: 80px;
             height: 80px;
             margin: 0 auto 20px;
@@ -107,20 +107,20 @@
             color: white;
         }
 
-        .directory-card h3 {
+        .game-card h3 {
             font-size: 24px;
             color: #4CAF50;
             margin-bottom: 15px;
             text-shadow: 2px 2px 0 #000;
         }
 
-        .directory-card p {
+        .game-card p {
             color: #B0BEC5;
             margin-bottom: 20px;
             line-height: 1.5;
         }
 
-        .directory-card .btn {
+        .game-card .btn {
             display: inline-block;
             padding: 12px 24px;
             background: #4CAF50;
@@ -132,39 +132,10 @@
             border: 2px solid #4CAF50;
         }
 
-        .directory-card .btn:hover {
+        .game-card .btn:hover {
             background: #45A049;
             border-color: #45A049;
             transform: translateY(-2px);
-        }
-
-        /* Math Directory Specific */
-        .math-card {
-            border-color: #FF9800;
-            box-shadow: 0 6px 0 #E65100, inset 0 0 20px rgba(255, 152, 0, 0.1);
-        }
-
-        .math-card:hover {
-            box-shadow: 0 12px 0 #E65100, 0 0 30px rgba(255, 152, 0, 0.3);
-            border-color: #FFB74D;
-        }
-
-        .math-card .directory-icon {
-            background: #FF9800;
-        }
-
-        .math-card h3 {
-            color: #FF9800;
-        }
-
-        .math-card .btn {
-            background: #FF9800;
-            border-color: #FF9800;
-        }
-
-        .math-card .btn:hover {
-            background: #F57C00;
-            border-color: #F57C00;
         }
 
         /* Footer */
@@ -189,23 +160,30 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎮 Educational Games Hub</h1>
-            <p>A collection of educational games and mathematical tools designed to make learning fun and engaging</p>
+            <h1>🎮 Retro 80s Game Collection</h1>
+            <p>A collection of educational games and interactive experiences with a retro aesthetic</p>
         </div>
 
-        <div class="directory-grid">
-            <div class="directory-card">
-                <div class="directory-icon">🎯</div>
-                <h3>Games Collection</h3>
-                <p>Access all educational games including platformers, puzzles, and interactive learning experiences. Each game integrates mathematical concepts with engaging gameplay.</p>
-                <a href="games/" class="btn">Enter Games</a>
+        <div class="games-grid">
+            <div class="game-card">
+                <div class="game-icon">🏔️</div>
+                <h3>Mountain Dung Dodger</h3>
+                <p>Educational platformer game that combines classic platforming with mathematical exercises. Navigate through mountain levels while solving math problems to gain extra lives.</p>
+                <a href="games/mountain_dung_dodger.html" class="btn">Play Game</a>
             </div>
 
-            <div class="directory-card math-card">
-                <div class="directory-icon">🧮</div>
-                <h3>Math Tools</h3>
-                <p>Explore mathematical modules, testing interfaces, and educational content. Includes reusable math problem generators and difficulty scaling systems.</p>
-                <a href="math/" class="btn">Enter Math</a>
+            <div class="game-card">
+                <div class="game-icon">⚔️</div>
+                <h3>Elemental Warrior</h3>
+                <p>Element-based combat game where you switch between fire, water, earth, and air elements to defeat enemies. Features math problems between levels for educational value.</p>
+                <a href="games/elemental_warrior.html" class="btn">Play Game</a>
+            </div>
+
+            <div class="game-card">
+                <div class="game-icon">🧩</div>
+                <h3>Fifteen Puzzle</h3>
+                <p>Classic sliding puzzle game with a modern twist. Slide tiles to arrange them in numerical order. Features move counter, timer, and responsive design.</p>
+                <a href="games/fifteen_puzzle.html" class="btn">Play Game</a>
             </div>
         </div>
 
