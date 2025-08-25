@@ -395,6 +395,29 @@
         // Math tests module instance
         const mathTests = new MathTests();
         
+        // Color utility functions
+        function lightenColor(color, amount) {
+            const num = parseInt(color.replace("#",""), 16);
+            const amt = Math.round(2.55 * amount * 100);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+                (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+        }
+        
+        function darkenColor(color, amount) {
+            const num = parseInt(color.replace("#",""), 16);
+            const amt = Math.round(2.55 * amount * 100);
+            const R = (num >> 16) - amt;
+            const G = (num >> 8 & 0x00FF) - amt;
+            const B = (num & 0x0000FF) - amt;
+            return "#" + (0x1000000 + (R > 255 ? 255 : R < 0 ? 0 : R) * 0x10000 +
+                (G > 255 ? 255 : G < 0 ? 0 : G) * 0x100 +
+                (B > 255 ? 255 : B < 0 ? 0 : B)).toString(16).slice(1);
+        }
+        
         // Elements system
         const ELEMENTS = [
             { name: 'FIRE', key: 'F', color: '#ff5b3a', beats: 'EARTH', icon: '🔥' },
@@ -464,41 +487,9 @@
             
             const currentElement = ELEMENTS[currentElementIndex];
             
-            // Find nearest robot in range
-            const range = 80;
-            let target = null;
-            let bestDistance = 9999;
-            
-            for (let robot of robots) {
-                const dx = robot.x - player.x;
-                if (dx >= -10 && dx <= range && dx < bestDistance) {
-                    bestDistance = dx;
-                    target = robot;
-                }
-            }
-            
-            if (target) {
-                // Check if element is effective
-                if (currentElement.beats === target.element) {
-                    // Effective hit
-                    score += Math.round(20 * target.size);
-                    createParticles(target.x + target.width/2, target.y, '#8ef', 15);
-                    
-                    // Remove robot
-                    const index = robots.indexOf(target);
-                    if (index > -1) robots.splice(index, 1);
-                    
-                    // Create success text
-                    createPopText(target.x, target.y - 10, '✔', '#8ef');
-                } else {
-                    // Ineffective - robot shoots back
-                    createPopText(target.x, target.y - 10, '✖', '#f88');
-                    robotShoot(target);
-                }
-            } else {
-                // No target - create cosmetic projectile
-                createProjectile(player.x + player.width, player.y + player.height/2, 1, currentElement.color, 'player');
-            }
+            // Always create a projectile in the direction the player is facing
+            const direction = player.facing;
+            createProjectile(player.x + (direction > 0 ? player.width : 0), player.y + player.height/2, direction, currentElement.color, 'player');
             
             updateHUD();
         }
@@ -745,19 +736,19 @@
                 }
             }
             
-            // Robot collision and AI
+            // Robot AI (shooting) - always active
+            for (let robot of robots) {
+                // Robot shooting
+                robot.lastShot++;
+                if (robot.lastShot > 120 && Math.random() < 0.01) {
+                    robotShoot(robot);
+                    robot.lastShot = 0;
+                }
+            }
+            
+            // Robot collision detection - only when not invulnerable
             if (player.invulnerable <= 0) {
                 for (let robot of robots) {
-                    // Robot is stationary - no movement
-                    // robot.x -= robot.speed; // Removed movement
-                    
-                    // Robot shooting
-                    robot.lastShot++;
-                    if (robot.lastShot > 120 && Math.random() < 0.01) {
-                        robotShoot(robot);
-                        robot.lastShot = 0;
-                    }
-                    
                     // Collision with player
                     if (player.x < robot.x + robot.width &&
                         player.x + player.width > robot.x &&
@@ -815,6 +806,35 @@
                             if (player.lives <= 0) {
                                 gameOver();
                             }
+                        }
+                    }
+                } else if (proj.from === 'player') {
+                    // Player projectile hits robot
+                    for (let j = robots.length - 1; j >= 0; j--) {
+                        const robot = robots[j];
+                        if (proj.x < robot.x + robot.width &&
+                            proj.x + proj.width > robot.x &&
+                            proj.y < robot.y + robot.height &&
+                            proj.y + proj.height > robot.y) {
+                            
+                            // Remove projectile
+                            projectiles.splice(i, 1);
+                            
+                            // Check if element is effective
+                            const currentElement = ELEMENTS[currentElementIndex];
+                            if (currentElement.beats === robot.element) {
+                                // Effective hit - destroy robot
+                                score += Math.round(20 * robot.size);
+                                createParticles(robot.x + robot.width/2, robot.y, '#8ef', 15);
+                                createPopText(robot.x, robot.y - 10, '✔', '#8ef');
+                                robots.splice(j, 1);
+                            } else {
+                                // Ineffective - robot shoots back
+                                createPopText(robot.x, robot.y - 10, '✖', '#f88');
+                                robotShoot(robot);
+                            }
+                            
+                            break; // Only hit one robot per projectile
                         }
                     }
                 }
@@ -914,46 +934,49 @@
             for (let robot of robots) {
                 const size = robot.size || 1;
                 const pixelSize = Math.max(1, Math.floor(size));
+                const element = ELEMENTS.find(e => e.name === robot.element);
+                const elementColor = element ? element.color : '#666666';
                 
                 // Shadow
                 ctx.fillStyle = '#000000';
                 ctx.fillRect(robot.x - 2, robot.y + robot.height - 3, robot.width + 4, 3);
                 
-                // Main body (dark gray)
-                ctx.fillStyle = '#2a2a2a';
+                // Main body (element color)
+                ctx.fillStyle = elementColor;
                 ctx.fillRect(robot.x, robot.y, robot.width, robot.height);
                 
-                // Central torso (lighter gray)
-                ctx.fillStyle = '#4a4a4a';
+                // Central torso (lighter version of element color)
+                ctx.fillStyle = lightenColor(elementColor, 0.3);
                 ctx.fillRect(robot.x + robot.width * 0.2, robot.y + robot.height * 0.1, robot.width * 0.6, robot.height * 0.8);
                 
                 // Central eye/sensor (dark with light ring)
                 ctx.fillStyle = '#000000';
                 ctx.fillRect(robot.x + robot.width * 0.4, robot.y + robot.height * 0.3, robot.width * 0.2, robot.height * 0.2);
-                ctx.fillStyle = '#666666';
+                ctx.fillStyle = lightenColor(elementColor, 0.5);
                 ctx.fillRect(robot.x + robot.width * 0.35, robot.y + robot.height * 0.25, robot.width * 0.3, robot.height * 0.3);
                 ctx.fillStyle = '#000000';
                 ctx.fillRect(robot.x + robot.width * 0.4, robot.y + robot.height * 0.3, robot.width * 0.2, robot.height * 0.2);
                 
-                // Shoulders (rectangular panels)
-                ctx.fillStyle = '#3a3a3a';
+                // Shoulders (rectangular panels - darker element color)
+                ctx.fillStyle = darkenColor(elementColor, 0.3);
                 ctx.fillRect(robot.x - robot.width * 0.1, robot.y + robot.height * 0.1, robot.width * 0.3, robot.height * 0.3);
+                ctx.fillStyle = darkenColor(elementColor, 0.3);
                 ctx.fillRect(robot.x + robot.width * 0.8, robot.y + robot.height * 0.1, robot.width * 0.3, robot.height * 0.3);
                 
                 // Shoulder details (HH 0Z text on left shoulder)
-                ctx.fillStyle = '#666666';
+                ctx.fillStyle = '#ffffff';
                 ctx.font = `${Math.max(6, 8 * size)}px monospace`;
                 ctx.fillText('HH', robot.x - robot.width * 0.05, robot.y + robot.height * 0.25);
                 ctx.fillText('0Z', robot.x - robot.width * 0.05, robot.y + robot.height * 0.35);
                 
                 // Right shoulder vents
-                ctx.fillStyle = '#555555';
+                ctx.fillStyle = darkenColor(elementColor, 0.2);
                 for (let i = 0; i < 3; i++) {
                     ctx.fillRect(robot.x + robot.width * 0.85, robot.y + robot.height * 0.15 + i * 0.05, robot.width * 0.1, robot.height * 0.02);
                 }
                 
-                // Arms/weapons (cylindrical)
-                ctx.fillStyle = '#333333';
+                // Arms/weapons (cylindrical - dark element color)
+                ctx.fillStyle = darkenColor(elementColor, 0.5);
                 ctx.fillRect(robot.x - robot.width * 0.15, robot.y + robot.height * 0.4, robot.width * 0.2, robot.height * 0.4);
                 ctx.fillRect(robot.x + robot.width * 0.95, robot.y + robot.height * 0.4, robot.width * 0.2, robot.height * 0.4);
                 
@@ -965,8 +988,9 @@
                 ctx.fillRect(robot.x + robot.width * 1.15, robot.y + robot.height * 0.45, robot.width * 0.05, robot.height * 0.1);
                 
                 // Legs (thick and armored)
-                ctx.fillStyle = '#2a2a2a';
+                ctx.fillStyle = elementColor;
                 ctx.fillRect(robot.x + robot.width * 0.2, robot.y + robot.height * 0.9, robot.width * 0.25, robot.height * 0.1);
+                ctx.fillStyle = elementColor;
                 ctx.fillRect(robot.x + robot.width * 0.55, robot.y + robot.height * 0.9, robot.width * 0.25, robot.height * 0.1);
                 
                 // Feet (dark, blocky)
@@ -975,7 +999,6 @@
                 ctx.fillRect(robot.x + robot.width * 0.5, robot.y + robot.height * 0.95, robot.width * 0.35, robot.height * 0.05);
                 
                 // Element indicator (small and subtle)
-                const element = ELEMENTS.find(e => e.name === robot.element);
                 if (element) {
                     ctx.fillStyle = '#ffffff';
                     ctx.font = `${Math.max(6, 8 * size)}px monospace`;
