@@ -662,7 +662,7 @@
                         type: 'ground'
                     });
                     
-                    // Place robots randomly
+                    // Place robots randomly on ground
                     if (Math.random() < 0.4 + levelNum * 0.1) {
                         const elementIndex = Math.floor(Math.random() * ELEMENTS.length);
                         const element = ELEMENTS[elementIndex];
@@ -670,13 +670,13 @@
                         
                         robots.push({
                             x: x + Math.random() * (w - 20),
-                            y: y - 20,
+                            y: y - 20, // Positioned on ground level
                             width: 16 * size,
                             height: 20 * size,
                             element: element.name,
                             elementColor: element.color,
                             size: size,
-                            speed: 0.5 + Math.random() * 0.5 + levelNum * 0.1,
+                            speed: 0, // Stationary - no movement
                             health: 1 + Math.floor(levelNum / 3),
                             lastShot: 0
                         });
@@ -748,8 +748,8 @@
             // Robot collision and AI
             if (player.invulnerable <= 0) {
                 for (let robot of robots) {
-                    // Robot movement
-                    robot.x -= robot.speed;
+                    // Robot is stationary - no movement
+                    // robot.x -= robot.speed; // Removed movement
                     
                     // Robot shooting
                     robot.lastShot++;
@@ -782,8 +782,8 @@
                 player.invulnerable--;
             }
             
-            // Remove off-screen robots
-            robots = robots.filter(robot => robot.x + robot.width > -50);
+                            // Robots are stationary, no need to remove off-screen ones
+                // robots = robots.filter(robot => robot.x + robot.width > -50);
             
             // Projectile updates
             for (let i = projectiles.length - 1; i >= 0; i--) {
@@ -912,25 +912,74 @@
             
             // Robots
             for (let robot of robots) {
+                const size = robot.size || 1;
+                const pixelSize = Math.max(1, Math.floor(size));
+                
                 // Shadow
                 ctx.fillStyle = '#000000';
                 ctx.fillRect(robot.x - 2, robot.y + robot.height - 3, robot.width + 4, 3);
                 
-                // Body
-                ctx.fillStyle = robot.elementColor;
+                // Main body (dark gray)
+                ctx.fillStyle = '#2a2a2a';
                 ctx.fillRect(robot.x, robot.y, robot.width, robot.height);
                 
-                // Details
-                ctx.fillStyle = '#000000';
-                ctx.fillRect(robot.x + 2, robot.y + 3, 4, 4); // Eye
-                ctx.fillRect(robot.x + robot.width - 8, robot.y + 8, 6, 2); // Mouth
+                // Central torso (lighter gray)
+                ctx.fillStyle = '#4a4a4a';
+                ctx.fillRect(robot.x + robot.width * 0.2, robot.y + robot.height * 0.1, robot.width * 0.6, robot.height * 0.8);
                 
-                // Element indicator
+                // Central eye/sensor (dark with light ring)
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(robot.x + robot.width * 0.4, robot.y + robot.height * 0.3, robot.width * 0.2, robot.height * 0.2);
+                ctx.fillStyle = '#666666';
+                ctx.fillRect(robot.x + robot.width * 0.35, robot.y + robot.height * 0.25, robot.width * 0.3, robot.height * 0.3);
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(robot.x + robot.width * 0.4, robot.y + robot.height * 0.3, robot.width * 0.2, robot.height * 0.2);
+                
+                // Shoulders (rectangular panels)
+                ctx.fillStyle = '#3a3a3a';
+                ctx.fillRect(robot.x - robot.width * 0.1, robot.y + robot.height * 0.1, robot.width * 0.3, robot.height * 0.3);
+                ctx.fillRect(robot.x + robot.width * 0.8, robot.y + robot.height * 0.1, robot.width * 0.3, robot.height * 0.3);
+                
+                // Shoulder details (HH 0Z text on left shoulder)
+                ctx.fillStyle = '#666666';
+                ctx.font = `${Math.max(6, 8 * size)}px monospace`;
+                ctx.fillText('HH', robot.x - robot.width * 0.05, robot.y + robot.height * 0.25);
+                ctx.fillText('0Z', robot.x - robot.width * 0.05, robot.y + robot.height * 0.35);
+                
+                // Right shoulder vents
+                ctx.fillStyle = '#555555';
+                for (let i = 0; i < 3; i++) {
+                    ctx.fillRect(robot.x + robot.width * 0.85, robot.y + robot.height * 0.15 + i * 0.05, robot.width * 0.1, robot.height * 0.02);
+                }
+                
+                // Arms/weapons (cylindrical)
+                ctx.fillStyle = '#333333';
+                ctx.fillRect(robot.x - robot.width * 0.15, robot.y + robot.height * 0.4, robot.width * 0.2, robot.height * 0.4);
+                ctx.fillRect(robot.x + robot.width * 0.95, robot.y + robot.height * 0.4, robot.width * 0.2, robot.height * 0.4);
+                
+                // Weapon barrels (double-barreled)
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(robot.x - robot.width * 0.2, robot.y + robot.height * 0.45, robot.width * 0.05, robot.height * 0.1);
+                ctx.fillRect(robot.x - robot.width * 0.15, robot.y + robot.height * 0.45, robot.width * 0.05, robot.height * 0.1);
+                ctx.fillRect(robot.x + robot.width * 1.1, robot.y + robot.height * 0.45, robot.width * 0.05, robot.height * 0.1);
+                ctx.fillRect(robot.x + robot.width * 1.15, robot.y + robot.height * 0.45, robot.width * 0.05, robot.height * 0.1);
+                
+                // Legs (thick and armored)
+                ctx.fillStyle = '#2a2a2a';
+                ctx.fillRect(robot.x + robot.width * 0.2, robot.y + robot.height * 0.9, robot.width * 0.25, robot.height * 0.1);
+                ctx.fillRect(robot.x + robot.width * 0.55, robot.y + robot.height * 0.9, robot.width * 0.25, robot.height * 0.1);
+                
+                // Feet (dark, blocky)
+                ctx.fillStyle = '#111111';
+                ctx.fillRect(robot.x + robot.width * 0.15, robot.y + robot.height * 0.95, robot.width * 0.35, robot.height * 0.05);
+                ctx.fillRect(robot.x + robot.width * 0.5, robot.y + robot.height * 0.95, robot.width * 0.35, robot.height * 0.05);
+                
+                // Element indicator (small and subtle)
                 const element = ELEMENTS.find(e => e.name === robot.element);
                 if (element) {
                     ctx.fillStyle = '#ffffff';
-                    ctx.font = '8px monospace';
-                    ctx.fillText(element.key, robot.x + robot.width - 6, robot.y + 10);
+                    ctx.font = `${Math.max(6, 8 * size)}px monospace`;
+                    ctx.fillText(element.key, robot.x + robot.width * 0.8, robot.y + robot.height * 0.2);
                 }
             }
             
@@ -961,21 +1010,72 @@
                 ctx.fillStyle = '#000000';
                 ctx.fillRect(player.x - 2, player.y + player.height - 3, player.width + 4, 3);
                 
-                // Shield (left)
-                ctx.fillStyle = '#b3b7ff';
-                ctx.fillRect(player.x - 4, player.y + 4, 4, 8);
+                // Shield (left hand) - dark with reddish emblem
+                ctx.fillStyle = '#4a3a2a';
+                ctx.fillRect(player.x - 6, player.y + 4, 6, 10);
+                ctx.fillStyle = '#8b4513';
+                ctx.fillRect(player.x - 5, player.y + 6, 4, 6);
+                ctx.fillStyle = '#a0522d';
+                ctx.fillRect(player.x - 4, player.y + 7, 2, 4);
                 
-                // Body
-                ctx.fillStyle = '#ffd166';
+                // Body (light tunic)
+                ctx.fillStyle = '#f5f5dc';
                 ctx.fillRect(player.x, player.y, player.width, player.height);
                 
-                // Helmet stripe
-                ctx.fillStyle = '#333333';
-                ctx.fillRect(player.x + 3, player.y + 1, 8, 2);
+                // Neck/collar (dark brown)
+                ctx.fillStyle = '#8b4513';
+                ctx.fillRect(player.x + 2, player.y + 2, player.width - 4, 4);
                 
-                // Sword
-                ctx.fillStyle = '#c0c4d8';
-                ctx.fillRect(player.x + player.width, player.y + 6, 10, 2);
+                // Waist belt
+                ctx.fillStyle = '#654321';
+                ctx.fillRect(player.x + 1, player.y + 8, player.width - 2, 2);
+                
+                // Arms/hands (dark brown gloves)
+                ctx.fillStyle = '#8b4513';
+                ctx.fillRect(player.x - 2, player.y + 4, 2, 8);
+                ctx.fillRect(player.x + player.width, player.y + 4, 2, 8);
+                
+                // Legs (dark brown pants)
+                ctx.fillStyle = '#654321';
+                ctx.fillRect(player.x + 2, player.y + 10, player.width - 4, player.height - 10);
+                
+                // Feet (dark brown boots)
+                ctx.fillStyle = '#8b4513';
+                ctx.fillRect(player.x + 1, player.y + player.height - 2, player.width - 2, 2);
+                
+                // Head details
+                // Hair (dark brown)
+                ctx.fillStyle = '#654321';
+                ctx.fillRect(player.x + 3, player.y - 2, 6, 3);
+                
+                // Face (peachy skin)
+                ctx.fillStyle = '#ffdbac';
+                ctx.fillRect(player.x + 4, player.y, 4, 4);
+                
+                // Eyes (bright purple)
+                ctx.fillStyle = '#8a2be2';
+                ctx.fillRect(player.x + 4, player.y + 1, 1, 1);
+                ctx.fillRect(player.x + 7, player.y + 1, 1, 1);
+                
+                // Mouth (small dark pixel)
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(player.x + 5, player.y + 3, 1, 1);
+                
+                // Sword across body (magical purple glow)
+                ctx.fillStyle = '#e6e6fa';
+                ctx.fillRect(player.x + 2, player.y + 6, player.width - 4, 2);
+                ctx.fillStyle = '#9370db';
+                ctx.fillRect(player.x + 3, player.y + 6, player.width - 6, 2);
+                
+                // Sword hilt
+                ctx.fillStyle = '#654321';
+                ctx.fillRect(player.x + player.width - 2, player.y + 5, 2, 4);
+                
+                // Small sword/dagger in right hand
+                ctx.fillStyle = '#c0c0c0';
+                ctx.fillRect(player.x + player.width + 1, player.y + 6, 6, 1);
+                ctx.fillStyle = '#654321';
+                ctx.fillRect(player.x + player.width + 1, player.y + 5, 1, 3);
                 
                 // Element aura when casting
                 if (player.casting) {
