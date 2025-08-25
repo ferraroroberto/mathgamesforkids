@@ -11,8 +11,8 @@ Elemental Warrior is an educational platformer game that combines elemental comb
 - **💨 AIR** → Beats **💧 WATER**
 - **💧 WATER** → Beats **🔥 FIRE**
 
-### **Element Switching & Casting**
-- Players can switch between elements using Q/E keys or touch buttons
+### **Element Selection & Casting**
+- Players have individual buttons for each element (Fire, Earth, Air, Water)
 - Each element has a unique color and icon
 - Casting powers requires timing and strategic element selection
 - **Element Effectiveness**: Using the correct element against a robot instantly defeats it and awards points
@@ -23,8 +23,8 @@ Elemental Warrior is an educational platformer game that combines elemental comb
 ### **Player Controls**
 - **Movement**: Left/Right arrow keys or touch controls
 - **Jumping**: Up arrow or touch jump button
-- **Element Casting**: Spacebar or tapping element buttons
-- **Element Switching**: Q (previous) / E (next) keys
+- **Element Casting**: Individual element buttons (Fire, Earth, Air, Water)
+- **Element Selection**: Direct button selection for immediate element access
 
 ### **Physics System**
 - **Gravity**: Constant downward acceleration (0.5)
@@ -140,22 +140,22 @@ Elemental Warrior is an educational platformer game that combines elemental comb
 
 ### **UI Elements**
 - **HUD Display**: Lives, level, and score counter
-- **Element Indicator**: Shows currently active element
-- **Touch Controls**: Mobile-optimized button layout
+- **Element Buttons**: Individual buttons for each element (Fire, Earth, Air, Water)
+- **Touch Controls**: Mobile-optimized button layout with dedicated element selection
 - **Progress Bars**: Math session completion tracking
 
 ## 📱 **Platform & Controls**
 
 ### **Cross-Platform Support**
-- **Desktop**: Keyboard and mouse controls
-- **Mobile**: Touch-optimized interface
+- **Desktop**: Keyboard and mouse controls with element hotkeys
+- **Mobile**: Touch-optimized interface with dedicated element buttons
 - **Responsive Design**: Adapts to different screen sizes
 - **No External Dependencies**: Pure HTML5/JavaScript implementation
 
 ### **Control Schemes**
 - **Movement**: Arrow keys or touch buttons
-- **Element Switching**: Q/E keys or touch element buttons
-- **Power Casting**: Spacebar or element button taps
+- **Element Selection**: Individual element buttons for each element type
+- **Power Casting**: Direct element button activation
 - **Math Input**: Number input with Enter key submission
 
 ## 🔄 **Game Flow & States**
@@ -193,7 +193,7 @@ Elemental Warrior is an educational platformer game that combines elemental comb
 ### **Sprite Enhancement Requirements**
 - **Higher Resolution**: Increase sprite detail from basic rectangles to detailed characters
 - **Animation Frames**: Implement smooth animation cycles for all character states
-- **Elemental Effects**: Dynamic visual feedback for element switching and casting
+- **Elemental Effects**: Dynamic visual feedback for element selection and casting
 - **Performance Optimization**: Ensure enhanced sprites maintain 60 FPS gameplay
 
 ### **Robot Behavior Modifications**
