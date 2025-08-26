@@ -490,6 +490,7 @@
             // Always create a projectile in the direction the player is facing
             const direction = player.facing;
             createProjectile(player.x + (direction > 0 ? player.width : 0), player.y + player.height/2, direction, currentElement.color, 'player');
+            console.log('Player projectile created at:', player.x + (direction > 0 ? player.width : 0), player.y + player.height/2); // Debug log
             
             updateHUD();
         }
@@ -539,6 +540,7 @@
         // Robot shooting
         function robotShoot(robot) {
             createProjectile(robot.x, robot.y + robot.height/2, -1, robot.elementColor, 'enemy');
+            console.log('Robot projectile created at:', robot.x, robot.y + robot.height/2); // Debug log
         }
         
         // Math problem functions
@@ -616,6 +618,7 @@
         
         // Generate level
         function generateLevel(levelNum) {
+            console.log('Generating level:', levelNum); // Debug log
             platforms = [];
             robots = [];
             particles = [];
@@ -661,7 +664,7 @@
                         
                         robots.push({
                             x: x + Math.random() * (w - 20),
-                            y: y - 20, // Positioned on ground level
+                            y: y + 20 - (20 * size), // Positioned on ground level, accounting for robot height
                             width: 16 * size,
                             height: 20 * size,
                             element: element.name,
@@ -684,6 +687,8 @@
                 width: 30,
                 height: 50
             };
+            
+            console.log('Level generated with', robots.length, 'robots'); // Debug log
             
             // Reset player
             player.x = 50;
@@ -742,9 +747,10 @@
             for (let robot of robots) {
                 // Robot shooting
                 robot.lastShot++;
-                if (robot.lastShot > 120 && Math.random() < 0.01) {
+                if (robot.lastShot > 60 && Math.random() < 0.02) { // Increased frequency and probability
                     robotShoot(robot);
                     robot.lastShot = 0;
+                    console.log('Robot shot!', robot.x, robot.y); // Debug log
                 }
             }
             
@@ -938,6 +944,7 @@
                 const pixelSize = Math.max(1, Math.floor(size));
                 const element = ELEMENTS.find(e => e.name === robot.element);
                 const elementColor = element ? element.color : '#666666';
+                console.log('Drawing robot at:', robot.x, robot.y, 'size:', size); // Debug log
                 
                 // Shadow
                 ctx.fillStyle = '#000000';
@@ -1012,21 +1019,22 @@
             if (goal) {
                 // Base
                 ctx.fillStyle = '#4CAF50';
-                ctx.fillRect(goal.x - camera.x, goal.y - camera.y + goal.height - 20, goal.width, 20);
+                ctx.fillRect(goal.x, goal.y + goal.height - 20, goal.width, 20);
                 
                 // Portal
                 ctx.fillStyle = '#00BCD4';
-                ctx.fillRect(goal.x - camera.x + 5, goal.y - camera.y, goal.width - 10, goal.height - 20);
+                ctx.fillRect(goal.x + 5, goal.y, goal.width - 10, goal.height - 20);
                 
                 // Glow effect
                 ctx.fillStyle = '#E0F7FA';
-                ctx.fillRect(goal.x - camera.x + 8, goal.y - camera.y + 3, goal.width - 16, goal.height - 26);
+                ctx.fillRect(goal.x + 8, goal.y + 3, goal.width - 16, goal.height - 26);
             }
             
             // Projectiles
             for (let proj of projectiles) {
                 ctx.fillStyle = proj.color;
-                ctx.fillRect(proj.x - camera.x, proj.y - camera.y, proj.width, proj.height);
+                ctx.fillRect(proj.x, proj.y, proj.width, proj.height);
+                console.log('Drawing projectile at:', proj.x, proj.y, 'from:', proj.from); // Debug log
             }
             
             // Player
@@ -1116,10 +1124,10 @@
                 if (particle.isText) {
                     ctx.fillStyle = particle.color;
                     ctx.font = '12px monospace';
-                    ctx.fillText(particle.text, particle.x - camera.x, particle.y - camera.y);
+                    ctx.fillText(particle.text, particle.x, particle.y);
                 } else {
                     ctx.fillStyle = particle.color || '#FF0000';
-                    ctx.fillRect(particle.x - camera.x, particle.y - camera.y, 3, 3);
+                    ctx.fillRect(particle.x, particle.y, 3, 3);
                 }
             }
             
