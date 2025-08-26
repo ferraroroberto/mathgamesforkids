@@ -728,13 +728,14 @@
         function startGame() {
             document.getElementById('startScreen').classList.add('hidden');
             document.getElementById('difficultyScreen').classList.add('hidden');
-            gameState = 'playing';
+            gameState = 'math'; // Start with math instead of playing
             level = 1;
             score = 0;
             player.lives = 3;
             mathTests.reset();
             updateHUD();
-            generateLevel(level);
+            // Don't generate level yet - wait for math completion
+            startMathExercise(); // Start the first math exercise
         }
         
         function gameOver() {
