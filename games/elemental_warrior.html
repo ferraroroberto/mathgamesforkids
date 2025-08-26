@@ -669,7 +669,7 @@
                             size: size,
                             speed: 0, // Stationary - no movement
                             health: 1 + Math.floor(levelNum / 3),
-                            lastShot: 0
+                            lastShot: Math.floor(Math.random() * 60) // Randomize initial shot timer
                         });
                     }
                     
@@ -692,6 +692,8 @@
             player.vy = 0;
             player.onGround = false;
             player.invulnerable = 0;
+            player.castCooldown = 0; // Reset shooting cooldown
+            player.casting = false; // Reset casting state
         }
         
         // Update game
@@ -782,8 +784,8 @@
                 proj.x += proj.vx;
                 proj.y += proj.vy;
                 
-                // Remove off-screen projectiles
-                if (proj.x < -50 || proj.x > canvas.width + 50) {
+                // Remove off-screen projectiles (account for camera)
+                if (proj.x < camera.x - 50 || proj.x > camera.x + canvas.width + 50) {
                     projectiles.splice(i, 1);
                     continue;
                 }
@@ -1010,21 +1012,21 @@
             if (goal) {
                 // Base
                 ctx.fillStyle = '#4CAF50';
-                ctx.fillRect(goal.x, goal.y + goal.height - 20, goal.width, 20);
+                ctx.fillRect(goal.x - camera.x, goal.y - camera.y + goal.height - 20, goal.width, 20);
                 
                 // Portal
                 ctx.fillStyle = '#00BCD4';
-                ctx.fillRect(goal.x + 5, goal.y, goal.width - 10, goal.height - 20);
+                ctx.fillRect(goal.x - camera.x + 5, goal.y - camera.y, goal.width - 10, goal.height - 20);
                 
                 // Glow effect
                 ctx.fillStyle = '#E0F7FA';
-                ctx.fillRect(goal.x + 8, goal.y + 3, goal.width - 16, goal.height - 26);
+                ctx.fillRect(goal.x - camera.x + 8, goal.y - camera.y + 3, goal.width - 16, goal.height - 26);
             }
             
             // Projectiles
             for (let proj of projectiles) {
                 ctx.fillStyle = proj.color;
-                ctx.fillRect(proj.x, proj.y, proj.width, proj.height);
+                ctx.fillRect(proj.x - camera.x, proj.y - camera.y, proj.width, proj.height);
             }
             
             // Player
@@ -1114,10 +1116,10 @@
                 if (particle.isText) {
                     ctx.fillStyle = particle.color;
                     ctx.font = '12px monospace';
-                    ctx.fillText(particle.text, particle.x, particle.y);
+                    ctx.fillText(particle.text, particle.x - camera.x, particle.y - camera.y);
                 } else {
                     ctx.fillStyle = particle.color || '#FF0000';
-                    ctx.fillRect(particle.x, particle.y, 3, 3);
+                    ctx.fillRect(particle.x - camera.x, particle.y - camera.y, 3, 3);
                 }
             }
             
@@ -1134,7 +1136,7 @@
         function startGame() {
             document.getElementById('startScreen').classList.add('hidden');
             document.getElementById('difficultyScreen').classList.add('hidden');
-            gameState = 'playing';
+            gameState = 'math'; // Start with math instead of playing
             level = 1;
             score = 0;
             player.lives = 3;
@@ -1142,7 +1144,8 @@
             mathTests.reset();
             updateHUD();
             updateElementButtons();
-            generateLevel(level);
+            // Don't generate level yet - wait for math completion
+            startMathExercise(); // Start the first math exercise
         }
         
         function gameOver() {
