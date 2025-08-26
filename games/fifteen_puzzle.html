@@ -15,39 +15,72 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            font-family: 'Courier New', monospace;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2C3E50 0%, #34495E 50%, #2C3E50 100%);
             padding: 20px;
+            color: white;
         }
 
         .game-container {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 400px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 4px solid #4CAF50;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 6px 0 #2E7D32, inset 0 0 20px rgba(76, 175, 80, 0.1);
+            max-width: 450px;
             width: 100%;
+            position: relative;
+            overflow: hidden;
+            animation: containerGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes containerGlow {
+            from { box-shadow: 0 6px 0 #2E7D32, inset 0 0 20px rgba(76, 175, 80, 0.1); }
+            to { box-shadow: 0 6px 0 #2E7D32, inset 0 0 30px rgba(76, 175, 80, 0.2); }
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .game-container:hover::before {
+            left: 100%;
         }
 
         .game-header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         h1 {
-            color: #333;
-            font-size: 28px;
+            color: #FFD700;
+            font-size: 32px;
             margin-bottom: 10px;
+            text-shadow: 3px 3px 0 #000, 6px 6px 0 #B8860B;
+            letter-spacing: 2px;
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            from { text-shadow: 3px 3px 0 #000, 6px 6px 0 #B8860B, 0 0 10px rgba(255, 215, 0, 0.3); }
+            to { text-shadow: 3px 3px 0 #000, 6px 6px 0 #B8860B, 0 0 20px rgba(255, 215, 0, 0.6); }
         }
 
         .stats {
             display: flex;
             justify-content: space-around;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .stat {
@@ -56,71 +89,124 @@
 
         .stat-label {
             font-size: 12px;
-            color: #666;
+            color: #87CEEB;
             text-transform: uppercase;
             letter-spacing: 1px;
+            text-shadow: 1px 1px 0 #000;
+            animation: labelGlow 2.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes labelGlow {
+            from { text-shadow: 1px 1px 0 #000, 0 0 3px rgba(135, 206, 235, 0.3); }
+            to { text-shadow: 1px 1px 0 #000, 0 0 8px rgba(135, 206, 235, 0.6); }
         }
 
         .stat-value {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
-            color: #4A90E2;
+            color: #4CAF50;
+            text-shadow: 2px 2px 0 #000;
+            animation: statGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes statGlow {
+            from { text-shadow: 2px 2px 0 #000, 0 0 5px rgba(76, 175, 80, 0.5); }
+            to { text-shadow: 2px 2px 0 #000, 0 0 15px rgba(76, 175, 80, 0.8); }
         }
 
         .puzzle-board {
             position: relative;
             width: 100%;
             padding-bottom: 100%;
-            background: #4A90E2;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border: 3px solid #FFD700;
             border-radius: 15px;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 0 #B8860B, inset 0 0 20px rgba(255, 215, 0, 0.1);
             overflow: hidden;
+            animation: boardGlow 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes boardGlow {
+            from { box-shadow: 0 4px 0 #B8860B, inset 0 0 20px rgba(255, 215, 0, 0.1); }
+            to { box-shadow: 0 4px 0 #B8860B, inset 0 0 30px rgba(255, 215, 0, 0.2); }
+        }
+
+        .puzzle-board::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(255, 215, 0, 0.03) 2px,
+                rgba(255, 215, 0, 0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 1;
         }
 
         .puzzle-grid {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            bottom: 10px;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             grid-template-rows: repeat(4, 1fr);
-            gap: 8px;
+            gap: 10px;
+            z-index: 2;
         }
 
         .tile {
-            background: #FFF8E1;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45A049 100%);
+            border: 2px solid #66BB6A;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: calc(100vw / 12);
             max-font-size: 32px;
             font-weight: bold;
-            color: #E74C3C;
+            color: white;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 3px 0 #2E7D32, inset 0 1px 0 rgba(255, 255, 255, 0.2);
             position: relative;
+            text-shadow: 2px 2px 0 #000;
         }
 
         .tile:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 5px 0 #2E7D32, 0 0 20px rgba(76, 175, 80, 0.5);
+            border-color: #81C784;
         }
 
         .tile:active {
-            transform: scale(0.98);
+            transform: scale(0.98) translateY(0);
+            box-shadow: 0 2px 0 #2E7D32;
         }
 
         .tile.moving {
             z-index: 10;
             transition: all 0.2s ease-out;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.8);
+            animation: tileGlow 0.2s ease-out;
+        }
+
+        @keyframes tileGlow {
+            0% { box-shadow: 0 0 20px rgba(76, 175, 80, 0.8); }
+            50% { box-shadow: 0 0 30px rgba(76, 175, 80, 1); }
+            100% { box-shadow: 0 0 20px rgba(76, 175, 80, 0.8); }
         }
 
         .empty {
             background: transparent;
+            border: 2px dashed #FFD700;
             box-shadow: none;
             cursor: default;
         }
@@ -131,39 +217,49 @@
         }
 
         .controls {
-            margin-top: 20px;
+            margin-top: 25px;
             display: flex;
-            gap: 10px;
+            gap: 15px;
         }
 
         button {
             flex: 1;
-            padding: 12px 20px;
+            padding: 15px 20px;
             font-size: 16px;
-            font-weight: 600;
-            border: none;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            border: 3px solid;
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
             color: white;
+            text-shadow: 2px 2px 0 #000;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .btn-shuffle {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border-color: #FFD700;
+            box-shadow: 0 4px 0 #B8860B, inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
 
         .btn-shuffle:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 7px 0 #B8860B, 0 0 20px rgba(255, 215, 0, 0.4);
         }
 
         .btn-solve {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+            border-color: #87CEEB;
+            box-shadow: 0 4px 0 #2F4F4F, inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
 
         .btn-solve:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 7px 0 #2F4F4F, 0 0 20px rgba(135, 206, 235, 0.4);
         }
 
         .win-message {
@@ -171,13 +267,16 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0);
-            background: white;
-            padding: 30px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 4px solid #FFD700;
+            padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 0 #B8860B, 0 0 40px rgba(255, 215, 0, 0.3);
             text-align: center;
             z-index: 1000;
             transition: transform 0.3s ease;
+            max-width: 400px;
+            width: 90%;
         }
 
         .win-message.show {
@@ -185,15 +284,24 @@
         }
 
         .win-message h2 {
-            color: #4CAF50;
+            color: #FFD700;
             font-size: 36px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 0 #000;
+            font-family: 'Courier New', monospace;
+            animation: winGlow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes winGlow {
+            from { text-shadow: 3px 3px 0 #000, 0 0 10px rgba(255, 215, 0, 0.5); }
+            to { text-shadow: 3px 3px 0 #000, 0 0 25px rgba(255, 215, 0, 0.8); }
         }
 
         .win-message p {
-            color: #666;
+            color: #87CEEB;
             font-size: 18px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            text-shadow: 1px 1px 0 #000;
         }
 
         .overlay {
@@ -202,7 +310,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.7);
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
@@ -220,11 +328,15 @@
             }
             
             h1 {
-                font-size: 24px;
+                font-size: 28px;
             }
             
             .stats {
                 gap: 20px;
+            }
+            
+            .game-container {
+                padding: 20px;
             }
         }
     </style>
@@ -232,7 +344,7 @@
 <body>
     <div class="game-container">
         <div class="game-header">
-            <h1>15 Puzzle</h1>
+            <h1>🧩 15 PUZZLE 🧩</h1>
         </div>
 
         <div class="stats">
@@ -251,8 +363,8 @@
         </div>
         
         <div class="controls">
-            <button class="btn-shuffle" onclick="shufflePuzzle()">Shuffle</button>
-            <button class="btn-solve" onclick="showSolution()">Hint</button>
+            <button class="btn-shuffle" onclick="shufflePuzzle()">SHUFFLE</button>
+            <button class="btn-solve" onclick="showSolution()">HINT</button>
         </div>
     </div>
 
@@ -261,7 +373,7 @@
         <h2>🎉 Congratulations!</h2>
         <p>You solved the puzzle in <span id="finalMoves">0</span> moves!</p>
         <p>Time: <span id="finalTime">0:00</span></p>
-        <button class="btn-shuffle" onclick="newGame()">Play Again</button>
+        <button class="btn-shuffle" onclick="newGame()">PLAY AGAIN</button>
     </div>
 
     <script>
@@ -460,9 +572,11 @@
             // Flash the tiles that are out of place
             for (let i = 0; i < 15; i++) {
                 if (tiles[i].dataset.value != i + 1) {
-                    tiles[i].style.background = '#ffcccc';
+                    tiles[i].style.background = '#ff6b6b';
+                    tiles[i].style.boxShadow = '0 0 20px rgba(255, 107, 107, 0.8)';
                     setTimeout(() => {
-                        tiles[i].style.background = '#FFF8E1';
+                        tiles[i].style.background = '';
+                        tiles[i].style.boxShadow = '';
                     }, 1000);
                 }
             }
