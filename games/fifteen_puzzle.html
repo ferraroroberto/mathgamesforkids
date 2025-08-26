@@ -251,16 +251,7 @@
             box-shadow: 0 7px 0 #B8860B, 0 0 20px rgba(255, 215, 0, 0.4);
         }
 
-        .btn-solve {
-            background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
-            border-color: #87CEEB;
-            box-shadow: 0 4px 0 #2F4F4F, inset 0 1px 0 rgba(255, 255, 255, 0.3);
-        }
 
-        .btn-solve:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 0 #2F4F4F, 0 0 20px rgba(135, 206, 235, 0.4);
-        }
 
         .win-message {
             position: fixed;
@@ -364,7 +355,6 @@
         
         <div class="controls">
             <button class="btn-shuffle" onclick="shufflePuzzle()">SHUFFLE</button>
-            <button class="btn-solve" onclick="showSolution()">HINT</button>
         </div>
     </div>
 
@@ -568,19 +558,7 @@
             document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        function showSolution() {
-            // Flash the tiles that are out of place
-            for (let i = 0; i < 15; i++) {
-                if (tiles[i].dataset.value != i + 1) {
-                    tiles[i].style.background = '#ff6b6b';
-                    tiles[i].style.boxShadow = '0 0 20px rgba(255, 107, 107, 0.8)';
-                    setTimeout(() => {
-                        tiles[i].style.background = '';
-                        tiles[i].style.boxShadow = '';
-                    }, 1000);
-                }
-            }
-        }
+
 
         // Initialize the game
         initPuzzle();
