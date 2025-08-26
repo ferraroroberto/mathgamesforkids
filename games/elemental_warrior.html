@@ -490,6 +490,7 @@
             // Always create a projectile in the direction the player is facing
             const direction = player.facing;
             createProjectile(player.x + (direction > 0 ? player.width : 0), player.y + player.height/2, direction, currentElement.color, 'player');
+            console.log('Player projectile created at:', player.x + (direction > 0 ? player.width : 0), player.y + player.height/2); // Debug log
             
             updateHUD();
         }
@@ -539,6 +540,7 @@
         // Robot shooting
         function robotShoot(robot) {
             createProjectile(robot.x, robot.y + robot.height/2, -1, robot.elementColor, 'enemy');
+            console.log('Robot projectile created at:', robot.x, robot.y + robot.height/2); // Debug log
         }
         
         // Math problem functions
@@ -616,6 +618,7 @@
         
         // Generate level
         function generateLevel(levelNum) {
+            console.log('Generating level:', levelNum); // Debug log
             platforms = [];
             robots = [];
             particles = [];
@@ -661,7 +664,7 @@
                         
                         robots.push({
                             x: x + Math.random() * (w - 20),
-                            y: y - 20, // Positioned on ground level
+                            y: y + 20 - (20 * size), // Positioned on ground level, accounting for robot height
                             width: 16 * size,
                             height: 20 * size,
                             element: element.name,
@@ -669,7 +672,7 @@
                             size: size,
                             speed: 0, // Stationary - no movement
                             health: 1 + Math.floor(levelNum / 3),
-                            lastShot: 0
+                            lastShot: Math.floor(Math.random() * 60) // Randomize initial shot timer
                         });
                     }
                     
@@ -685,6 +688,8 @@
                 height: 50
             };
             
+            console.log('Level generated with', robots.length, 'robots'); // Debug log
+            
             // Reset player
             player.x = 50;
             player.y = 355;
@@ -692,6 +697,8 @@
             player.vy = 0;
             player.onGround = false;
             player.invulnerable = 0;
+            player.castCooldown = 0; // Reset shooting cooldown
+            player.casting = false; // Reset casting state
         }
         
         // Update game
@@ -740,9 +747,10 @@
             for (let robot of robots) {
                 // Robot shooting
                 robot.lastShot++;
-                if (robot.lastShot > 120 && Math.random() < 0.01) {
+                if (robot.lastShot > 60 && Math.random() < 0.02) { // Increased frequency and probability
                     robotShoot(robot);
                     robot.lastShot = 0;
+                    console.log('Robot shot!', robot.x, robot.y); // Debug log
                 }
             }
             
@@ -782,8 +790,8 @@
                 proj.x += proj.vx;
                 proj.y += proj.vy;
                 
-                // Remove off-screen projectiles
-                if (proj.x < -50 || proj.x > canvas.width + 50) {
+                // Remove off-screen projectiles (account for camera)
+                if (proj.x < camera.x - 50 || proj.x > camera.x + canvas.width + 50) {
                     projectiles.splice(i, 1);
                     continue;
                 }
@@ -936,6 +944,7 @@
                 const pixelSize = Math.max(1, Math.floor(size));
                 const element = ELEMENTS.find(e => e.name === robot.element);
                 const elementColor = element ? element.color : '#666666';
+                console.log('Drawing robot at:', robot.x, robot.y, 'size:', size); // Debug log
                 
                 // Shadow
                 ctx.fillStyle = '#000000';
@@ -1025,6 +1034,7 @@
             for (let proj of projectiles) {
                 ctx.fillStyle = proj.color;
                 ctx.fillRect(proj.x, proj.y, proj.width, proj.height);
+                console.log('Drawing projectile at:', proj.x, proj.y, 'from:', proj.from); // Debug log
             }
             
             // Player
@@ -1134,7 +1144,7 @@
         function startGame() {
             document.getElementById('startScreen').classList.add('hidden');
             document.getElementById('difficultyScreen').classList.add('hidden');
-            gameState = 'playing';
+            gameState = 'math'; // Start with math instead of playing
             level = 1;
             score = 0;
             player.lives = 3;
@@ -1142,7 +1152,8 @@
             mathTests.reset();
             updateHUD();
             updateElementButtons();
-            generateLevel(level);
+            // Don't generate level yet - wait for math completion
+            startMathExercise(); // Start the first math exercise
         }
         
         function gameOver() {
