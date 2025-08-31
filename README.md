@@ -2,7 +2,7 @@
 
 ## 📁 Project Structure
 
-This repository contains a collection of educational games and mathematical tools organized into a clear, maintainable structure:
+This repository contains a collection of educational games, mathematical tools, and fun HTML experiments organized into a clear, maintainable structure:
 
 ```
 /
@@ -13,10 +13,27 @@ This repository contains a collection of educational games and mathematical tool
 │   ├── mountain_dung_dodger.html  # Math platformer game
 │   ├── elemental_warrior.html     # Element-based math game
 │   └── fifteen_puzzle.html        # Classic sliding puzzle
+├── funstuff/                    # HTML experiments and fun projects
+│   ├── annoying_captcha.html    # World's most annoying CAPTCHA (educational)
+│   └── annoying_captcha.README.md # CAPTCHA technical documentation
 └── math/                        # Mathematical tools and modules
     ├── mathTests.js            # Reusable math problem generator
     └── test_math.html          # Math module testing interface
 ```
+
+## 🎪 Fun Stuff Directory (`/funstuff/`)
+
+### Annoying CAPTCHA (`annoying_captcha.html`)
+- **Type**: Educational web development experiment
+- **Purpose**: Demonstrates advanced JavaScript and CSS techniques
+- **Features**: 10 progressively frustrating CAPTCHA levels
+- **Educational Value**: Shows DOM manipulation, event handling, animations, and user experience design
+- **Technical Demo**: CSS animations, JavaScript event listeners, dynamic content creation
+
+### Technical Documentation (`annoying_captcha.README.md`)
+- **Purpose**: Comprehensive guide to the CAPTCHA's implementation
+- **Coverage**: HTML structure, CSS techniques, JavaScript patterns
+- **Learning Focus**: Web development concepts and programming techniques
 
 ## 🏗️ Technical Architecture
 
