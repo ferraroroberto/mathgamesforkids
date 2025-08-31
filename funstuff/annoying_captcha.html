@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Most Annoying CAPTCHA Ever</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive;
+            background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00, #ff00ff);
+            background-size: 400% 400%;
+            animation: gradient 3s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .captcha-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 90%;
+            animation: shake 0.5s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px) rotate(-0.5deg); }
+            75% { transform: translateX(2px) rotate(0.5deg); }
+        }
+
+        h1 {
+            color: #ff0080;
+            margin-bottom: 20px;
+            text-align: center;
+            animation: rainbow 2s linear infinite;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        @keyframes rainbow {
+            0% { color: #ff0080; }
+            33% { color: #00ff80; }
+            66% { color: #8000ff; }
+            100% { color: #ff0080; }
+        }
+
+        .level-indicator {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .test-area {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            min-height: 200px;
+            position: relative;
+        }
+
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .success {
+            color: #00c851;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .error {
+            color: #ff4444;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .timer {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            color: #ff0000;
+            font-weight: bold;
+        }
+
+        .dancing-text {
+            animation: dance 0.5s infinite alternate;
+        }
+
+        @keyframes dance {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .image-option {
+            border: 3px solid transparent;
+            padding: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .image-option:hover {
+            border-color: #4ecdc4;
+        }
+
+        .image-option.selected {
+            border-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .slider-container {
+            margin: 20px 0;
+        }
+
+        .fake-loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-bar {
+            width: 100%;
+            height: 30px;
+            background: #ddd;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .loading-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #ff6b6b);
+            width: 0%;
+            transition: width 0.5s;
+        }
+
+        .annoying-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: none;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .emoji-rain {
+            position: fixed;
+            top: -50px;
+            font-size: 30px;
+            animation: fall 3s linear;
+            pointer-events: none;
+            z-index: 998;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(calc(100vh + 50px));
+            }
+        }
+
+        .morse-code {
+            font-family: monospace;
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .upside-down {
+            transform: rotate(180deg);
+            display: inline-block;
+        }
+
+        .math-problem {
+            font-size: 24px;
+            text-align: center;
+            margin: 20px 0;
+            font-family: 'Times New Roman', serif;
+        }
+
+        .tiny-text {
+            font-size: 8px;
+            color: #999;
+        }
+
+        .huge-text {
+            font-size: 48px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="captcha-container">
+        <h1 class="dancing-text">🤖 PROVE YOU'RE HUMAN 🤖</h1>
+        <div class="level-indicator">
+            Level <span id="level">1</span> of ∞ | Annoyance Factor: <span id="annoyance">😐</span>
+        </div>
+        
+        <div class="test-area" id="testArea">
+            <div id="testContent"></div>
+        </div>
+        
+        <div id="message"></div>
+        
+        <div style="text-align: center;">
+            <button id="submitBtn" onclick="checkAnswer()">SUBMIT</button>
+            <button onclick="giveUp()">I Give Up 😭</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="annoying-popup" id="popup">
+        <h3>⚠️ ARE YOU SURE? ⚠️</h3>
+        <p>Click "Yes" 5 times to confirm</p>
+        <button id="confirmBtn" onclick="confirmClick()">Yes (<span id="clickCount">5</span> more)</button>
+        <button onclick="closePopup()">No</button>
+    </div>
+
+    <script>
+        let currentLevel = 1;
+        let currentAnswer = null;
+        let confirmClicks = 5;
+        let timerInterval = null;
+        let mouseTrail = [];
+
+        const annoyanceLevels = ['😐', '😑', '😤', '😡', '🤬', '💀', '👹', '🌋'];
+
+        function getRandomEmoji() {
+            const emojis = ['💩', '🤡', '👻', '🦄', '🌈', '✨', '🎈', '🍕', '🚀', '🎵'];
+            return emojis[Math.floor(Math.random() * emojis.length)];
+        }
+
+        function createEmojiRain() {
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    const emoji = document.createElement('div');
+                    emoji.className = 'emoji-rain';
+                    emoji.textContent = getRandomEmoji();
+                    emoji.style.left = Math.random() * window.innerWidth + 'px';
+                    document.body.appendChild(emoji);
+                    setTimeout(() => emoji.remove(), 3000);
+                }, i * 200);
+            }
+        }
+
+        function generateTest() {
+            clearInterval(timerInterval);
+            const testContent = document.getElementById('testContent');
+            const message = document.getElementById('message');
+            message.innerHTML = '';
+            
+            document.getElementById('level').textContent = currentLevel;
+            document.getElementById('annoyance').textContent = annoyanceLevels[Math.min(currentLevel - 1, annoyanceLevels.length - 1)];
+
+            // Make it progressively more annoying
+            if (currentLevel > 3) {
+                createEmojiRain();
+            }
+
+            switch(currentLevel) {
+                case 1:
+                    generateClickBoxes();
+                    break;
+                case 2:
+                    generateMathWhileMoving();
+                    break;
+                case 3:
+                    generateSelectAllTrafficLights();
+                    break;
+                case 4:
+                    generateTypingTest();
+                    break;
+                case 5:
+                    generateMorseCode();
+                    break;
+                case 6:
+                    generateSliderPuzzle();
+                    break;
+                case 7:
+                    generateMemoryTest();
+                    break;
+                case 8:
+                    generateMouseMaze();
+                    break;
+                case 9:
+                    generateUpsideDownMath();
+                    break;
+                case 10:
+                    generateFinalBoss();
+                    break;
+                default:
+                    generateRandomChaos();
+            }
+        }
+
+        function generateClickBoxes() {
+            currentAnswer = 'checkbox';
+            testContent.innerHTML = `
+                <h3>Check all boxes that contain a "🚦" (traffic light)</h3>
+                <div class="tiny-text">Note: Some traffic lights may be really, really small</div>
+                <div class="checkbox-grid">
+                    ${Array(9).fill().map((_, i) => {
+                        const hasLight = Math.random() > 0.6;
+                        const size = hasLight && Math.random() > 0.5 ? 'font-size: 6px;' : '';
+                        return `
+                            <div class="image-option" data-correct="${hasLight}" onclick="toggleSelect(this)">
+                                <div style="${size}">${hasLight ? '🚦' : ['🚗', '🚙', '🚕', '🚌'][Math.floor(Math.random() * 4)]}</div>
+                                <div>Square ${i + 1}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function generateMathWhileMoving() {
+            const num1 = Math.floor(Math.random() * 50) + 10;
+            const num2 = Math.floor(Math.random() * 30) + 10;
+            const num3 = Math.floor(Math.random() * 20) + 5;
+            currentAnswer = num1 + num2 - num3;
+            
+            testContent.innerHTML = `
+                <h3>Solve this while the numbers dance!</h3>
+                <div class="math-problem">
+                    <span class="dancing-text">${num1}</span> + 
+                    <span class="dancing-text" style="animation-delay: 0.2s">${num2}</span> - 
+                    <span class="dancing-text" style="animation-delay: 0.4s">${num3}</span> = ?
+                </div>
+                <input type="number" id="mathAnswer" placeholder="Enter answer">
+                <div class="timer" id="timer">10</div>
+            `;
+            
+            let timeLeft = 10;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    showError("Time's up! Try again!");
+                    setTimeout(generateTest, 2000);
+                }
+            }, 1000);
+        }
+
+        function generateSelectAllTrafficLights() {
+            currentAnswer = 'images';
+            testContent.innerHTML = `
+                <h3>Select ALL squares with traffic lights</h3>
+                <div class="tiny-text">But wait! New images appear when you click!</div>
+                <div class="checkbox-grid" id="imageGrid">
+                    ${Array(16).fill().map((_, i) => {
+                        const hasLight = Math.random() > 0.7;
+                        return `
+                            <div class="image-option" data-correct="${hasLight}" data-index="${i}" onclick="imageClick(this)">
+                                ${hasLight ? '🚦' : '🌳'}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function imageClick(element) {
+            element.classList.toggle('selected');
+            // Annoyingly change some images
+            if (Math.random() > 0.6) {
+                setTimeout(() => {
+                    const hasLight = Math.random() > 0.5;
+                    element.textContent = hasLight ? '🚦' : '🌳';
+                    element.dataset.correct = hasLight;
+                }, 500);
+            }
+        }
+
+        function generateTypingTest() {
+            const phrase = "I solemnly swear that I am definitely not a robot, probably!";
+            currentAnswer = phrase;
+            
+            testContent.innerHTML = `
+                <h3>Type this EXACTLY (including punctuation):</h3>
+                <div style="background: #fffacd; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                    <span style="font-family: 'Wingdings', sans-serif;">I sol</span>emnly swear that I am definitely not a robot, probably!
+                </div>
+                <div class="tiny-text">Hint: The first part might look weird but type it normally</div>
+                <input type="text" id="typingTest" placeholder="Type here..." style="font-family: monospace;">
+                <div class="timer" id="timer">15</div>
+            `;
+            
+            let timeLeft = 15;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                // Randomly change the input font
+                if (Math.random() > 0.7) {
+                    document.getElementById('typingTest').style.fontFamily = 
+                        ['cursive', 'monospace', 'fantasy', 'Comic Sans MS'][Math.floor(Math.random() * 4)];
+                }
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    showError("Too slow! Try again!");
+                    setTimeout(generateTest, 2000);
+                }
+            }, 1000);
+        }
+
+        function generateMorseCode() {
+            const words = ['HUMAN', 'ROBOT', 'CAPTCHA', 'VERIFY'];
+            const word = words[Math.floor(Math.random() * words.length)];
+            currentAnswer = word;
+            
+            const morseCode = {
+                'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+                'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+                'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+                'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+                'Y': '-.--', 'Z': '--..'
+            };
+            
+            const morse = word.split('').map(letter => morseCode[letter]).join(' / ');
+            
+            testContent.innerHTML = `
+                <h3>Decode this Morse code:</h3>
+                <div class="morse-code">${morse}</div>
+                <div class="tiny-text">Use "/" to separate letters</div>
+                <input type="text" id="morseAnswer" placeholder="Enter decoded word in CAPITALS">
+                <div class="fake-loading">
+                    <p>Decoding signal...</p>
+                    <div class="loading-bar">
+                        <div class="loading-fill" id="loadingBar"></div>
+                    </div>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                document.getElementById('loadingBar').style.width = '100%';
+            }, 100);
+        }
+
+        function generateSliderPuzzle() {
+            const min = Math.floor(Math.random() * 30) + 10;
+            const max = min + Math.floor(Math.random() * 40) + 20;
+            const target = Math.floor(Math.random() * (max - min - 10)) + min + 5;
+            currentAnswer = target;
+            
+            testContent.innerHTML = `
+                <h3>Set the slider to EXACTLY ${target}</h3>
+                <div class="slider-container">
+                    <input type="range" id="slider" min="${min}" max="${max}" value="${min}" 
+                           onmousemove="updateSliderValue()" ontouchmove="updateSliderValue()">
+                    <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                        <span>${min}</span>
+                        <span style="font-size: 24px; font-weight: bold;" id="sliderValue">${min}</span>
+                        <span>${max}</span>
+                    </div>
+                </div>
+                <div class="tiny-text">Good luck! The slider might be a bit... sensitive</div>
+            `;
+            
+            // Make the slider jumpy
+            document.getElementById('slider').addEventListener('input', function() {
+                if (Math.random() > 0.8) {
+                    this.value = parseInt(this.value) + (Math.random() > 0.5 ? 2 : -2);
+                }
+            });
+        }
+
+        function updateSliderValue() {
+            const slider = document.getElementById('slider');
+            document.getElementById('sliderValue').textContent = slider.value;
+        }
+
+        function generateMemoryTest() {
+            const emojis = ['🎈', '🎨', '🎭', '🎪', '🎯', '🎲', '🎸', '🎺'];
+            const sequence = Array(5).fill().map(() => emojis[Math.floor(Math.random() * emojis.length)]);
+            currentAnswer = sequence.join('');
+            
+            testContent.innerHTML = `
+                <h3>Memorize this sequence!</h3>
+                <div class="huge-text" id="sequence">${sequence.join(' ')}</div>
+                <div class="tiny-text">You have 3 seconds...</div>
+            `;
+            
+            setTimeout(() => {
+                testContent.innerHTML = `
+                    <h3>Now type the sequence you saw:</h3>
+                    <div class="tiny-text">Use these buttons in the correct order:</div>
+                    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 20px 0;">
+                        ${emojis.map(e => `<button onclick="addToSequence('${e}')">${e}</button>`).join('')}
+                    </div>
+                    <div style="font-size: 24px; margin: 20px 0;" id="userSequence"></div>
+                    <button onclick="clearSequence()">Clear</button>
+                `;
+                window.userSequence = '';
+            }, 3000);
+        }
+
+        function addToSequence(emoji) {
+            window.userSequence = (window.userSequence || '') + emoji;
+            document.getElementById('userSequence').textContent = window.userSequence;
+        }
+
+        function clearSequence() {
+            window.userSequence = '';
+            document.getElementById('userSequence').textContent = '';
+        }
+
+        function generateMouseMaze() {
+            currentAnswer = 'maze';
+            testContent.innerHTML = `
+                <h3>Move your mouse from START to END without leaving the path!</h3>
+                <div style="position: relative; height: 300px; background: #f0f0f0; border-radius: 10px; overflow: hidden;">
+                    <div style="position: absolute; top: 10px; left: 10px; padding: 10px; background: #4ecdc4; color: white; border-radius: 5px;">START</div>
+                    <div style="position: absolute; bottom: 10px; right: 10px; padding: 10px; background: #ff6b6b; color: white; border-radius: 5px;" 
+                         onmouseenter="mazeSolved()">END</div>
+                    <div style="position: absolute; top: 0; left: 60px; width: 100px; height: 200px; background: #333;"></div>
+                    <div style="position: absolute; top: 100px; left: 160px; width: 200px; height: 100px; background: #333;"></div>
+                    <div style="position: absolute; top: 200px; left: 260px; width: 100px; height: 90px; background: #333;"></div>
+                </div>
+                <div class="tiny-text">Don't touch the dark areas! Mouse must stay on the path.</div>
+            `;
+        }
+
+        function mazeSolved() {
+            currentAnswer = 'solved';
+            showSuccess("Maze completed!");
+        }
+
+        function generateUpsideDownMath() {
+            const num1 = Math.floor(Math.random() * 100) + 50;
+            const num2 = Math.floor(Math.random() * 50) + 25;
+            currentAnswer = num1 * num2;
+            
+            testContent.innerHTML = `
+                <h3>Solve this upside-down equation:</h3>
+                <div class="math-problem upside-down">
+                    ${num1} × ${num2} = ?
+                </div>
+                <div class="tiny-text">The equation is upside down, but enter your answer normally!</div>
+                <input type="number" id="upsideAnswer" placeholder="Enter answer right-side up">
+            `;
+        }
+
+        function generateFinalBoss() {
+            currentAnswer = 'IAMHUMAN2024!';
+            testContent.innerHTML = `
+                <h3>🔥 FINAL BOSS LEVEL 🔥</h3>
+                <p>Complete ALL of these:</p>
+                <ol>
+                    <li>Type: "I AM HUMAN 2024!"</li>
+                    <li>Click the button that appears 3 times</li>
+                    <li>Solve: 47 + 89 - 23 = ?</li>
+                    <li>Find the hidden "🔑" on this page</li>
+                </ol>
+                <input type="text" id="finalText" placeholder="Step 1: Type here">
+                <input type="number" id="finalMath" placeholder="Step 3: Math answer">
+                <div id="movingButton" style="margin: 20px 0;"></div>
+                <div style="position: absolute; bottom: 5px; right: 5px; font-size: 8px; color: #ddd;">🔑</div>
+            `;
+            
+            let buttonClicks = 0;
+            function createMovingButton() {
+                const btn = document.createElement('button');
+                btn.textContent = `Click me! (${3 - buttonClicks} left)`;
+                btn.onclick = () => {
+                    buttonClicks++;
+                    if (buttonClicks < 3) {
+                        btn.remove();
+                        setTimeout(createMovingButton, 500);
+                    } else {
+                        btn.textContent = '✓ Done!';
+                        btn.disabled = true;
+                    }
+                };
+                document.getElementById('movingButton').appendChild(btn);
+            }
+            createMovingButton();
+        }
+
+        function generateRandomChaos() {
+            const challenges = [
+                generateClickBoxes,
+                generateMathWhileMoving,
+                generateTypingTest,
+                generateMorseCode,
+                generateSliderPuzzle,
+                generateMemoryTest,
+                generateUpsideDownMath
+            ];
+            
+            // Pick a random previous challenge but make it harder
+            const challenge = challenges[Math.floor(Math.random() * challenges.length)];
+            challenge();
+            
+            // Add extra annoyances
+            if (Math.random() > 0.5) {
+                document.querySelector('.captcha-container').style.animation = 'shake 0.2s infinite';
+            }
+            createEmojiRain();
+        }
+
+        function toggleSelect(element) {
+            element.classList.toggle('selected');
+        }
+
+        function checkAnswer() {
+            const message = document.getElementById('message');
+            
+            switch(currentLevel) {
+                case 1:
+                    const selected = document.querySelectorAll('.image-option.selected');
+                    const correct = document.querySelectorAll('.image-option[data-correct="true"]');
+                    if (selected.length === correct.length && 
+                        Array.from(selected).every(el => el.dataset.correct === 'true')) {
+                        showSuccess("Correct! But it gets worse...");
+                        currentLevel++;
+                        setTimeout(generateTest, 2000);
+                    } else {
+                        showError("Wrong! Try again!");
+                    }
+                    break;
+                    
+                case 2:
+                    const mathAnswer = document.getElementById('mathAnswer').value;
+                    if (parseInt(mathAnswer) === currentAnswer) {
+                        showSuccess("Math genius! Now for something different...");
+                        currentLevel++;
+                        setTimeout(generateTest, 2000);
+                    } else {
+                        showError("Incorrect! The answer was " + currentAnswer);
+                    }
+                    break;
+                    
+                case 3:
+                    const selectedImages = document.querySelectorAll('.image-option.selected');
+                    const correctImages = document.querySelectorAll('.image-option[data-correct="true"]');
+                    if (selectedImages.length === correctImages.length && 
+                        Array.from(selectedImages).every(el => el.dataset.correct === 'true')) {
+                        showSuccess("Nice try! But wait, there's more...");
+                        currentLevel++;
+                        setTimeout(generateTest, 2000);
+                    } else {
+                        showError("Missed some! The images keep changing!");
+                    }
+                    break;
+                    
+                case 4:
+                    const typed = document.getElementById('typingTest').value;
+                    if (typed === currentAnswer) {
+                        showSuccess("Perfect typing! Ready for morse code?");
+                        currentLevel++;
+                        setTimeout(generateTest, 2000);
+                    } else {
+                        showError("Not quite right! Check punctuation and spacing!");
+                    }
+                    break;
+                    
+                case 5:
+                    const morseAnswer = document.getElementById('morseAnswer').value.toUpperCase();
+                    if (morseAnswer === currentAnswer) {
+                        showSuccess("Decoded! How about some precision?");
+                        currentLevel++;
+                        setTimeout(generateTest, 2000);
+                    } else {
+                        showError("Wrong decode! The answer was: " + currentAnswer);
+                    }
+                    break;
+                    
+                case 6:
+                    const sliderValue = document.getElementById('slider').value;
+                    if (parseInt(sliderValue) === currentAnswer) {
+                        showSuccess("Precise! Memory test incoming...");
+                        currentLevel++;
+                        setTimeout(generateTest, 2000);
+                    } else {
+                        showError(`So close! You were off by ${Math.abs(parseInt(sliderValue) - currentAnswer)}`);
+                    }
+                    break;
+                    
+                case 7:
+                    if (window.userSequence === currentAnswer) {
+                        showSuccess("Great memory! Navigate this maze...");
+                        currentLevel++;
+                        setTimeout(generateTest, 2000);
+                    } else {
+                        showError("Wrong sequence! It was: " + currentAnswer);
+                    }
+                    break;
+                    
+                case 8:
+                    if (currentAnswer === 'solved') {
+                        showSuccess("Maze master! Can you read upside down?");
+                        currentLevel++;
+                        setTimeout(generateTest, 2000);
+                    } else {
+                        showError("Complete the maze first!");
+                    }
+                    break;
+                    
+                case 9:
+                    const upsideAnswer = document.getElementById('upsideAnswer').value;
+                    if (parseInt(upsideAnswer) === currentAnswer) {
+                        showSuccess("Impressive! FINAL BOSS TIME!");
+                        currentLevel++;
+                        setTimeout(generateTest, 2000);
+                    } else {
+                        showError("Wrong! The answer was: " + currentAnswer);
+                    }
+                    break;
+                    
+                case 10:
+                    const finalText = document.getElementById('finalText').value;
+                    const finalMath = document.getElementById('finalMath').value;
+                    if (finalText === "I AM HUMAN 2024!" && parseInt(finalMath) === 113) {
+                        showSuccess("🎉 YOU DID IT! You're officially human! But wait...");
+                        currentLevel++;
+                        setTimeout(generateTest, 2000);
+                    } else {
+                        showError("Complete ALL steps correctly!");
+                    }
+                    break;
+                    
+                default:
+                    // For levels beyond 10, randomly check if they "pass"
+                    if (Math.random() > 0.7) {
+                        showSuccess(`Level ${currentLevel} complete! It never ends...`);
+                        currentLevel++;
+                        setTimeout(generateTest, 2000);
+                    } else {
+                        showError("NOPE! Try harder!");
+                    }
+            }
+        }
+
+        function showSuccess(msg) {
+            const message = document.getElementById('message');
+            message.innerHTML = `<div class="success">${msg}</div>`;
+            createEmojiRain();
+        }
+
+        function showError(msg) {
+            const message = document.getElementById('message');
+            message.innerHTML = `<div class="error">${msg}</div>`;
+            // Make everything shake more
+            document.querySelector('.captcha-container').style.animation = 'shake 0.2s infinite';
+            setTimeout(() => {
+                document.querySelector('.captcha-container').style.animation = 'shake 0.5s infinite';
+            }, 1000);
+        }
+
+        function giveUp() {
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('popup').style.display = 'block';
+            confirmClicks = 5;
+            document.getElementById('clickCount').textContent = confirmClicks;
+        }
+
+        function confirmClick() {
+            confirmClicks--;
+            if (confirmClicks > 0) {
+                document.getElementById('clickCount').textContent = confirmClicks;
+                // Move the button randomly
+                const popup = document.getElementById('popup');
+                popup.style.left = Math.random() * 60 + 20 + '%';
+                popup.style.top = Math.random() * 60 + 20 + '%';
+            } else {
+                alert("🤖 Nice try, robot! The CAPTCHA never gives up! 🤖");
+                closePopup();
+                currentLevel = 1;
+                generateTest();
+            }
+        }
+
+        function closePopup() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('popup').style.display = 'none';
+        }
+
+        // Add annoying mouse trail
+        document.addEventListener('mousemove', (e) => {
+            if (currentLevel > 5 && Math.random() > 0.95) {
+                const trail = document.createElement('div');
+                trail.textContent = '👁️';
+                trail.style.position = 'fixed';
+                trail.style.left = e.clientX + 'px';
+                trail.style.top = e.clientY + 'px';
+                trail.style.pointerEvents = 'none';
+                trail.style.animation = 'fall 2s linear';
+                trail.style.zIndex = '9999';
+                document.body.appendChild(trail);
+                setTimeout(() => trail.remove(), 2000);
+            }
+        });
+
+        // Randomly alert annoying messages
+        function randomAlert() {
+            if (currentLevel > 7 && Math.random() > 0.98) {
+                const messages = [
+                    "Still trying? 🤔",
+                    "Beep boop! Robot detected!",
+                    "Your clicking license has expired!",
+                    "Have you tried turning yourself off and on again?",
+                    "Error 404: Human not found"
+                ];
+                alert(messages[Math.floor(Math.random() * messages.length)]);
+            }
+        }
+
+        setInterval(randomAlert, 10000);
+
+        // Initialize
+        generateTest();
+
+        // Add keyboard shortcuts that do the opposite
+        document.addEventListener('keydown', (e) => {
+            if (currentLevel > 6) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    showError("Enter key disabled! Use the button!");
+                }
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    showError("Tab key disabled! No shortcuts allowed!");
+                }
+            }
+        });
+
+        // Randomly change the cursor
+        if (currentLevel > 4) {
+            setInterval(() => {
+                const cursors = ['crosshair', 'wait', 'help', 'move', 'not-allowed', 'progress'];
+                document.body.style.cursor = cursors[Math.floor(Math.random() * cursors.length)];
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
