@@ -11,19 +11,30 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --lavender: #DDD3E4; /* light */
+            --indigo: #6D61D6;   /* primary */
+            --sand: #D8B683;     /* accent */
+            --aqua: #6ACCD7;     /* accent */
+            --plum: #594169;     /* secondary */
+            --charcoal: #1B1320; /* text */
+            --green: #5EAA2C;    /* success */
+            --mauve: #85619D;    /* accent */
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--lavender) 0%, var(--mauve) 50%, var(--indigo) 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
-            color: #333;
+            color: var(--charcoal);
         }
 
         .header {
-            background: #4A90E2;
+            background: var(--indigo);
             color: white;
             width: 100%;
             max-width: 1200px;
@@ -81,7 +92,7 @@
             height: 40px;
             background: white;
             border-radius: 50%;
-            border: 3px solid #333;
+            border: 3px solid var(--charcoal);
             z-index: 10;
         }
 
@@ -94,34 +105,34 @@
             height: 0;
             border-left: 20px solid transparent;
             border-right: 20px solid transparent;
-            border-top: 40px solid #333;
+            border-top: 40px solid var(--charcoal);
             z-index: 11;
         }
 
         .spin-button {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 20px;
-            border-radius: 50px;
+            background: var(--lavender);
+            color: var(--charcoal);
+            border: 1px solid var(--mauve);
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            transition: all 0.2s ease-in-out;
+            box-shadow: none;
             margin-bottom: 10px;
         }
 
         .spin-button:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+            background: #cec4da;
         }
 
         .spin-button:disabled {
-            background: #ccc;
+            background: #ddd;
+            border-color: #d0c6df;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+            color: #9a9a9a;
         }
 
         .tap-to-spin {
@@ -150,21 +161,21 @@
         .stat {
             flex: 1;
             padding: 10px;
-            background: #f5f5f5;
+            background: var(--lavender);
             border-radius: 5px;
             text-align: center;
         }
 
         .stat-label {
             font-size: 14px;
-            color: #666;
+            color: var(--plum);
             margin-bottom: 5px;
         }
 
         .stat-value {
             font-size: 24px;
             font-weight: bold;
-            color: #333;
+            color: var(--charcoal);
         }
 
         .controls {
@@ -177,8 +188,8 @@
         .control-btn {
             flex: 1;
             padding: 10px 15px;
-            background: #f0f0f0;
-            border: 1px solid #ddd;
+            background: var(--lavender);
+            border: 1px solid var(--mauve);
             border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s;
@@ -190,14 +201,14 @@
         }
 
         .control-btn:hover {
-            background: #e0e0e0;
+            background: #cec4da;
         }
 
         .names-input {
             width: 100%;
             min-height: 200px;
             padding: 15px;
-            border: 2px solid #ddd;
+            border: 2px solid var(--lavender);
             border-radius: 5px;
             font-size: 16px;
             resize: vertical;
@@ -207,7 +218,7 @@
 
         .names-input:focus {
             outline: none;
-            border-color: #4A90E2;
+            border-color: var(--indigo);
         }
 
         .winner-modal {
@@ -245,14 +256,14 @@
 
         .winner-title {
             font-size: 36px;
-            color: #4CAF50;
+            color: var(--green);
             margin-bottom: 20px;
         }
 
         .winner-name {
             font-size: 48px;
             font-weight: bold;
-            color: #333;
+            color: var(--charcoal);
             margin-bottom: 30px;
         }
 
@@ -272,21 +283,21 @@
         }
 
         .remove-btn {
-            background: #f44336;
+            background: var(--plum);
             color: white;
         }
 
         .remove-btn:hover {
-            background: #da190b;
+            background: var(--charcoal);
         }
 
         .keep-btn {
-            background: #4A90E2;
+            background: var(--indigo);
             color: white;
         }
 
         .keep-btn:hover {
-            background: #357abd;
+            background: #5c50c3;
         }
 
         .results-section {
@@ -302,7 +313,7 @@
         .results-title {
             font-size: 20px;
             margin-bottom: 15px;
-            color: #333;
+            color: var(--charcoal);
         }
 
         .results-list {
@@ -312,7 +323,7 @@
         }
 
         .result-item {
-            background: #f0f0f0;
+            background: var(--lavender);
             padding: 8px 15px;
             border-radius: 20px;
             font-size: 14px;
@@ -321,8 +332,8 @@
         .clear-results {
             margin-top: 15px;
             padding: 8px 20px;
-            background: #ff9800;
-            color: white;
+            background: var(--sand);
+            color: var(--charcoal);
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -330,7 +341,7 @@
         }
 
         .clear-results:hover {
-            background: #f57c00;
+            background: #c9a768;
         }
 
         @media (max-width: 768px) {
@@ -444,11 +455,10 @@ David"></textarea>
         canvas.width = 350;
         canvas.height = 350;
 
-        // Color palette
+        // Color palette (applied from design)
         const colorPalette = [
-            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-            '#FD79A8', '#A29BFE', '#6C5CE7', '#FDCB6E', '#00B894',
-            '#00CEC9', '#0984E3', '#6C63FF', '#A8E6CF', '#FFD93D'
+            '#DDD3E4', '#6D61D6', '#D8B683', '#6ACCD7', '#594169',
+            '#1B1320', '#5EAA2C', '#85619D'
         ];
 
         function getNames() {
@@ -671,7 +681,7 @@ David"></textarea>
         drawWheel();
 
         // Add some example names
-        namesInput.value = '\nRoberto\nrest';
+        namesInput.value = 'Valentina\nRoberto\nLuca\nAna';
         updateStats();
         generateColors(names.length);
         drawWheel();
