@@ -550,10 +550,18 @@ David"></textarea>
                 if (progress < 1) {
                     requestAnimationFrame(animate);
                 } else {
-                    // Determine winner
-                    const normalizedAngle = (2 * Math.PI - (currentRotation % (2 * Math.PI))) % (2 * Math.PI);
-                    const winnerIndex = Math.floor(normalizedAngle / ((2 * Math.PI) / names.length));
+                    // Determine winner: pointer is at the top of the wheel
+                    const sliceAngle = (2 * Math.PI) / names.length;
+                    // Canvas 0 rad is to the right; our pointer triangle is at the top (-PI/2)
+                    const pointerAngle = -Math.PI / 2;
+                    const fullTurn = 2 * Math.PI;
+                    // Normalize current rotation to [0, 2π)
+                    const normalizedRotation = ((currentRotation % fullTurn) + fullTurn) % fullTurn;
+                    // Angle on the wheel directly under the fixed pointer
+                    const angleUnderPointer = ((pointerAngle - normalizedRotation) + fullTurn) % fullTurn;
+                    const winnerIndex = Math.floor(angleUnderPointer / sliceAngle);
                     currentWinner = names[winnerIndex];
+                    
                     
                     // Show winner
                     setTimeout(() => {
@@ -663,7 +671,7 @@ David"></textarea>
         drawWheel();
 
         // Add some example names
-        namesInput.value = 'Jordi\nRoberto\nrest';
+        namesInput.value = '\nRoberto\nrest';
         updateStats();
         generateColors(names.length);
         drawWheel();
