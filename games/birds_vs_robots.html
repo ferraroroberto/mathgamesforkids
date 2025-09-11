@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Birds vs. Robots</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../math/mathTests.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -235,6 +236,111 @@
         .difficulty-btn[data-difficulty="medium"]:hover { box-shadow: 0 6px 0 #2980b9; }
         .difficulty-btn[data-difficulty="hard"]:hover { box-shadow: 0 6px 0 #c0392b; }
 
+        .math-problem {
+            font-size: 24px;
+            color: var(--accent-color);
+            text-shadow: 2px 2px 0 #000;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .math-input {
+            width: 80px;
+            height: 50px;
+            font-size: 24px;
+            text-align: center;
+            border: 3px solid var(--accent-color);
+            border-radius: 8px;
+            background: #fff;
+            color: #000;
+            margin: 10px;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .math-submit {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: var(--success-color);
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            box-shadow: 0 4px 0 #27ae60;
+            border: 3px solid #27ae60;
+            transition: all 0.2s ease;
+        }
+
+        .math-submit:hover {
+            transform: translateY(-3px);
+            background-color: #3fe37e;
+            box-shadow: 0 6px 0 #27ae60;
+        }
+
+        .math-submit:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 0 #27ae60;
+        }
+
+        .math-result {
+            font-size: 14px;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .math-result.correct {
+            background: rgba(76, 175, 80, 0.3);
+            color: #4CAF50;
+        }
+
+        .math-result.incorrect {
+            background: rgba(244, 67, 54, 0.3);
+            color: #F44336;
+        }
+
+        .math-progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .math-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), #ff6b9d);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .grade-btn {
+            padding: 1rem;
+            font-family: 'Press Start 2P', cursive;
+            background-color: var(--primary-color);
+            color: white;
+            border: 3px solid #2980b9;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 #2980b9;
+        }
+
+        .grade-btn:hover {
+            transform: translateY(-3px);
+            background-color: #4eb1ee;
+            box-shadow: 0 6px 0 #2980b9;
+        }
+
+        .grade-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 0 #2980b9;
+        }
+
     </style>
 </head>
 <body>
@@ -271,7 +377,7 @@
     </div>
 </div>
 
-<div id="difficulty-modal" class="modal visible">
+<div id="difficulty-modal" class="modal">
     <div class="modal-content">
         <h2 class="modal-title">CHOOSE DIFFICULTY</h2>
         <div class="difficulty-options">
@@ -279,6 +385,35 @@
             <button class="difficulty-btn" data-difficulty="medium">MEDIUM</button>
             <button class="difficulty-btn" data-difficulty="hard">HARD</button>
         </div>
+    </div>
+    </div>
+
+    <!-- Grade Selection Modal -->
+    <div id="grade-modal" class="modal visible">
+        <div class="modal-content">
+            <h2 class="modal-title">📚 Choose Your Grade 📚</h2>
+            <p style="margin: 1rem 0; text-align: center;">Select your math grade level for the challenges!</p>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                <button class="grade-btn" data-grade="1">Grade 1</button>
+                <button class="grade-btn" data-grade="2">Grade 2</button>
+                <button class="grade-btn" data-grade="3">Grade 3</button>
+                <button class="grade-btn" data-grade="4">Grade 4</button>
+                <button class="grade-btn" data-grade="5">Grade 5</button>
+            </div>
+        </div>
+    </div>
+
+<div id="math-modal" class="modal">
+    <div class="modal-content">
+        <h2 class="modal-title">🧮 MATH CHALLENGE! 🧮</h2>
+        <div class="math-progress-bar">
+            <div class="math-progress-fill" id="mathProgress"></div>
+        </div>
+        <p style="margin: 1rem 0; text-align: center;">Solve the math problem to continue!</p>
+        <div class="math-problem" id="mathProblem"></div>
+        <input type="number" class="math-input" id="mathAnswer" placeholder="?" min="0" max="999">
+        <button class="math-submit" onclick="submitMathAnswer()">SUBMIT</button>
+        <div id="mathResult"></div>
     </div>
 </div>
 
@@ -303,9 +438,29 @@
     const difficultyModal = document.getElementById('difficulty-modal');
     const difficultyBtns = document.querySelectorAll('.difficulty-btn');
 
+    // Grade modal elements
+    const gradeModal = document.getElementById('grade-modal');
+    const gradeBtns = document.querySelectorAll('.grade-btn');
+
+    // Math modal elements
+    const mathModal = document.getElementById('math-modal');
+    const mathProblem = document.getElementById('mathProblem');
+    const mathAnswer = document.getElementById('mathAnswer');
+    const mathResult = document.getElementById('mathResult');
+    const mathProgress = document.getElementById('mathProgress');
+
+    // Math tests module instance
+    const mathTests = new MathTests();
+
+    // Selected grade level (will be set when grade is chosen)
+    let selectedGrade = 3; // Default to grade 3
+
     // Game state
     let gameState = {};
     let mousePos = { x: -1, y: -1 };
+    
+    // Store initial math bonus before game starts
+    let initialMathBonus = 0;
 
 
     // Game constants
@@ -354,7 +509,7 @@
     function initializeGame(difficulty) {
         const settings = DIFFICULTY_SETTINGS[difficulty];
         gameState = {
-            resources: settings.resources,
+            resources: settings.resources + initialMathBonus, // Add the initial math bonus!
             lives: settings.lives,
             wave: 0,
             birds: [],
@@ -363,21 +518,37 @@
             particles: [],
             selectedBird: null,
             waveInProgress: false,
+            robotsSpawning: false,
             gameOver: false,
             gameWon: false,
             frames: 0,
             difficulty: difficulty
         };
+        
+        // Reset the initial bonus after using it
+        initialMathBonus = 0;
+        
         updateUI();
         gameOverModal.classList.remove('visible');
         startWaveBtn.disabled = false;
+        startWaveBtn.textContent = 'START WAVE 1';
     }
     
     function startGame(difficulty) {
         difficultyModal.classList.remove('visible');
         gameWrapper.classList.remove('hidden');
         initializeGame(difficulty);
+
+        // Start the game loop for bird placement (no initial math here)
         gameLoop();
+    }
+
+    function selectGrade(grade) {
+        selectedGrade = grade;
+        gradeModal.classList.remove('visible');
+
+        // Start the initial math challenge (once at game start)
+        startMathExercise();
     }
 
 
@@ -660,7 +831,7 @@
         gameState.projectiles = gameState.projectiles.filter(p => p.x > -10);
         gameState.particles = gameState.particles.filter(p => p.life > 0);
 
-        if (gameState.waveInProgress && gameState.robots.length === 0) {
+        if (gameState.waveInProgress && gameState.robots.length === 0 && !gameState.robotsSpawning) {
             endWave();
         }
         
@@ -675,10 +846,16 @@
 
     function startWave() {
         if (gameState.waveInProgress || gameState.wave >= WAVES.length) return;
-        
+
+        // Increment wave when it actually starts
         gameState.wave++;
+        
         gameState.waveInProgress = true;
+        gameState.robotsSpawning = true;
         startWaveBtn.disabled = true;
+
+        // Update wave display
+        waveDisplay.textContent = `WAVE: ${gameState.wave}/${WAVES.length}`;
 
         const waveConfig = WAVES[gameState.wave - 1];
         let spawnCount = 0;
@@ -693,14 +870,21 @@
                 spawnCount++;
             }
         }
+        
+        // Mark spawning as complete after all robots are scheduled
+        setTimeout(() => {
+            gameState.robotsSpawning = false;
+        }, spawnCount * 500);
     }
     
     function endWave() {
         gameState.waveInProgress = false;
-        startWaveBtn.disabled = false;
-        
+
         if (gameState.wave >= WAVES.length) {
             endGame(true);
+        } else {
+            // Start math exercise BEFORE the next wave begins
+            startMathExercise();
         }
     }
 
@@ -715,6 +899,142 @@
             modalText.textContent = "The robots have taken over!";
         }
         gameOverModal.classList.add('visible');
+    }
+
+    function startMathExercise() {
+        const problem = mathTests.startMathExercise(selectedGrade, 3); // Use selected grade, 3 exercises
+        mathProblem.textContent = problem.problem;
+
+        mathAnswer.value = '';
+        mathResult.innerHTML = '';
+        mathProgress.style.width = '0%';
+
+        mathModal.classList.add('visible');
+        mathAnswer.focus(); // Focus on input for Enter key
+    }
+
+    function submitMathAnswer() {
+        const userAnswer = parseInt(mathAnswer.value);
+        if (isNaN(userAnswer)) {
+            alert('Please enter a valid number');
+            return;
+        }
+
+        const result = mathTests.submitMathAnswer(userAnswer);
+
+        if (result.isCorrect) {
+            mathResult.innerHTML = '<div class="math-result correct">✅ Correct! Well done!</div>';
+        } else {
+            mathResult.innerHTML = `<div class="math-result incorrect">❌ Wrong! The answer was ${result.correctAnswer}</div>`;
+        }
+
+        mathProgress.style.width = `${(result.exerciseCount / 3) * 100}%`;
+
+        if (!result.isSessionComplete) {
+            setTimeout(() => {
+                mathProblem.textContent = result.nextProblem.problem;
+                mathAnswer.value = '';
+                mathResult.innerHTML = '';
+            }, 1500);
+        } else {
+            setTimeout(() => {
+                finishMathSession();
+            }, 1500);
+        }
+    }
+
+    function finishMathSession() {
+        mathModal.classList.remove('visible');
+
+        const sessionSummary = mathTests.finishMathSession();
+        
+        // Check if game has been initialized yet
+        if (!gameState || gameState.wave === undefined) {
+            // This is the initial math challenge (before game starts)
+            // Store the bonus for when game starts
+            initialMathBonus = calculateMathBonus(sessionSummary.correctAnswers);
+            showBonusMessage(getBonusMessage(sessionSummary.correctAnswers));
+            
+            // Show difficulty selection
+            difficultyModal.classList.add('visible');
+        } else if (gameState.wave === 0) {
+            // Game initialized but wave 0 - start the game loop for bird placement
+            giveMathBonus(sessionSummary.correctAnswers);
+            gameLoop();
+        } else {
+            // This is wave-end math - prepare for next wave
+            giveMathBonus(sessionSummary.correctAnswers);
+            
+            // Enable the start wave button so player can place birds
+            startWaveBtn.disabled = false;
+            startWaveBtn.textContent = `START WAVE ${gameState.wave + 1}`;
+        }
+    }
+
+    function calculateMathBonus(correctAnswers) {
+        if (correctAnswers === 3) {
+            return 50; // All correct - big bonus
+        } else if (correctAnswers === 2) {
+            return 25; // One error - medium bonus
+        } else if (correctAnswers === 1) {
+            return 10; // Two errors - small bonus
+        } else {
+            return 0; // All wrong - no bonus
+        }
+    }
+    
+    function getBonusMessage(correctAnswers) {
+        if (correctAnswers === 3) {
+            return '🎉 Perfect! +50 seeds bonus!';
+        } else if (correctAnswers === 2) {
+            return '👍 Great job! +25 seeds bonus!';
+        } else if (correctAnswers === 1) {
+            return '💪 Keep trying! +10 seeds bonus!';
+        } else {
+            return '📚 Keep practicing! No bonus this time.';
+        }
+    }
+
+    function giveMathBonus(correctAnswers) {
+        const bonus = calculateMathBonus(correctAnswers);
+        const message = getBonusMessage(correctAnswers);
+
+        gameState.resources += bonus;
+        updateUI();
+
+        // Show bonus message briefly
+        if (bonus > 0) {
+            showBonusMessage(message);
+        }
+    }
+
+    function showBonusMessage(message) {
+        // Create a temporary message element
+        const messageDiv = document.createElement('div');
+        messageDiv.textContent = message;
+        messageDiv.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #FFD700;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+            z-index: 1000;
+            pointer-events: none;
+        `;
+
+        document.body.appendChild(messageDiv);
+
+        // Remove after 2 seconds
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.parentNode.removeChild(messageDiv);
+            }
+        }, 2000);
     }
 
     // --- Drawing ---
@@ -883,7 +1203,7 @@
     restartGameBtn.addEventListener('click', () => {
         gameOverModal.classList.remove('visible');
         gameWrapper.classList.add('hidden');
-        difficultyModal.classList.add('visible');
+        gradeModal.classList.add('visible');
     });
     
     difficultyBtns.forEach(btn => {
@@ -891,6 +1211,21 @@
             const difficulty = e.currentTarget.dataset.difficulty;
             startGame(difficulty);
         });
+    });
+
+    // Grade selection event listeners
+    gradeBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const grade = parseInt(e.currentTarget.dataset.grade);
+            selectGrade(grade);
+        });
+    });
+
+    // Enter key handling for math input
+    mathAnswer.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && mathModal.classList.contains('visible')) {
+            submitMathAnswer();
+        }
     });
 
 </script>
