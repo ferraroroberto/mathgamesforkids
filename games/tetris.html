@@ -55,6 +55,21 @@
         /* Prevent ugly blue highlight on mobile buttons */
         .mobile-control-btn {
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        /* Mobile controls styling */
+        .mobile-control-btn:active {
+            transform: scale(0.95);
+            transition: transform 0.1s ease;
+        }
+        
+        /* Touch gesture hint */
+        .touch-hint {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            text-align: center;
+            margin-top: 0.5rem;
         }
         
         canvas {
@@ -74,18 +89,26 @@
             <div>
                 <h1 class="text-3xl sm:text-4xl font-bold text-shadow text-center text-accent-color mb-6">TETRIS</h1>
                 <div class="hidden lg:block p-4 pixel-border">
-                    <h2 class="text-lg mb-2 text-center">Controls</h2>
+                    <h2 class="text-lg mb-2 text-center">Desktop Controls</h2>
                     <p class="text-sm mb-1"><span class="font-bold text-accent-color">LEFT/RIGHT:</span> Move</p>
                     <p class="text-sm mb-1"><span class="font-bold text-accent-color">UP:</span> Rotate</p>
                     <p class="text-sm mb-1"><span class="font-bold text-accent-color">DOWN:</span> Soft Drop</p>
                     <p class="text-sm"><span class="font-bold text-accent-color">SPACE:</span> Hard Drop</p>
+                </div>
+                
+                <div class="lg:hidden p-4 pixel-border mt-4">
+                    <h2 class="text-lg mb-2 text-center">Mobile Controls</h2>
+                    <p class="text-sm mb-1"><span class="font-bold text-accent-color">Buttons:</span> Use control buttons below</p>
+                    <p class="text-sm mb-1"><span class="font-bold text-accent-color">Tap:</span> Rotate piece</p>
+                    <p class="text-sm mb-1"><span class="font-bold text-accent-color">Swipe:</span> Move/rotate</p>
+                    <p class="text-sm"><span class="font-bold text-accent-color">Long Press:</span> Hard drop</p>
                 </div>
             </div>
         </div>
 
         <!-- Center Panel: Game Board -->
         <div class="order-1 lg:order-2 flex justify-center items-center">
-            <canvas id="tetris" class="pixel-border"></canvas>
+            <canvas id="tetris" class="pixel-border" style="touch-action: none;"></canvas>
         </div>
 
         <!-- Right Panel: Stats & Controls -->
@@ -125,12 +148,18 @@
     </div>
 
     <!-- Mobile Controls -->
-    <div id="mobile-controls" class="lg:hidden grid grid-cols-3 grid-rows-2 gap-2 w-full max-w-sm mt-4 p-2">
+    <div id="mobile-controls" class="lg:hidden grid grid-cols-4 grid-rows-2 gap-2 w-full max-w-md mt-4 p-2">
         <button id="mobile-left" class="mobile-control-btn pixel-button col-start-1 row-start-2 py-4 text-2xl">◀</button>
-        <button id="mobile-right" class="mobile-control-btn pixel-button col-start-2 row-start-2 py-4 text-2xl">▶</button>
-        <button id="mobile-rotate" class="mobile-control-btn pixel-button col-start-3 row-start-1 py-4 text-2xl">⟳</button>
-        <button id="mobile-down" class="mobile-control-btn pixel-button col-start-3 row-start-2 py-4 text-2xl">▼</button>
-        <div class="col-span-2 row-start-1"></div>
+        <button id="mobile-down" class="mobile-control-btn pixel-button col-start-2 row-start-2 py-4 text-2xl">▼</button>
+        <button id="mobile-right" class="mobile-control-btn pixel-button col-start-3 row-start-2 py-4 text-2xl">▶</button>
+        <button id="mobile-rotate" class="mobile-control-btn pixel-button col-start-4 row-start-1 py-4 text-2xl">⟳</button>
+        <button id="mobile-hard-drop" class="mobile-control-btn pixel-button col-start-4 row-start-2 py-4 text-xl">⬇</button>
+        <div class="col-span-3 row-start-1"></div>
+    </div>
+    
+    <!-- Touch Gesture Hints -->
+    <div class="lg:hidden touch-hint text-center px-4">
+        <p class="text-xs">Tap game area to rotate • Swipe to move • Long press for hard drop</p>
     </div>
 
 
@@ -167,6 +196,7 @@
             const mobileRight = document.getElementById('mobile-right');
             const mobileRotate = document.getElementById('mobile-rotate');
             const mobileDown = document.getElementById('mobile-down');
+            const mobileHardDrop = document.getElementById('mobile-hard-drop');
 
             const COLS = 10;
             const ROWS = 20;
@@ -619,6 +649,81 @@
             mobileRight.addEventListener('click', () => { if(!isPaused) pieceMove(1) });
             mobileRotate.addEventListener('click', () => { if(!isPaused) pieceRotate() });
             mobileDown.addEventListener('click', () => { if(!isPaused) pieceDrop() });
+            mobileHardDrop.addEventListener('click', () => { if(!isPaused) hardDrop() });
+            
+            // Touch Gestures for Enhanced Mobile Experience
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let touchEndX = 0;
+            let touchEndY = 0;
+            const minSwipeDistance = 50; // Minimum distance for a swipe
+            
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (isPaused) return;
+                
+                const touch = e.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+            }, { passive: false });
+            
+            canvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                if (isPaused) return;
+                
+                const touch = e.changedTouches[0];
+                touchEndX = touch.clientX;
+                touchEndY = touch.clientY;
+                
+                const deltaX = touchEndX - touchStartX;
+                const deltaY = touchEndY - touchStartY;
+                
+                // Determine if it's a swipe or tap
+                if (Math.abs(deltaX) > minSwipeDistance || Math.abs(deltaY) > minSwipeDistance) {
+                    // It's a swipe
+                    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                        // Horizontal swipe
+                        if (deltaX > 0) {
+                            pieceMove(1); // Swipe right
+                        } else {
+                            pieceMove(-1); // Swipe left
+                        }
+                    } else {
+                        // Vertical swipe
+                        if (deltaY > 0) {
+                            pieceDrop(); // Swipe down
+                        } else {
+                            pieceRotate(); // Swipe up
+                        }
+                    }
+                } else {
+                    // It's a tap - rotate piece
+                    pieceRotate();
+                }
+            }, { passive: false });
+            
+            // Long press for hard drop
+            let longPressTimer = null;
+            canvas.addEventListener('touchstart', (e) => {
+                if (isPaused) return;
+                longPressTimer = setTimeout(() => {
+                    hardDrop();
+                }, 500); // 500ms for long press
+            });
+            
+            canvas.addEventListener('touchend', () => {
+                if (longPressTimer) {
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                }
+            });
+            
+            canvas.addEventListener('touchmove', () => {
+                if (longPressTimer) {
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                }
+            });
             
             // Difficulty Selection
             function setDifficulty(level) {
