@@ -107,18 +107,12 @@
         <button id="start-btn" class="pixel-button w-full py-2 text-sm">Start Game</button>
     </div>
 
-    <!-- Mobile Controls -->
-    <div id="mobile-controls" class="lg:hidden mt-2 p-2">
-        <!-- Movement Controls Row -->
-        <div class="flex justify-center space-x-4 mb-4">
-            <button id="mobile-left" class="mobile-control-btn pixel-button w-16 h-16 sm:w-20 sm:h-20 text-2xl sm:text-3xl">◀</button>
-            <button id="mobile-right" class="mobile-control-btn pixel-button w-16 h-16 sm:w-20 sm:h-20 text-2xl sm:text-3xl">▶</button>
-        </div>
-        <!-- Action Controls Row -->
-        <div class="flex justify-center space-x-4">
-            <button id="mobile-rotate" class="mobile-control-btn pixel-button w-16 h-16 sm:w-20 sm:h-20 text-2xl sm:text-3xl">⟳</button>
-            <button id="mobile-down" class="mobile-control-btn pixel-button w-16 h-16 sm:w-20 sm:h-20 text-2xl sm:text-3xl">▼</button>
-            <button id="mobile-hard-drop" class="mobile-control-btn pixel-button w-16 h-16 sm:w-20 sm:h-20 text-xl sm:text-2xl">⬇</button>
+    <!-- Mobile Touch Instructions -->
+    <div id="mobile-instructions" class="lg:hidden mt-2 p-2 text-center">
+        <div class="text-xs text-accent-color bg-black bg-opacity-50 rounded p-2 pixel-border">
+            <p class="mb-1">📱 Touch Controls:</p>
+            <p>• Tap the falling piece to rotate</p>
+            <p>• Drag left/right to move</p>
         </div>
     </div>
 
@@ -157,11 +151,13 @@
             const mediumBtn = document.getElementById('medium-btn');
             const hardBtn = document.getElementById('hard-btn');
 
-            const mobileLeft = document.getElementById('mobile-left');
-            const mobileRight = document.getElementById('mobile-right');
-            const mobileRotate = document.getElementById('mobile-rotate');
-            const mobileDown = document.getElementById('mobile-down');
-            const mobileHardDrop = document.getElementById('mobile-hard-drop');
+            // Touch control variables
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let touchStartTime = 0;
+            let isDragging = false;
+            let dragThreshold = 30; // Minimum distance for drag detection
+            let tapThreshold = 200; // Maximum time for tap detection (ms)
 
             const COLS = 10;
             const ROWS = 20;
@@ -609,12 +605,66 @@
                 }
             });
 
-            // Mobile Controls
-            mobileLeft.addEventListener('click', () => { if(!isPaused) pieceMove(-1) });
-            mobileRight.addEventListener('click', () => { if(!isPaused) pieceMove(1) });
-            mobileRotate.addEventListener('click', () => { if(!isPaused) pieceRotate() });
-            mobileDown.addEventListener('click', () => { if(!isPaused) pieceDrop() });
-            mobileHardDrop.addEventListener('click', () => { if(!isPaused) hardDrop() });
+            // Touch Controls for Mobile
+            function getTouchPos(canvas, touchEvent) {
+                const rect = canvas.getBoundingClientRect();
+                return {
+                    x: touchEvent.touches[0].clientX - rect.left,
+                    y: touchEvent.touches[0].clientY - rect.top
+                };
+            }
+
+            canvas.addEventListener('touchstart', (e) => {
+                if (isPaused) return;
+                e.preventDefault();
+
+                const touch = e.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+                touchStartTime = Date.now();
+                isDragging = false;
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (isPaused) return;
+                e.preventDefault();
+
+                const touch = e.touches[0];
+                const deltaX = touch.clientX - touchStartX;
+                const deltaY = touch.clientY - touchStartY;
+
+                // If moved more than threshold, consider it a drag
+                if (Math.abs(deltaX) > dragThreshold || Math.abs(deltaY) > dragThreshold) {
+                    isDragging = true;
+
+                    // Horizontal drag for left/right movement
+                    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                        if (deltaX > dragThreshold && touchStartX < touch.clientX) {
+                            pieceMove(1); // Move right
+                            touchStartX = touch.clientX; // Reset for continuous movement
+                        } else if (deltaX < -dragThreshold && touchStartX > touch.clientX) {
+                            pieceMove(-1); // Move left
+                            touchStartX = touch.clientX; // Reset for continuous movement
+                        }
+                    }
+                }
+            });
+
+            canvas.addEventListener('touchend', (e) => {
+                if (isPaused) return;
+                e.preventDefault();
+
+                const touchEndTime = Date.now();
+                const touchDuration = touchEndTime - touchStartTime;
+
+                // If it's a quick tap (not a drag), rotate the piece
+                if (!isDragging && touchDuration < tapThreshold) {
+                    pieceRotate();
+                }
+
+                // Reset drag state
+                isDragging = false;
+            });
             
             // Difficulty Selection
             function setDifficulty(level) {
