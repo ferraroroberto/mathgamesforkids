@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Tetris</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
@@ -22,6 +22,12 @@
             background-color: var(--bg-color);
             color: var(--main-color);
             overscroll-behavior: none;
+        }
+
+        /* Safe-area padding helper for devices with bottom bars (iOS/Android) */
+        .mb-safe {
+            padding-bottom: constant(safe-area-inset-bottom);
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         /* Custom styling for the retro look */
@@ -95,7 +101,7 @@
     </div>
 
     <!-- Controls Section (Below Grid) -->
-    <div class="w-full max-w-md mx-auto px-1">
+    <div class="w-full max-w-md mx-auto px-1 mb-safe">
         <div class="mb-2">
             <h3 class="text-center mb-1 text-sm">Difficulty</h3>
             <div class="flex justify-between">
@@ -695,7 +701,8 @@
 
                 // Account for stats above and controls below the grid
                 // Approximate space used by other elements: stats (~60px), controls (~80px), padding (~40px)
-                const reservedSpace = window.innerWidth < 640 ? 180 : 200; // Smaller on mobile
+                // Reserve extra space on mobile to avoid bottom UI and safe areas cutting off controls
+                const reservedSpace = window.innerWidth < 640 ? 220 : 220;
                 const availableHeight = window.innerHeight - reservedSpace;
 
                 // Calculate size based on available width and height
