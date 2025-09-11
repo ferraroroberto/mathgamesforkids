@@ -82,37 +82,82 @@
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-2 sm:p-4 touch-none">
 
-    <div id="game-container" class="w-full max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <!-- Mobile Layout -->
+    <div class="lg:hidden w-full max-w-md mx-auto flex flex-col items-center">
+        <h1 class="text-3xl font-bold text-shadow text-center text-accent-color mb-4">TETRIS</h1>
+        
+        <!-- Stats Row -->
+        <div class="w-full grid grid-cols-2 gap-2 mb-4">
+            <div class="pixel-border p-3 text-center">
+                <span class="text-accent-color text-sm">SCORE</span>
+                <p id="score-mobile" class="text-lg mt-1">0</p>
+            </div>
+            <div class="pixel-border p-3 text-center">
+                <span class="text-accent-color text-sm">LINES</span>
+                <p id="lines-mobile" class="text-lg mt-1">0</p>
+            </div>
+            <div class="pixel-border p-3 text-center">
+                <span class="text-accent-color text-sm">LEVEL</span>
+                <p id="level-mobile" class="text-lg mt-1">1</p>
+            </div>
+            <div class="pixel-border p-3 text-center">
+                <span class="text-accent-color text-sm">NEXT</span>
+                <canvas id="next-mobile" class="mx-auto mt-2"></canvas>
+            </div>
+        </div>
+        
+        <!-- Game Board -->
+        <div class="mb-4">
+            <canvas id="tetris-mobile" class="pixel-border" style="touch-action: none;"></canvas>
+        </div>
+        
+        <!-- Difficulty and Start Button -->
+        <div class="w-full mb-4">
+            <div class="mb-4">
+                <h3 class="text-center mb-2">Difficulty</h3>
+                <div class="flex justify-center space-x-2">
+                    <button id="easy-btn-mobile" class="pixel-button px-3 py-2 text-sm">Easy</button>
+                    <button id="medium-btn-mobile" class="pixel-button px-3 py-2 text-sm !bg-accent-color !text-white">Medium</button>
+                    <button id="hard-btn-mobile" class="pixel-button px-3 py-2 text-sm">Hard</button>
+                </div>
+            </div>
+            <button id="start-btn-mobile" class="pixel-button w-full py-3 text-xl">Start Game</button>
+        </div>
+        
+        <!-- Mobile Instructions -->
+        <div class="p-4 pixel-border mb-4">
+            <h2 class="text-lg mb-2 text-center">Mobile Controls</h2>
+            <p class="text-sm mb-1"><span class="font-bold text-accent-color">Buttons:</span> Use control buttons below</p>
+            <p class="text-sm mb-1"><span class="font-bold text-accent-color">Tap:</span> Rotate piece</p>
+            <p class="text-sm mb-1"><span class="font-bold text-accent-color">Swipe:</span> Move/rotate</p>
+            <p class="text-sm"><span class="font-bold text-accent-color">Long Press:</span> Hard drop</p>
+        </div>
+    </div>
+
+    <!-- Desktop Layout -->
+    <div id="game-container" class="hidden lg:grid w-full max-w-4xl mx-auto grid-cols-3 gap-4">
         
         <!-- Left Panel: Title & Instructions -->
-        <div class="flex flex-col items-center justify-start order-2 lg:order-1 lg:p-4">
+        <div class="flex flex-col items-center justify-start lg:p-4">
             <div>
-                <h1 class="text-3xl sm:text-4xl font-bold text-shadow text-center text-accent-color mb-6">TETRIS</h1>
-                <div class="hidden lg:block p-4 pixel-border">
+                <h1 class="text-4xl font-bold text-shadow text-center text-accent-color mb-6">TETRIS</h1>
+                <div class="p-4 pixel-border">
                     <h2 class="text-lg mb-2 text-center">Desktop Controls</h2>
                     <p class="text-sm mb-1"><span class="font-bold text-accent-color">LEFT/RIGHT:</span> Move</p>
                     <p class="text-sm mb-1"><span class="font-bold text-accent-color">UP:</span> Rotate</p>
                     <p class="text-sm mb-1"><span class="font-bold text-accent-color">DOWN:</span> Soft Drop</p>
                     <p class="text-sm"><span class="font-bold text-accent-color">SPACE:</span> Hard Drop</p>
                 </div>
-                
-                <div class="lg:hidden p-4 pixel-border mt-4">
-                    <h2 class="text-lg mb-2 text-center">Mobile Controls</h2>
-                    <p class="text-sm mb-1"><span class="font-bold text-accent-color">Buttons:</span> Use control buttons below</p>
-                    <p class="text-sm mb-1"><span class="font-bold text-accent-color">Tap:</span> Rotate piece</p>
-                    <p class="text-sm mb-1"><span class="font-bold text-accent-color">Swipe:</span> Move/rotate</p>
-                    <p class="text-sm"><span class="font-bold text-accent-color">Long Press:</span> Hard drop</p>
-                </div>
             </div>
         </div>
 
         <!-- Center Panel: Game Board -->
-        <div class="order-1 lg:order-2 flex justify-center items-center">
+        <div class="flex justify-center items-center">
             <canvas id="tetris" class="pixel-border" style="touch-action: none;"></canvas>
         </div>
 
         <!-- Right Panel: Stats & Controls -->
-        <div class="order-3 lg:order-3 flex flex-col justify-between items-center lg:p-4">
+        <div class="flex flex-col justify-between items-center lg:p-4">
             <div class="w-full grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-1 gap-4 text-center">
                 <div class="pixel-border p-3 w-full">
                     <span class="text-accent-color text-sm">SCORE</span>
@@ -180,6 +225,12 @@
             const nextCanvas = document.getElementById('next');
             const nextContext = nextCanvas.getContext('2d');
 
+            // Mobile elements
+            const mobileCanvas = document.getElementById('tetris-mobile');
+            const mobileContext = mobileCanvas.getContext('2d');
+            const mobileNextCanvas = document.getElementById('next-mobile');
+            const mobileNextContext = mobileNextCanvas.getContext('2d');
+
             const scoreElement = document.getElementById('score');
             const linesElement = document.getElementById('lines');
             const levelElement = document.getElementById('level');
@@ -191,6 +242,15 @@
             const easyBtn = document.getElementById('easy-btn');
             const mediumBtn = document.getElementById('medium-btn');
             const hardBtn = document.getElementById('hard-btn');
+
+            // Mobile UI elements
+            const mobileScoreElement = document.getElementById('score-mobile');
+            const mobileLinesElement = document.getElementById('lines-mobile');
+            const mobileLevelElement = document.getElementById('level-mobile');
+            const mobileStartBtn = document.getElementById('start-btn-mobile');
+            const mobileEasyBtn = document.getElementById('easy-btn-mobile');
+            const mobileMediumBtn = document.getElementById('medium-btn-mobile');
+            const mobileHardBtn = document.getElementById('hard-btn-mobile');
 
             const mobileLeft = document.getElementById('mobile-left');
             const mobileRight = document.getElementById('mobile-right');
@@ -452,45 +512,55 @@
                 scoreElement.innerText = score;
                 linesElement.innerText = lines;
                 levelElement.innerText = level;
+                
+                // Update mobile elements
+                mobileScoreElement.innerText = score;
+                mobileLinesElement.innerText = lines;
+                mobileLevelElement.innerText = level;
             }
 
             // --- Drawing ---
             function draw() {
+                drawCanvas(canvas, context);
+                drawCanvas(mobileCanvas, mobileContext);
+            }
+            
+            function drawCanvas(targetCanvas, targetContext) {
                 // Draw main board
-                context.fillStyle = '#1a1a1a';
-                context.fillRect(0, 0, canvas.width, canvas.height);
+                targetContext.fillStyle = '#1a1a1a';
+                targetContext.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
                 
                 // Draw grid lines
-                const currentBlockSize = canvas.width / COLS;
-                context.strokeStyle = 'rgba(128, 128, 128, 0.1)';
-                context.lineWidth = 1;
+                const currentBlockSize = targetCanvas.width / COLS;
+                targetContext.strokeStyle = 'rgba(128, 128, 128, 0.1)';
+                targetContext.lineWidth = 1;
                 for (let x = 0; x < COLS; x++) {
                     for (let y = 0; y < ROWS; y++) {
-                        context.strokeRect(x * currentBlockSize, y * currentBlockSize, currentBlockSize, currentBlockSize);
+                        targetContext.strokeRect(x * currentBlockSize, y * currentBlockSize, currentBlockSize, currentBlockSize);
                     }
                 }
 
-                drawMatrix(context, board, { x: 0, y: 0 });
+                drawMatrix(targetContext, board, { x: 0, y: 0 }, targetCanvas);
                 if (piece) {
-                    drawMatrix(context, piece.matrix, piece.pos);
+                    drawMatrix(targetContext, piece.matrix, piece.pos, targetCanvas);
                 }
             }
 
-            function drawMatrix(context, matrix, offset) {
+            function drawMatrix(targetContext, matrix, offset, targetCanvas) {
                 matrix.forEach((row, y) => {
                     row.forEach((value, x) => {
                         if (value !== 0) {
-                            context.fillStyle = COLORS[value];
-                            const currentBlockSize = canvas.width / COLS;
-                            context.fillRect(
+                            targetContext.fillStyle = COLORS[value];
+                            const currentBlockSize = targetCanvas.width / COLS;
+                            targetContext.fillRect(
                                 (x + offset.x) * currentBlockSize,
                                 (y + offset.y) * currentBlockSize,
                                 currentBlockSize, currentBlockSize);
                             
                             // Add a little 3D effect
-                            context.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-                            context.lineWidth = 2;
-                            context.strokeRect(
+                            targetContext.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                            targetContext.lineWidth = 2;
+                            targetContext.strokeRect(
                                 (x + offset.x) * currentBlockSize + 1,
                                 (y + offset.y) * currentBlockSize + 1,
                                 currentBlockSize - 2, currentBlockSize - 2);
@@ -500,9 +570,14 @@
             }
             
             function drawNextPiece() {
-                const blockSize = nextCanvas.width / NEXT_GRID_SIZE;
-                nextContext.fillStyle = '#1a1a1a';
-                nextContext.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+                drawNextPieceCanvas(nextCanvas, nextContext);
+                drawNextPieceCanvas(mobileNextCanvas, mobileNextContext);
+            }
+            
+            function drawNextPieceCanvas(targetCanvas, targetContext) {
+                const blockSize = targetCanvas.width / NEXT_GRID_SIZE;
+                targetContext.fillStyle = '#1a1a1a';
+                targetContext.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
                 
                 const matrix = nextPiece.matrix;
                 const offsetX = (NEXT_GRID_SIZE - matrix[0].length) / 2;
@@ -511,16 +586,16 @@
                 matrix.forEach((row, y) => {
                     row.forEach((value, x) => {
                         if (value !== 0) {
-                            nextContext.fillStyle = COLORS[value];
-                            nextContext.fillRect(
+                            targetContext.fillStyle = COLORS[value];
+                            targetContext.fillRect(
                                 (x + offsetX) * blockSize,
                                 (y + offsetY) * blockSize,
                                 blockSize, blockSize
                             );
                              // Add a little 3D effect
-                            nextContext.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-                            nextContext.lineWidth = 2;
-                            nextContext.strokeRect(
+                            targetContext.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                            targetContext.lineWidth = 2;
+                            targetContext.strokeRect(
                                 (x + offsetX) * blockSize + 1,
                                 (y + offsetY) * blockSize + 1,
                                 blockSize - 2, blockSize - 2);
@@ -561,6 +636,7 @@
                 resetPiece();
                 modal.classList.add('hidden');
                 startBtn.textContent = "Pause Game";
+                mobileStartBtn.textContent = "Pause Game";
 
                 if (!musicStarted) {
                     Tone.start();
@@ -580,9 +656,11 @@
                 isPaused = !isPaused;
                 if (isPaused) {
                     startBtn.textContent = "Resume Game";
+                    mobileStartBtn.textContent = "Resume Game";
                     if(musicStarted) Tone.Transport.pause();
                 } else {
                     startBtn.textContent = "Pause Game";
+                    mobileStartBtn.textContent = "Pause Game";
                     if(musicStarted) Tone.Transport.start();
                     update();
                 }
@@ -615,7 +693,22 @@
                 }
             }
             
+            function handleMobileStartClick() {
+                if (isGameOver) {
+                    startGame();
+                } else if (isPaused) {
+                    if (mobileStartBtn.textContent === "Start Game") {
+                        startGame();
+                    } else {
+                        pauseGame();
+                    }
+                } else {
+                    pauseGame();
+                }
+            }
+            
             startBtn.addEventListener('click', handleStartClick);
+            mobileStartBtn.addEventListener('click', handleMobileStartClick);
             modalButton.addEventListener('click', startGame);
 
             document.addEventListener('keydown', event => {
@@ -658,7 +751,8 @@
             let touchEndY = 0;
             const minSwipeDistance = 50; // Minimum distance for a swipe
             
-            canvas.addEventListener('touchstart', (e) => {
+            // Touch events for mobile canvas
+            mobileCanvas.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 if (isPaused) return;
                 
@@ -667,7 +761,7 @@
                 touchStartY = touch.clientY;
             }, { passive: false });
             
-            canvas.addEventListener('touchend', (e) => {
+            mobileCanvas.addEventListener('touchend', (e) => {
                 e.preventDefault();
                 if (isPaused) return;
                 
@@ -704,21 +798,21 @@
             
             // Long press for hard drop
             let longPressTimer = null;
-            canvas.addEventListener('touchstart', (e) => {
+            mobileCanvas.addEventListener('touchstart', (e) => {
                 if (isPaused) return;
                 longPressTimer = setTimeout(() => {
                     hardDrop();
                 }, 500); // 500ms for long press
             });
             
-            canvas.addEventListener('touchend', () => {
+            mobileCanvas.addEventListener('touchend', () => {
                 if (longPressTimer) {
                     clearTimeout(longPressTimer);
                     longPressTimer = null;
                 }
             });
             
-            canvas.addEventListener('touchmove', () => {
+            mobileCanvas.addEventListener('touchmove', () => {
                 if (longPressTimer) {
                     clearTimeout(longPressTimer);
                     longPressTimer = null;
@@ -730,18 +824,30 @@
                 currentDifficulty = level;
                 dropInterval = difficulties[level];
                 
+                // Update desktop buttons
                 [easyBtn, mediumBtn, hardBtn].forEach(btn => {
                     btn.classList.remove('!bg-accent-color', '!text-white');
                 });
                 document.getElementById(`${level}-btn`).classList.add('!bg-accent-color', '!text-white');
+                
+                // Update mobile buttons
+                [mobileEasyBtn, mobileMediumBtn, mobileHardBtn].forEach(btn => {
+                    btn.classList.remove('!bg-accent-color', '!text-white');
+                });
+                document.getElementById(`${level}-btn-mobile`).classList.add('!bg-accent-color', '!text-white');
             }
             
             easyBtn.addEventListener('click', () => setDifficulty('easy'));
             mediumBtn.addEventListener('click', () => setDifficulty('medium'));
             hardBtn.addEventListener('click', () => setDifficulty('hard'));
             
+            mobileEasyBtn.addEventListener('click', () => setDifficulty('easy'));
+            mobileMediumBtn.addEventListener('click', () => setDifficulty('medium'));
+            mobileHardBtn.addEventListener('click', () => setDifficulty('hard'));
+            
             // --- Responsive Canvas ---
             function resizeCanvas() {
+                // Desktop canvas
                 const container = canvas.parentElement;
                 const size = Math.min(container.clientWidth, window.innerHeight * 0.7);
                 const newBlockSize = Math.floor(size / COLS);
@@ -751,6 +857,17 @@
 
                 nextCanvas.width = newBlockSize * NEXT_GRID_SIZE;
                 nextCanvas.height = newBlockSize * NEXT_GRID_SIZE;
+                
+                // Mobile canvas
+                const mobileContainer = mobileCanvas.parentElement;
+                const mobileSize = Math.min(mobileContainer.clientWidth, window.innerWidth * 0.8);
+                const mobileBlockSize = Math.floor(mobileSize / COLS);
+                
+                mobileCanvas.width = mobileBlockSize * COLS;
+                mobileCanvas.height = mobileBlockSize * ROWS;
+
+                mobileNextCanvas.width = mobileBlockSize * NEXT_GRID_SIZE;
+                mobileNextCanvas.height = mobileBlockSize * NEXT_GRID_SIZE;
 
                 draw();
                 if(nextPiece) drawNextPiece();
