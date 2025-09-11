@@ -7,6 +7,7 @@
     <title>Tetris</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <script src="../math/mathTests.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -69,6 +70,125 @@
             image-rendering: crisp-edges;
         }
 
+        .mathProblem {
+            font-size: 24px;
+            color: var(--accent-color);
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .mathInput {
+            width: 80px;
+            height: 50px;
+            font-size: 24px;
+            text-align: center;
+            border: 3px solid var(--accent-color);
+            border-radius: 5px;
+            background: #fff;
+            color: #000;
+            margin: 10px;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .mathSubmit {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: #FF9800;
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            box-shadow: 0 3px 0 #F57C00;
+        }
+
+        .mathSubmit:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #F57C00;
+        }
+
+        .mathResult {
+            font-size: 14px;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .mathResult.correct {
+            background: rgba(76, 175, 80, 0.3);
+            color: #4CAF50;
+        }
+
+        .mathResult.incorrect {
+            background: rgba(244, 67, 54, 0.3);
+            color: #F44336;
+        }
+
+        .progressBar {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progressFill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), #ff6b9d);
+            transition: width 0.3s ease;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal .pixel-border {
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.visible .pixel-border {
+             transform: scale(1);
+        }
+
+        .grade-btn {
+            font-size: 0.7rem;
+            padding: 0.5rem;
+            min-height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grade-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #F57C00;
+        }
+
+        .grade-btn:active {
+            transform: translateY(0px);
+            box-shadow: 0 2px 0 #F57C00;
+        }
+
     </style>
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-1 sm:p-2 touch-none">
@@ -113,6 +233,21 @@
         <button id="start-btn" class="pixel-button w-full py-2 text-sm px-3 overflow-visible whitespace-nowrap">Start Game</button>
     </div>
 
+    <!-- Grade Selection Modal -->
+    <div id="grade-modal" class="modal">
+        <div class="pixel-border p-8 text-center max-w-sm w-full">
+            <h2 class="text-2xl text-accent-color text-shadow mb-4">📚 Choose Your Grade 📚</h2>
+            <p class="mb-6 text-sm">Select your math grade level for the challenges!</p>
+            <div class="grid grid-cols-3 gap-2 mb-4">
+                <button class="grade-btn pixel-button py-2" data-grade="1">Grade 1</button>
+                <button class="grade-btn pixel-button py-2" data-grade="2">Grade 2</button>
+                <button class="grade-btn pixel-button py-2" data-grade="3">Grade 3</button>
+                <button class="grade-btn pixel-button py-2" data-grade="4">Grade 4</button>
+                <button class="grade-btn pixel-button py-2" data-grade="5">Grade 5</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Mobile Touch Instructions -->
     <div id="mobile-instructions" class="lg:hidden mt-2 p-2 text-center">
         <div class="text-xs text-accent-color bg-black bg-opacity-50 rounded p-2 pixel-border">
@@ -137,6 +272,21 @@
             <button id="modal-button" class="pixel-button w-full py-3 text-lg">Play Again</button>
         </div>
     </div>
+
+    <!-- Math Modal Dialog -->
+    <div id="math-modal" class="modal">
+        <div class="pixel-border p-8 text-center max-w-sm w-full">
+            <h2 class="text-2xl text-accent-color text-shadow mb-4">🧮 Math Challenge! 🧮</h2>
+            <div class="progressBar mb-4">
+                <div class="progressFill" id="mathProgress" style="width: 0%"></div>
+            </div>
+            <p class="mb-4 text-sm">Solve the math problem to continue!</p>
+            <div class="mathProblem mb-4" id="mathProblem"></div>
+            <input type="number" class="mathInput mb-4" id="mathAnswer" placeholder="?" min="0" max="999">
+            <button class="mathSubmit mb-4" onclick="submitMathAnswer()">Submit Answer</button>
+            <div id="mathResult"></div>
+        </div>
+    </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -157,6 +307,23 @@
             const easyBtn = document.getElementById('easy-btn');
             const mediumBtn = document.getElementById('medium-btn');
             const hardBtn = document.getElementById('hard-btn');
+
+            // Modal elements
+            const gradeModal = document.getElementById('grade-modal');
+            const gradeBtns = document.querySelectorAll('.grade-btn');
+
+            // Math modal elements
+            const mathModal = document.getElementById('math-modal');
+            const mathProblem = document.getElementById('mathProblem');
+            const mathAnswer = document.getElementById('mathAnswer');
+            const mathResult = document.getElementById('mathResult');
+            const mathProgress = document.getElementById('mathProgress');
+
+            // Math tests module instance
+            const mathTests = new MathTests();
+
+            // Selected grade level
+            let selectedGrade = 3; // Default to grade 3
 
             // Touch control variables
             let touchStartX = 0;
@@ -527,7 +694,7 @@
                 dropInterval = difficulties[currentDifficulty];
                 updateScore(0);
                 resetPiece();
-                modal.classList.add('hidden');
+                modal.classList.remove('visible');
                 startBtn.textContent = "Pause Game";
 
                 if (!musicStarted) {
@@ -561,11 +728,60 @@
                 isPaused = true;
                 playSound('game_over');
                 if(musicStarted) Tone.Transport.stop();
-                
+
+                // Show game over modal directly
                 modalTitle.textContent = "Game Over";
                 modalScore.innerText = `Final Score: ${score}`;
                 modalButton.textContent = "Play Again";
-                modal.classList.remove('hidden');
+                modal.classList.add('visible');
+            }
+
+            function startMathExercise() {
+                const problem = mathTests.startMathExercise(selectedGrade, 3); // Use selected grade, 3 exercises
+                mathProblem.textContent = problem.problem;
+
+                mathAnswer.value = '';
+                mathResult.innerHTML = '';
+                mathProgress.style.width = '0%';
+
+                mathModal.classList.add('visible');
+            }
+
+            function submitMathAnswer() {
+                const userAnswer = parseInt(mathAnswer.value);
+                if (isNaN(userAnswer)) {
+                    alert('Please enter a valid number');
+                    return;
+                }
+
+                const result = mathTests.submitMathAnswer(userAnswer);
+
+                if (result.isCorrect) {
+                    mathResult.innerHTML = '<div class="mathResult correct">✅ Correct! Well done!</div>';
+                } else {
+                    mathResult.innerHTML = `<div class="mathResult incorrect">❌ Wrong! The answer was ${result.correctAnswer}</div>`;
+                }
+
+                mathProgress.style.width = `${(result.exerciseCount / 3) * 100}%`;
+
+                if (!result.isSessionComplete) {
+                    setTimeout(() => {
+                        mathProblem.textContent = result.nextProblem.problem;
+                        mathAnswer.value = '';
+                        mathResult.innerHTML = '';
+                    }, 1500);
+                } else {
+                    setTimeout(() => {
+                        finishMathSession();
+                    }, 1500);
+                }
+            }
+
+            function finishMathSession() {
+                mathModal.classList.remove('visible');
+
+                // Start the actual game after math is completed
+                startGame();
             }
             
             // --- UI & Event Listeners ---
@@ -574,7 +790,8 @@
                     startGame();
                 } else if (isPaused) {
                     if (startBtn.textContent === "Start Game") {
-                        startGame();
+                        // Show grade selection first
+                        showGradeSelection();
                     } else {
                         pauseGame();
                     }
@@ -582,11 +799,27 @@
                     pauseGame();
                 }
             }
+
+            function showGradeSelection() {
+                gradeModal.classList.add('visible');
+            }
+
+            function selectGrade(grade) {
+                selectedGrade = grade;
+                gradeModal.classList.remove('visible');
+                startMathExercise();
+            }
             
             startBtn.addEventListener('click', handleStartClick);
             modalButton.addEventListener('click', startGame);
 
             document.addEventListener('keydown', event => {
+                // Handle Enter key for math input
+                if (event.key === 'Enter' && mathModal.classList.contains('visible')) {
+                    submitMathAnswer();
+                    return;
+                }
+
                 if(isPaused) return;
                 switch (event.code) {
                     case 'ArrowLeft':
@@ -694,6 +927,14 @@
             easyBtn.addEventListener('click', () => setDifficulty('easy'));
             mediumBtn.addEventListener('click', () => setDifficulty('medium'));
             hardBtn.addEventListener('click', () => setDifficulty('hard'));
+
+            // Grade selection event listeners
+            gradeBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const grade = parseInt(e.currentTarget.dataset.grade);
+                    selectGrade(grade);
+                });
+            });
             
             // --- Responsive Canvas ---
             function resizeCanvas() {
