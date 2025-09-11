@@ -282,7 +282,37 @@
     </div>
 </div>
 
+<div id="math-grade-modal" class="modal">
+    <div class="modal-content">
+        <h2 class="modal-title">📚 SELECT YOUR GRADE LEVEL 📚</h2>
+        <p class="text-sm mb-6">Choose the difficulty that matches your math skills!</p>
+        <div class="difficulty-options">
+            <button class="difficulty-btn" data-grade="1">Grade 1</button>
+            <button class="difficulty-btn" data-grade="2">Grade 2</button>
+            <button class="difficulty-btn" data-grade="3">Grade 3</button>
+            <button class="difficulty-btn" data-grade="4">Grade 4</button>
+            <button class="difficulty-btn" data-grade="5">Grade 5</button>
+        </div>
+    </div>
+</div>
 
+<div id="math-screen" class="modal">
+    <div class="modal-content">
+        <h2 class="modal-title">🧮 Math Challenge! 🧮</h2>
+        <div class="mb-4">
+            <div class="w-full bg-gray-600 rounded-full h-4 mb-2">
+                <div id="math-progress" class="bg-accent-color h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <p id="math-instructions" class="text-sm">Solve the math problem to continue!</p>
+        </div>
+        <div id="math-problem" class="text-2xl text-accent-color text-shadow mb-4"></div>
+        <input type="number" id="math-answer" class="w-20 h-12 text-center text-xl bg-white text-black mb-4 border-2 border-gray-400 rounded" placeholder="?" min="0" max="999">
+        <button id="math-submit" class="modal-button mb-4">Submit Answer</button>
+        <div id="math-result" class="text-lg"></div>
+    </div>
+</div>
+
+<script src="../math/mathTests.js"></script>
 <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -302,10 +332,26 @@
     const restartGameBtn = document.getElementById('restart-game-btn');
     const difficultyModal = document.getElementById('difficulty-modal');
     const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+    
+    // Math-related elements
+    const mathGradeModal = document.getElementById('math-grade-modal');
+    const mathScreen = document.getElementById('math-screen');
+    const mathProblem = document.getElementById('math-problem');
+    const mathAnswer = document.getElementById('math-answer');
+    const mathSubmit = document.getElementById('math-submit');
+    const mathResult = document.getElementById('math-result');
+    const mathProgress = document.getElementById('math-progress');
+    const mathInstructions = document.getElementById('math-instructions');
+    const mathGradeBtns = document.querySelectorAll('[data-grade]');
 
     // Game state
     let gameState = {};
     let mousePos = { x: -1, y: -1 };
+    
+    // Math-related variables
+    let mathTests = null;
+    let selectedMathDifficulty = 1;
+    let gameMode = 'difficulty'; // 'difficulty', 'math-grade', 'math', 'playing', 'gameover'
 
 
     // Game constants
@@ -351,6 +397,74 @@
         hard:   { lives: 10,  resources: 100,  robotHealthModifier: 1.20 },
     };
 
+    // --- Math Functions ---
+    function initializeMath() {
+        mathTests = new MathTests();
+    }
+
+    function startMathExercise() {
+        const problem = mathTests.startMathExercise(selectedMathDifficulty, 3);
+        mathProblem.textContent = problem.problem;
+        
+        mathAnswer.value = '';
+        mathResult.innerHTML = '';
+        mathInstructions.textContent = `Solve the math problem to continue! (1/3)`;
+        mathProgress.style.width = '0%';
+        
+        mathScreen.classList.add('visible');
+        gameMode = 'math';
+    }
+
+    function submitMathAnswer() {
+        const userAnswer = parseInt(mathAnswer.value);
+        const result = mathTests.submitMathAnswer(userAnswer);
+        
+        if (result.isCorrect) {
+            mathResult.innerHTML = '<div class="text-green-400">✅ Correct! Well done!</div>';
+        } else {
+            mathResult.innerHTML = `<div class="text-red-400">❌ Wrong! The answer was ${result.correctAnswer}</div>`;
+        }
+        
+        mathProgress.style.width = `${(result.exerciseCount / 3) * 100}%`;
+        
+        if (!result.isSessionComplete) {
+            setTimeout(() => {
+                mathProblem.textContent = result.nextProblem.problem;
+                mathAnswer.value = '';
+                mathResult.innerHTML = '';
+                mathInstructions.textContent = `Solve the math problem to continue! (${result.exerciseCount + 1}/3)`;
+            }, 1500);
+        } else {
+            setTimeout(() => {
+                finishMathSession();
+            }, 1500);
+        }
+    }
+
+    function finishMathSession() {
+        const sessionSummary = mathTests.finishMathSession();
+        mathScreen.classList.remove('visible');
+        
+        // Determine bonus based on performance
+        let bonus = 0;
+        if (sessionSummary.correctAnswers === 3) {
+            bonus = 50; // Perfect score bonus
+        } else if (sessionSummary.correctAnswers === 2) {
+            bonus = 25; // Good score bonus
+        } else if (sessionSummary.correctAnswers === 1) {
+            bonus = 10; // Small bonus
+        }
+        
+        if (bonus > 0) {
+            gameState.resources += bonus;
+            updateUI();
+        }
+        
+        if (gameMode === 'math') {
+            gameMode = 'playing';
+        }
+    }
+
     function initializeGame(difficulty) {
         const settings = DIFFICULTY_SETTINGS[difficulty];
         gameState = {
@@ -375,9 +489,8 @@
     
     function startGame(difficulty) {
         difficultyModal.classList.remove('visible');
-        gameWrapper.classList.remove('hidden');
-        initializeGame(difficulty);
-        gameLoop();
+        mathGradeModal.classList.add('visible');
+        gameMode = 'math-grade';
     }
 
 
@@ -701,6 +814,9 @@
         
         if (gameState.wave >= WAVES.length) {
             endGame(true);
+        } else {
+            // Start math exercise between waves
+            startMathExercise();
         }
     }
 
@@ -708,11 +824,11 @@
         if (isVictory) {
             gameState.gameWon = true;
             modalTitle.textContent = "VICTORY!";
-            modalText.textContent = `You beat the game on ${gameState.difficulty} mode!`;
+            modalText.textContent = `You beat the game on ${gameState.difficulty} mode! Math Problems Solved: ${mathTests ? mathTests.problemsSolved : 0}`;
         } else {
             gameState.gameOver = true;
             modalTitle.textContent = "GAME OVER";
-            modalText.textContent = "The robots have taken over!";
+            modalText.textContent = `The robots have taken over! Math Problems Solved: ${mathTests ? mathTests.problemsSolved : 0}`;
         }
         gameOverModal.classList.add('visible');
     }
@@ -884,12 +1000,34 @@
         gameOverModal.classList.remove('visible');
         gameWrapper.classList.add('hidden');
         difficultyModal.classList.add('visible');
+        gameMode = 'difficulty';
     });
     
     difficultyBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             const difficulty = e.currentTarget.dataset.difficulty;
+            gameState.difficulty = difficulty;
             startGame(difficulty);
+        });
+    });
+
+    // Math event listeners
+    mathSubmit.addEventListener('click', submitMathAnswer);
+    mathAnswer.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            submitMathAnswer();
+        }
+    });
+
+    // Math grade selection
+    mathGradeBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            selectedMathDifficulty = parseInt(e.target.dataset.grade);
+            mathGradeModal.classList.remove('visible');
+            gameWrapper.classList.remove('hidden');
+            initializeGame(gameState.difficulty);
+            initializeMath();
+            startMathExercise();
         });
     });
 
