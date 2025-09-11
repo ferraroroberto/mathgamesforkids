@@ -1,0 +1,899 @@
+<!-- source: https://gemini.google.com/app/705f1deb4e4cb1b0 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Birds vs. Robots</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #34495e;
+            --surface-color: #2c3e50;
+            --primary-color: #3498db;
+            --accent-color: #f1c40f;
+            --text-color: #ecf0f1;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: none; /* Prevents pull-to-refresh and other browser gestures */
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+
+        .game-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            gap: 1rem;
+        }
+
+        canvas {
+            background-color: #87CEEB; /* Sky Blue */
+            cursor: crosshair;
+            border-radius: 8px;
+            border: 4px solid var(--surface-color);
+            max-width: 100%;
+            max-height: 70vh;
+            aspect-ratio: 800 / 600;
+        }
+
+        .ui-panel {
+            background-color: var(--surface-color);
+            padding: 0.5rem;
+            border-radius: 8px;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            border: 4px solid var(--text-color);
+            box-shadow: 0 8px 0 #95a5a6, 0 12px 10px rgba(0,0,0,0.4);
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .bird-card {
+            background-color: var(--primary-color);
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid #2980b9;
+            transition: all 0.2s ease;
+            text-align: center;
+            box-shadow: 0 4px 0 #2980b9;
+            font-size: 0.7rem;
+            flex-grow: 1;
+        }
+        
+        .bird-card:hover, .bird-card.selected {
+            transform: translateY(-5px);
+            background-color: #4eb1ee;
+            box-shadow: 0 8px 0 #2980b9;
+        }
+
+        .bird-card.selected {
+            border-color: var(--accent-color);
+        }
+
+        .info-display {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.8rem;
+            text-shadow: 2px 2px var(--surface-color);
+            text-align: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        @media (min-width: 640px) {
+            .info-display { font-size: 1rem; gap: 2rem; }
+            .bird-card { font-size: 0.8rem; padding: 0.75rem;}
+        }
+
+        .start-button {
+            background-color: var(--success-color);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            border: 3px solid #27ae60;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 0 #27ae60;
+            font-size: 0.7rem;
+            flex-grow: 1;
+        }
+
+        .start-button:hover {
+            transform: translateY(-3px);
+            background-color: #3fe37e;
+            box-shadow: 0 6px 0 #27ae60;
+        }
+
+        .start-button:active {
+            transform: translateY(1px);
+             box-shadow: 0 2px 0 #27ae60;
+        }
+
+        .start-button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+            border-color: #7f8c8d;
+            box-shadow: 0 4px 0 #7f8c8d;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background-color: var(--surface-color);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 5px solid var(--text-color);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal.visible .modal-content {
+             transform: scale(1);
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        
+         @media (min-width: 640px) {
+            .modal-title { font-size: 2.5rem; }
+         }
+
+
+        .modal-button {
+            background-color: var(--error-color);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            border: none;
+            margin-top: 1.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .modal-button:hover {
+            background-color: #c0392b;
+        }
+        
+        .difficulty-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .difficulty-btn {
+            padding: 1rem 2rem;
+            font-family: 'Press Start 2P', cursive;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .difficulty-btn[data-difficulty="easy"] { background-color: var(--success-color); box-shadow: 0 4px 0 #27ae60; }
+        .difficulty-btn[data-difficulty="medium"] { background-color: var(--primary-color); box-shadow: 0 4px 0 #2980b9; }
+        .difficulty-btn[data-difficulty="hard"] { background-color: var(--error-color); box-shadow: 0 4px 0 #c0392b; }
+        
+        .difficulty-btn:hover {
+            transform: translateY(-3px);
+        }
+        .difficulty-btn[data-difficulty="easy"]:hover { box-shadow: 0 6px 0 #27ae60; }
+        .difficulty-btn[data-difficulty="medium"]:hover { box-shadow: 0 6px 0 #2980b9; }
+        .difficulty-btn[data-difficulty="hard"]:hover { box-shadow: 0 6px 0 #c0392b; }
+
+    </style>
+</head>
+<body>
+
+<div id="game-wrapper" class="game-wrapper hidden">
+    <div class="info-display">
+        <div id="resources-display">SEED$: 100</div>
+        <div id="lives-display">LIVES: 10</div>
+        <div id="wave-display">WAVE: 0</div>
+    </div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="ui-panel">
+        <div class="bird-card" data-type="pecker">
+            <div>PECKER</div>
+            <div>(25$)</div>
+        </div>
+        <div class="bird-card" data-type="bomber">
+            <div>BOMBER</div>
+            <div>(75$)</div>
+        </div>
+        <div class="bird-card" data-type="freezer">
+            <div>FREEZER</div>
+            <div>(50$)</div>
+        </div>
+        <button id="start-wave-btn" class="start-button">START WAVE</button>
+    </div>
+</div>
+
+<div id="game-over-modal" class="modal">
+    <div class="modal-content">
+        <h2 id="modal-title" class="modal-title">GAME OVER</h2>
+        <p id="modal-text">The robots have taken over!</p>
+        <button id="restart-game-btn" class="modal-button">RESTART</button>
+    </div>
+</div>
+
+<div id="difficulty-modal" class="modal visible">
+    <div class="modal-content">
+        <h2 class="modal-title">CHOOSE DIFFICULTY</h2>
+        <div class="difficulty-options">
+            <button class="difficulty-btn" data-difficulty="easy">EASY</button>
+            <button class="difficulty-btn" data-difficulty="medium">MEDIUM</button>
+            <button class="difficulty-btn" data-difficulty="hard">HARD</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // UI Elements
+    const gameWrapper = document.getElementById('game-wrapper');
+    const resourcesDisplay = document.getElementById('resources-display');
+    const livesDisplay = document.getElementById('lives-display');
+    const waveDisplay = document.getElementById('wave-display');
+    const startWaveBtn = document.getElementById('start-wave-btn');
+    const birdCards = document.querySelectorAll('.bird-card');
+    
+    // Modals
+    const gameOverModal = document.getElementById('game-over-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalText = document.getElementById('modal-text');
+    const restartGameBtn = document.getElementById('restart-game-btn');
+    const difficultyModal = document.getElementById('difficulty-modal');
+    const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+
+    // Game state
+    let gameState = {};
+    let mousePos = { x: -1, y: -1 };
+
+
+    // Game constants
+    const TILE_SIZE = 50;
+    const PATH = [
+        { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 2, y: 5 }, { x: 3, y: 5 },
+        { x: 3, y: 4 }, { x: 3, y: 3 }, { x: 3, y: 2 }, { x: 4, y: 2 },
+        { x: 5, y: 2 }, { x: 6, y: 2 }, { x: 7, y: 2 }, { x: 8, y: 2 },
+        { x: 8, y: 3 }, { x: 8, y: 4 }, { x: 8, y: 5 }, { x: 8, y: 6 },
+        { x: 8, y: 7 }, { x: 8, y: 8 }, { x: 7, y: 8 }, { x: 6, y: 8 },
+        { x: 5, y: 8 }, { x: 4, y: 8 }, { x: 3, y: 8 }, { x: 2, y: 8 },
+        { x: 2, y: 9 }, { x: 2, y: 10 }, { x: 3, y: 10 }, { x: 4, y: 10 },
+        { x: 5, y: 10 }, { x: 6, y: 10 }, { x: 7, y: 10 }, { x: 8, y: 10 },
+        { x: 9, y: 10 }, { x: 10, y: 10 }, { x: 11, y: 10 }, { x: 12, y: 10 },
+        { x: 13, y: 10 }, { x: 14, y: 10 }, { x: 15, y: 10 }
+    ];
+
+    const BIRD_TYPES = {
+        pecker: { cost: 25, range: 120, damage: 5, fireRate: 30, color: '#f1c40f' },
+        bomber: { cost: 75, range: 150, damage: 20, fireRate: 100, color: '#34495e', splash: 40 },
+        freezer: { cost: 50, range: 100, damage: 1, fireRate: 60, color: '#3498db', slow: 0.5 }
+    };
+
+    const ROBOT_TYPES = {
+        scout: { health: 50, speed: 2, reward: 5, color: '#95a5a6' },
+        tank: { health: 200, speed: 1, reward: 15, color: '#7f8c8d' },
+        boss: { health: 1000, speed: 0.8, reward: 100, color: '#e74c3c' }
+    };
+
+    const WAVES = [
+        { scout: 10 },
+        { scout: 15, tank: 2 },
+        { scout: 20, tank: 5 },
+        { tank: 10, scout: 10 },
+        { tank: 15, boss: 1 },
+        { tank: 20, boss: 2, scout: 20 }
+    ];
+    
+    // --- RE-BALANCED DIFFICULTY SETTINGS ---
+    const DIFFICULTY_SETTINGS = {
+        easy:   { lives: 25, resources: 200, robotHealthModifier: 0.60 },
+        medium: { lives: 15, resources: 125, robotHealthModifier: 0.85 },
+        hard:   { lives: 10,  resources: 100,  robotHealthModifier: 1.20 },
+    };
+
+    function initializeGame(difficulty) {
+        const settings = DIFFICULTY_SETTINGS[difficulty];
+        gameState = {
+            resources: settings.resources,
+            lives: settings.lives,
+            wave: 0,
+            birds: [],
+            robots: [],
+            projectiles: [],
+            particles: [],
+            selectedBird: null,
+            waveInProgress: false,
+            gameOver: false,
+            gameWon: false,
+            frames: 0,
+            difficulty: difficulty
+        };
+        updateUI();
+        gameOverModal.classList.remove('visible');
+        startWaveBtn.disabled = false;
+    }
+    
+    function startGame(difficulty) {
+        difficultyModal.classList.remove('visible');
+        gameWrapper.classList.remove('hidden');
+        initializeGame(difficulty);
+        gameLoop();
+    }
+
+
+    // --- Classes ---
+    class Bird {
+        constructor(x, y, type) {
+            this.x = x;
+            this.y = y;
+            this.type = type;
+            this.config = BIRD_TYPES[type];
+            this.target = null;
+            this.fireCooldown = 0;
+            this.size = TILE_SIZE * 0.4;
+        }
+
+        draw() {
+            ctx.fillStyle = this.config.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#e67e22';
+            ctx.beginPath();
+            const angle = this.target ? Math.atan2(this.target.y - this.y, this.target.x - this.x) : 0;
+            ctx.moveTo(this.x + Math.cos(angle) * this.size, this.y + Math.sin(angle) * this.size);
+            ctx.lineTo(this.x + Math.cos(angle - 0.3) * (this.size + 10), this.y + Math.sin(angle - 0.3) * (this.size + 10));
+            ctx.lineTo(this.x + Math.cos(angle + 0.3) * (this.size + 10), this.y + Math.sin(angle + 0.3) * (this.size + 10));
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(this.x + Math.cos(angle) * (this.size / 2), this.y + Math.sin(angle) * (this.size / 2), 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.arc(this.x + Math.cos(angle) * (this.size / 2 + 1), this.y + Math.sin(angle) * (this.size / 2 + 1), 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        update() {
+            this.fireCooldown--;
+            if (!this.target || this.getDistance(this.target) > this.config.range || this.target.health <= 0) {
+                this.findTarget();
+            }
+
+            if (this.target && this.fireCooldown <= 0) {
+                this.shoot();
+                this.fireCooldown = this.config.fireRate;
+            }
+        }
+        
+        getDistance(target) {
+             const dx = this.x - target.x;
+             const dy = this.y - target.y;
+             return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        findTarget() {
+            let closestRobot = null;
+            let minDistance = Infinity;
+
+            for (const robot of gameState.robots) {
+                const distance = this.getDistance(robot);
+                if (distance < minDistance && distance <= this.config.range) {
+                    minDistance = distance;
+                    closestRobot = robot;
+                }
+            }
+            this.target = closestRobot;
+        }
+
+        shoot() {
+            gameState.projectiles.push(new Projectile(this.x, this.y, this.target, this.type));
+        }
+    }
+
+    class Robot {
+        constructor(type) {
+            this.type = type;
+            this.config = ROBOT_TYPES[type];
+            this.pathIndex = 0;
+            const startPos = getPixelCoords(PATH[0].x, PATH[0].y);
+            this.x = startPos.x;
+            this.y = startPos.y;
+            const healthModifier = DIFFICULTY_SETTINGS[gameState.difficulty].robotHealthModifier;
+            this.health = this.config.health * healthModifier;
+            this.maxHealth = this.config.health * healthModifier;
+            this.speed = this.config.speed;
+            this.isSlowed = false;
+            this.slowTimer = 0;
+            this.size = TILE_SIZE * 0.7;
+        }
+
+        draw() {
+            ctx.fillStyle = this.isSlowed ? '#74b9ff' : this.config.color;
+            ctx.fillRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+
+            ctx.fillStyle = '#c0392b';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y - 5, 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            const healthBarWidth = this.size;
+            const healthBarHeight = 5;
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(this.x - healthBarWidth/2, this.y - this.size/2 - 10, healthBarWidth, healthBarHeight);
+            ctx.fillStyle = '#2ecc71';
+            const currentHealthWidth = (this.health / this.maxHealth) * healthBarWidth;
+            ctx.fillRect(this.x - healthBarWidth/2, this.y - this.size/2 - 10, currentHealthWidth, healthBarHeight);
+        }
+        
+        takeDamage(amount) {
+            this.health -= amount;
+            if(this.health <= 0){
+                gameState.resources += this.config.reward;
+                createExplosion(this.x, this.y, this.config.color);
+            }
+        }
+
+        applySlow(slowFactor, duration) {
+            if (!this.isSlowed) {
+                this.speed *= slowFactor;
+                this.isSlowed = true;
+            }
+            this.slowTimer = duration;
+        }
+
+        update() {
+            if (this.isSlowed) {
+                this.slowTimer--;
+                if (this.slowTimer <= 0) {
+                    this.isSlowed = false;
+                    this.speed = this.config.speed;
+                }
+            }
+            
+            if (this.pathIndex < PATH.length - 1) {
+                const targetNode = PATH[this.pathIndex + 1];
+                const target = getPixelCoords(targetNode.x, targetNode.y);
+                const dx = target.x - this.x;
+                const dy = target.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < this.speed) {
+                    this.pathIndex++;
+                    this.x = target.x;
+                    this.y = target.y;
+                } else {
+                    this.x += (dx / distance) * this.speed;
+                    this.y += (dy / distance) * this.speed;
+                }
+            } else {
+                gameState.lives--;
+                this.health = 0;
+            }
+        }
+    }
+
+    class Projectile {
+        constructor(x, y, target, birdType) {
+            this.x = x;
+            this.y = y;
+            this.target = target;
+            this.birdType = birdType;
+            this.config = BIRD_TYPES[birdType];
+            this.speed = 5;
+        }
+
+        draw() {
+             if (this.birdType === 'bomber') {
+                ctx.fillStyle = this.config.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+             } else {
+                ctx.fillStyle = this.config.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+             }
+        }
+
+        update() {
+            if (!this.target) { // Failsafe if target is already gone
+                this.x = -100;
+                return;
+            }
+            const dx = this.target.x - this.x;
+            const dy = this.target.y - this.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < this.speed || this.target.health <= 0) {
+                this.hitTarget();
+            } else {
+                this.x += (dx / distance) * this.speed;
+                this.y += (dy / distance) * this.speed;
+            }
+        }
+        
+        hitTarget(){
+            this.x = -100; 
+            
+            if(this.config.splash){
+                createExplosion(this.target.x, this.target.y, this.config.color, this.config.splash);
+                for(const robot of gameState.robots){
+                    const dx = this.target.x - robot.x;
+                    const dy = this.target.y - robot.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if(distance < this.config.splash){
+                        robot.takeDamage(this.config.damage);
+                    }
+                }
+            } else {
+                if(this.target && this.target.health > 0) {
+                     this.target.takeDamage(this.config.damage);
+                     if (this.config.slow) {
+                        this.target.applySlow(this.config.slow, 120);
+                    }
+                }
+            }
+        }
+    }
+    
+    class Particle {
+        constructor(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            this.size = Math.random() * 5 + 2;
+            this.life = 60;
+            this.vx = (Math.random() - 0.5) * 4;
+            this.vy = (Math.random() - 0.5) * 4;
+        }
+
+        update() {
+            this.life--;
+            this.x += this.vx;
+            this.y += this.vy;
+            this.vy += 0.1;
+            this.size *= 0.98;
+        }
+
+        draw() {
+            ctx.fillStyle = this.color;
+            ctx.globalAlpha = this.life / 60;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    // --- Game Logic ---
+    let animationFrameId;
+    function gameLoop() {
+        if (gameState.gameOver || gameState.gameWon) {
+            cancelAnimationFrame(animationFrameId);
+            return;
+        };
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawGrid();
+        drawPath();
+
+        gameState.birds.forEach(b => { b.update(); b.draw(); });
+        gameState.robots.forEach(r => { r.update(); r.draw(); });
+        gameState.projectiles.forEach(p => { p.update(); p.draw(); });
+        gameState.particles.forEach(p => { p.update(); p.draw(); });
+        
+        if (gameState.selectedBird) {
+            drawPlacementPreview();
+        }
+
+        gameState.robots = gameState.robots.filter(r => r.health > 0);
+        gameState.projectiles = gameState.projectiles.filter(p => p.x > -10);
+        gameState.particles = gameState.particles.filter(p => p.life > 0);
+
+        if (gameState.waveInProgress && gameState.robots.length === 0) {
+            endWave();
+        }
+        
+        if(gameState.lives <= 0 && !gameState.gameOver) {
+            endGame(false);
+        }
+
+        updateUI();
+        gameState.frames++;
+        animationFrameId = requestAnimationFrame(gameLoop);
+    }
+
+    function startWave() {
+        if (gameState.waveInProgress || gameState.wave >= WAVES.length) return;
+        
+        gameState.wave++;
+        gameState.waveInProgress = true;
+        startWaveBtn.disabled = true;
+
+        const waveConfig = WAVES[gameState.wave - 1];
+        let spawnCount = 0;
+        for (const type in waveConfig) {
+            for (let i = 0; i < waveConfig[type]; i++) {
+                setTimeout(() => {
+                    // Only spawn if the game is still running
+                    if (!gameState.gameOver && !gameState.gameWon) {
+                        gameState.robots.push(new Robot(type));
+                    }
+                }, spawnCount * 500);
+                spawnCount++;
+            }
+        }
+    }
+    
+    function endWave() {
+        gameState.waveInProgress = false;
+        startWaveBtn.disabled = false;
+        
+        if (gameState.wave >= WAVES.length) {
+            endGame(true);
+        }
+    }
+
+    function endGame(isVictory) {
+        if (isVictory) {
+            gameState.gameWon = true;
+            modalTitle.textContent = "VICTORY!";
+            modalText.textContent = `You beat the game on ${gameState.difficulty} mode!`;
+        } else {
+            gameState.gameOver = true;
+            modalTitle.textContent = "GAME OVER";
+            modalText.textContent = "The robots have taken over!";
+        }
+        gameOverModal.classList.add('visible');
+    }
+
+    // --- Drawing ---
+    function drawGrid() {
+        ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < canvas.width; x += TILE_SIZE) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, canvas.height);
+            ctx.stroke();
+        }
+        for (let y = 0; y < canvas.height; y += TILE_SIZE) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvas.width, y);
+            ctx.stroke();
+        }
+    }
+
+    function drawPath() {
+        ctx.fillStyle = '#6ab04c';
+        ctx.strokeStyle = '#4d8036';
+        ctx.lineWidth = 2;
+        PATH.forEach(p => {
+            ctx.fillRect(p.x * TILE_SIZE, p.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            ctx.strokeRect(p.x * TILE_SIZE, p.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+        });
+    }
+
+    function drawPlacementPreview() {
+        if (mousePos.x < 0 || mousePos.y < 0) return;
+
+        const gridX = Math.floor(mousePos.x / TILE_SIZE);
+        const gridY = Math.floor(mousePos.y / TILE_SIZE);
+        
+        const canPlace = canPlaceBirdAt(gridX, gridY);
+        const {x, y} = getPixelCoords(gridX, gridY);
+
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = BIRD_TYPES[gameState.selectedBird].color;
+        ctx.beginPath();
+        ctx.arc(x, y, TILE_SIZE * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = canPlace ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 0, 0, 0.3)';
+        ctx.beginPath();
+        ctx.arc(x, y, BIRD_TYPES[gameState.selectedBird].range, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.globalAlpha = 1.0;
+    }
+    
+    function createExplosion(x, y, color, size = 30) {
+        for(let i=0; i<size; i++){
+            gameState.particles.push(new Particle(x, y, color));
+        }
+    }
+
+
+    // --- UI & Event Handlers ---
+    function updateUI() {
+        if(!gameState.resources) return;
+        resourcesDisplay.textContent = `SEED$: ${gameState.resources}`;
+        livesDisplay.textContent = `LIVES: ${gameState.lives}`;
+        waveDisplay.textContent = `WAVE: ${gameState.wave}/${WAVES.length}`;
+    }
+
+    birdCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const birdType = card.dataset.type;
+            if (gameState.selectedBird === birdType) {
+                gameState.selectedBird = null;
+                card.classList.remove('selected');
+            } else {
+                if (gameState.resources >= BIRD_TYPES[birdType].cost) {
+                    gameState.selectedBird = birdType;
+                    birdCards.forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                }
+            }
+        });
+    });
+    
+    function getCanvasCoordinates(event) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        let clientX, clientY;
+
+        if (event.touches) {
+            if (event.touches.length === 0) return {x: -1, y: -1};
+            clientX = event.touches[0].clientX;
+            clientY = event.touches[0].clientY;
+        } else {
+            clientX = event.clientX;
+            clientY = event.clientY;
+        }
+        
+        const x = (clientX - rect.left) * scaleX;
+        const y = (clientY - rect.top) * scaleY;
+        
+        return {x, y};
+    }
+    
+    function handlePointerMove(e) {
+        e.preventDefault();
+        const coords = getCanvasCoordinates(e);
+        mousePos = coords;
+    }
+
+    function handlePointerUp(e) {
+        e.preventDefault();
+        placeBird();
+    }
+    
+    function placeBird() {
+        if (!gameState.selectedBird || mousePos.x < 0) return;
+
+        const gridX = Math.floor(mousePos.x / TILE_SIZE);
+        const gridY = Math.floor(mousePos.y / TILE_SIZE);
+        const cost = BIRD_TYPES[gameState.selectedBird].cost;
+
+        if (gameState.resources >= cost && canPlaceBirdAt(gridX, gridY)) {
+            const {x, y} = getPixelCoords(gridX, gridY);
+            gameState.birds.push(new Bird(x, y, gameState.selectedBird));
+            gameState.resources -= cost;
+            
+            gameState.selectedBird = null;
+            birdCards.forEach(c => c.classList.remove('selected'));
+            updateUI();
+        }
+    }
+
+    canvas.addEventListener('mousemove', handlePointerMove);
+    canvas.addEventListener('touchmove', handlePointerMove);
+    canvas.addEventListener('click', placeBird);
+
+    function canPlaceBirdAt(gridX, gridY) {
+        if (gridX < 0 || gridY < 0 || gridX >= canvas.width / TILE_SIZE || gridY >= canvas.height / TILE_SIZE) {
+            return false;
+        }
+        
+        const onPath = PATH.some(p => p.x === gridX && p.y === gridY);
+        if (onPath) return false;
+        
+        const birdExists = gameState.birds.some(b => {
+           const bGridX = Math.floor((b.x - TILE_SIZE/2) / TILE_SIZE);
+           const bGridY = Math.floor((b.y - TILE_SIZE/2) / TILE_SIZE);
+           return bGridX === gridX && bGridY === gridY;
+        });
+        if (birdExists) return false;
+        
+        return true;
+    }
+    
+    function getPixelCoords(gridX, gridY) {
+        return {
+            x: gridX * TILE_SIZE + TILE_SIZE / 2,
+            y: gridY * TILE_SIZE + TILE_SIZE / 2
+        };
+    }
+
+    startWaveBtn.addEventListener('click', startWave);
+    
+    restartGameBtn.addEventListener('click', () => {
+        gameOverModal.classList.remove('visible');
+        gameWrapper.classList.add('hidden');
+        difficultyModal.classList.add('visible');
+    });
+    
+    difficultyBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const difficulty = e.currentTarget.dataset.difficulty;
+            startGame(difficulty);
+        });
+    });
+
+</script>
+</body>
+</html>
+
