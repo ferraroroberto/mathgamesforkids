@@ -95,7 +95,7 @@
     </div>
 
     <!-- Controls Section (Below Grid) -->
-    <div class="w-full max-w-md mx-auto">
+    <div class="w-full max-w-md mx-auto px-1">
         <div class="mb-2">
             <h3 class="text-center mb-1 text-sm">Difficulty</h3>
             <div class="flex justify-between">
@@ -104,7 +104,7 @@
                 <button id="hard-btn" class="pixel-button flex-1 mx-1 px-2 py-1 text-xs">Hard</button>
             </div>
         </div>
-        <button id="start-btn" class="pixel-button w-full py-2 text-sm">Start Game</button>
+        <button id="start-btn" class="pixel-button w-full py-2 text-sm px-3 overflow-visible whitespace-nowrap">Start Game</button>
     </div>
 
     <!-- Mobile Touch Instructions -->
@@ -113,6 +113,7 @@
             <p class="mb-1">📱 Touch Controls:</p>
             <p>• Tap the falling piece to rotate</p>
             <p>• Drag left/right to move</p>
+            <p>• Drag down to hard drop</p>
         </div>
     </div>
 
@@ -645,6 +646,13 @@
                         } else if (deltaX < -dragThreshold && touchStartX > touch.clientX) {
                             pieceMove(-1); // Move left
                             touchStartX = touch.clientX; // Reset for continuous movement
+                        }
+                    }
+                    // Vertical downward drag for hard drop
+                    else if (Math.abs(deltaY) > Math.abs(deltaX)) {
+                        if (deltaY > dragThreshold && touchStartY < touch.clientY) {
+                            hardDrop(); // Hard drop on downward drag
+                            touchStartY = touch.clientY; // Reset to prevent repeated drops
                         }
                     }
                 }
