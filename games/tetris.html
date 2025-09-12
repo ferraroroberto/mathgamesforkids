@@ -87,6 +87,16 @@
             color: #000;
             margin: 10px;
             font-family: 'Press Start 2P', cursive;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+            touch-action: manipulation;
+        }
+        
+        .mathInput::-webkit-outer-spin-button,
+        .mathInput::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
 
         .mathSubmit {
@@ -101,6 +111,9 @@
             cursor: pointer;
             font-family: 'Press Start 2P', cursive;
             box-shadow: 0 3px 0 #F57C00;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            min-height: 44px; /* iOS recommended minimum touch target */
         }
 
         .mathSubmit:active {
@@ -282,8 +295,8 @@
             </div>
             <p class="mb-4 text-sm">Solve the math problem to continue!</p>
             <div class="mathProblem mb-4" id="mathProblem"></div>
-            <input type="number" class="mathInput mb-4" id="mathAnswer" placeholder="?" min="0" max="999">
-            <button class="mathSubmit mb-4" onclick="submitMathAnswer()">Submit Answer</button>
+            <input type="text" class="mathInput mb-4" id="mathAnswer" placeholder="?" inputmode="numeric" pattern="[0-9]*">
+            <button class="mathSubmit mb-4" id="mathSubmitBtn">Submit Answer</button>
             <div id="mathResult"></div>
         </div>
     </div>
@@ -318,6 +331,7 @@
             const mathAnswer = document.getElementById('mathAnswer');
             const mathResult = document.getElementById('mathResult');
             const mathProgress = document.getElementById('mathProgress');
+            const mathSubmitBtn = document.getElementById('mathSubmitBtn');
 
             // Math tests module instance
             const mathTests = new MathTests();
@@ -748,9 +762,12 @@
             }
 
             function submitMathAnswer() {
-                const userAnswer = parseInt(mathAnswer.value);
-                if (isNaN(userAnswer)) {
-                    alert('Please enter a valid number');
+                // Clean the input value - remove any non-numeric characters
+                const cleanValue = mathAnswer.value.replace(/[^0-9]/g, '');
+                const userAnswer = parseInt(cleanValue);
+                
+                if (isNaN(userAnswer) || cleanValue === '') {
+                    mathResult.innerHTML = '<div class="mathResult incorrect">❌ Please enter a valid number</div>';
                     return;
                 }
 
@@ -812,6 +829,26 @@
             
             startBtn.addEventListener('click', handleStartClick);
             modalButton.addEventListener('click', startGame);
+            
+            // Math submit button event listeners (both click and touch for iPad compatibility)
+            mathSubmitBtn.addEventListener('click', submitMathAnswer);
+            mathSubmitBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                submitMathAnswer();
+            });
+            
+            // Input validation for math answer field
+            mathAnswer.addEventListener('input', (e) => {
+                // Only allow numeric input
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            });
+            
+            mathAnswer.addEventListener('keypress', (e) => {
+                // Only allow numeric keys
+                if (!/[0-9]/.test(e.key) && e.key !== 'Enter') {
+                    e.preventDefault();
+                }
+            });
 
             document.addEventListener('keydown', event => {
                 // Handle Enter key for math input
