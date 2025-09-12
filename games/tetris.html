@@ -202,6 +202,11 @@
             box-shadow: 0 2px 0 #F57C00;
         }
 
+        /* Hide mobile instructions during gameplay */
+        .mobile-instructions-hidden {
+            display: none !important;
+        }
+
     </style>
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-1 sm:p-2 touch-none">
@@ -332,6 +337,7 @@
             const mathResult = document.getElementById('mathResult');
             const mathProgress = document.getElementById('mathProgress');
             const mathSubmitBtn = document.getElementById('mathSubmitBtn');
+            const mobileInstructions = document.getElementById('mobile-instructions');
 
             // Math tests module instance
             const mathTests = new MathTests();
@@ -344,8 +350,13 @@
             let touchStartY = 0;
             let touchStartTime = 0;
             let isDragging = false;
-            let dragThreshold = 30; // Minimum distance for drag detection
+            let dragThreshold = 50; // Increased minimum distance for drag detection
             let tapThreshold = 200; // Maximum time for tap detection (ms)
+            let lastMoveTime = 0; // For debouncing movement
+            let moveDebounceDelay = 150; // Minimum time between moves (ms)
+            let lastDropTime = 0; // For debouncing drops
+            let dropDebounceDelay = 300; // Minimum time between drops (ms)
+            let isHardDropping = false; // Prevent multiple hard drops
 
             const COLS = 10;
             const ROWS = 20;
@@ -499,7 +510,10 @@
             }
             
             function hardDrop() {
-                if (isPaused) return;
+                if (isPaused || isHardDropping) return;
+                
+                isHardDropping = true; // Set flag to prevent multiple drops
+                
                 while (!checkCollision(board, piece)) {
                     piece.pos.y++;
                 }
@@ -509,6 +523,11 @@
                 resetPiece();
                 updateScore(2); // 2 points per hard drop
                 playSound('hard_drop');
+                
+                // Reset flag after a short delay to allow next drop
+                setTimeout(() => {
+                    isHardDropping = false;
+                }, 500);
             }
 
 
@@ -710,6 +729,11 @@
                 resetPiece();
                 modal.classList.remove('visible');
                 startBtn.textContent = "Pause Game";
+                
+                // Hide mobile instructions during gameplay
+                if (mobileInstructions) {
+                    mobileInstructions.classList.add('mobile-instructions-hidden');
+                }
 
                 if (!musicStarted) {
                     Tone.start();
@@ -730,9 +754,19 @@
                 if (isPaused) {
                     startBtn.textContent = "Resume Game";
                     if(musicStarted) Tone.Transport.pause();
+                    
+                    // Show mobile instructions when paused
+                    if (mobileInstructions) {
+                        mobileInstructions.classList.remove('mobile-instructions-hidden');
+                    }
                 } else {
                     startBtn.textContent = "Pause Game";
                     if(musicStarted) Tone.Transport.start();
+                    
+                    // Hide mobile instructions when resuming
+                    if (mobileInstructions) {
+                        mobileInstructions.classList.add('mobile-instructions-hidden');
+                    }
                     update();
                 }
             }
@@ -742,6 +776,11 @@
                 isPaused = true;
                 playSound('game_over');
                 if(musicStarted) Tone.Transport.stop();
+
+                // Show mobile instructions when game is over
+                if (mobileInstructions) {
+                    mobileInstructions.classList.remove('mobile-instructions-hidden');
+                }
 
                 // Show game over modal directly
                 modalTitle.textContent = "Game Over";
@@ -909,6 +948,7 @@
                 const touch = e.touches[0];
                 const deltaX = touch.clientX - touchStartX;
                 const deltaY = touch.clientY - touchStartY;
+                const currentTime = Date.now();
 
                 // If moved more than threshold, consider it a drag
                 if (Math.abs(deltaX) > dragThreshold || Math.abs(deltaY) > dragThreshold) {
@@ -916,19 +956,26 @@
 
                     // Horizontal drag for left/right movement
                     if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                        if (deltaX > dragThreshold && touchStartX < touch.clientX) {
-                            pieceMove(1); // Move right
-                            touchStartX = touch.clientX; // Reset for continuous movement
-                        } else if (deltaX < -dragThreshold && touchStartX > touch.clientX) {
-                            pieceMove(-1); // Move left
-                            touchStartX = touch.clientX; // Reset for continuous movement
+                        // Debounce horizontal movement
+                        if (currentTime - lastMoveTime > moveDebounceDelay) {
+                            if (deltaX > dragThreshold && touchStartX < touch.clientX) {
+                                pieceMove(1); // Move right
+                                touchStartX = touch.clientX; // Reset for continuous movement
+                                lastMoveTime = currentTime;
+                            } else if (deltaX < -dragThreshold && touchStartX > touch.clientX) {
+                                pieceMove(-1); // Move left
+                                touchStartX = touch.clientX; // Reset for continuous movement
+                                lastMoveTime = currentTime;
+                            }
                         }
                     }
-                    // Vertical downward drag for hard drop
-                    else if (Math.abs(deltaY) > Math.abs(deltaX)) {
-                        if (deltaY > dragThreshold && touchStartY < touch.clientY) {
+                    // Vertical downward drag for hard drop - requires more deliberate movement
+                    else if (Math.abs(deltaY) > Math.abs(deltaX) && deltaY > dragThreshold * 2) {
+                        // Debounce drops more aggressively and check if already dropping
+                        if (currentTime - lastDropTime > dropDebounceDelay && !isHardDropping) {
                             hardDrop(); // Hard drop on downward drag
                             touchStartY = touch.clientY; // Reset to prevent repeated drops
+                            lastDropTime = currentTime;
                         }
                     }
                 }
