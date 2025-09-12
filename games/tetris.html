@@ -356,6 +356,7 @@
             let moveDebounceDelay = 150; // Minimum time between moves (ms)
             let lastDropTime = 0; // For debouncing drops
             let dropDebounceDelay = 300; // Minimum time between drops (ms)
+            let isHardDropping = false; // Prevent multiple hard drops
 
             const COLS = 10;
             const ROWS = 20;
@@ -509,7 +510,10 @@
             }
             
             function hardDrop() {
-                if (isPaused) return;
+                if (isPaused || isHardDropping) return;
+                
+                isHardDropping = true; // Set flag to prevent multiple drops
+                
                 while (!checkCollision(board, piece)) {
                     piece.pos.y++;
                 }
@@ -519,6 +523,11 @@
                 resetPiece();
                 updateScore(2); // 2 points per hard drop
                 playSound('hard_drop');
+                
+                // Reset flag after a short delay to allow next drop
+                setTimeout(() => {
+                    isHardDropping = false;
+                }, 500);
             }
 
 
@@ -961,9 +970,9 @@
                         }
                     }
                     // Vertical downward drag for hard drop - requires more deliberate movement
-                    else if (Math.abs(deltaY) > Math.abs(deltaX) && deltaY > dragThreshold * 1.5) {
-                        // Debounce drops more aggressively
-                        if (currentTime - lastDropTime > dropDebounceDelay) {
+                    else if (Math.abs(deltaY) > Math.abs(deltaX) && deltaY > dragThreshold * 2) {
+                        // Debounce drops more aggressively and check if already dropping
+                        if (currentTime - lastDropTime > dropDebounceDelay && !isHardDropping) {
                             hardDrop(); // Hard drop on downward drag
                             touchStartY = touch.clientY; // Reset to prevent repeated drops
                             lastDropTime = currentTime;
