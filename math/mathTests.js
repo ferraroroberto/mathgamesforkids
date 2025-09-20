@@ -29,7 +29,7 @@ class MathTests {
         
         switch(difficulty) {
             case 1: // Grade 1: Addition up to 10
-                const num1 = Math.floor(Math.random() * 10) + 1;
+                const num1 = Math.floor(Math.random() * 9) + 1; // Corrected to ensure sum is <= 10
                 const num2 = Math.floor(Math.random() * (10 - num1)) + 1;
                 problem = `${num1} + ${num2} = ?`;
                 answer = num1 + num2;
