@@ -55,7 +55,9 @@
     <div class="test-section">
         <h2>Problem Generation Test</h2>
         <button onclick="testProblemGeneration()">Generate Problems for All Difficulties</button>
+        <button onclick="testGrade1Sum()">Test Grade 1 Sum Constraint</button>
         <div id="problemResults"></div>
+        <div id="grade1SumTestResult"></div>
     </div>
     
     <div class="test-section">
@@ -106,6 +108,31 @@
                 results += `<p><strong>Grade ${difficulty}:</strong> ${problem.problem} = ${problem.answer}</p>`;
             }
             document.getElementById('problemResults').innerHTML = results;
+        }
+
+        // Test Grade 1 sum constraint
+        function testGrade1Sum() {
+            if (!mathTests) {
+                alert('Please wait for module to load');
+                return;
+            }
+
+            const testIterations = 1000;
+            let bugFound = false;
+            for (let i = 0; i < testIterations; i++) {
+                const problem = mathTests.generateMathProblem(1);
+                if (problem.answer > 10) {
+                    bugFound = true;
+                    document.getElementById('grade1SumTestResult').innerHTML =
+                        `<p style="color: red;">❌ Test Failed: Found problem with sum > 10: ${problem.problem} = ${problem.answer}</p>`;
+                    break;
+                }
+            }
+
+            if (!bugFound) {
+                document.getElementById('grade1SumTestResult').innerHTML =
+                    `<p style="color: green;">✅ Test Passed: No problems with sum > 10 found after ${testIterations} iterations.</p>`;
+            }
         }
         
         // Test math session
