@@ -166,10 +166,23 @@ class MathTests {
     }
 
     /**
-     * Finish the current math session
+     * Finish the current math session.
+     * Idempotent: if the session is already finished (sessionActive is false)
+     * this is a no-op that returns the same summary without double-counting.
      * @returns {object} Session summary
      */
     finishMathSession() {
+        if (!this.sessionActive) {
+            // Session already finished — return current stats without modifying them
+            return {
+                totalExercises: this.exercisesPerSession,
+                correctAnswers: this.correctAnswers,
+                accuracy: this.exercisesPerSession > 0
+                    ? (this.correctAnswers / this.exercisesPerSession) * 100
+                    : 0,
+                problemsSolved: this.problemsSolved
+            };
+        }
         this.sessionActive = false;
         this.problemsSolved += this.correctAnswers;
         
