@@ -9,13 +9,16 @@ This repository contains a collection of educational games, mathematical tools, 
 ├── README.md                    # Technical documentation (this file)
 ├── index.html                   # Main hub page with navigation
 ├── games/                       # All game implementations
-│   ├── index.html              # Games collection landing page
 │   ├── mountain_dung_dodger.html  # Math platformer game
 │   ├── elemental_warrior.html     # Element-based math game
-│   └── fifteen_puzzle.html        # Classic sliding puzzle
+│   ├── fifteen_puzzle.html        # Classic sliding puzzle
+│   ├── tetris.html                # Classic block-stacking game
+│   └── birds_vs_robots.html       # Birds vs. Robots action game
 ├── funstuff/                    # HTML experiments and fun projects
 │   ├── annoying_captcha.html    # World's most annoying CAPTCHA (educational)
-│   └── annoying_captcha.README.md # CAPTCHA technical documentation
+│   ├── annoying_captcha.README.md # CAPTCHA technical documentation
+│   ├── random_name_wheel.html   # Wheel-of-names spinner
+│   └── random_name_wheel.README.md # Random name wheel documentation
 └── math/                        # Mathematical tools and modules
     ├── mathTests.js            # Reusable math problem generator
     └── test_math.html          # Math module testing interface
@@ -35,6 +38,15 @@ This repository contains a collection of educational games, mathematical tools, 
 - **Coverage**: HTML structure, CSS techniques, JavaScript patterns
 - **Learning Focus**: Web development concepts and programming techniques
 
+### Random Name Wheel (`random_name_wheel.html`)
+- **Type**: Interactive utility / classroom tool
+- **Purpose**: Spin a wheel to pick a random name from a custom list
+- **Features**: Animated spinning wheel, configurable name list
+
+### Random Name Wheel Documentation (`random_name_wheel.README.md`)
+- **Purpose**: Guide to using and customising the name wheel
+- **Coverage**: Usage instructions and customisation options
+
 ## 🏗️ Technical Architecture
 
 ### Technology Stack
@@ -52,11 +64,6 @@ This repository contains a collection of educational games, mathematical tools, 
 - **Performance**: Optimized rendering and efficient algorithms
 
 ## 🎮 Games Directory (`/games/`)
-
-### Game Collection Landing Page (`index.html`)
-- **Purpose**: Central hub for all games
-- **Features**: Responsive grid layout, game descriptions, navigation
-- **Design**: Retro 80s aesthetic with modern CSS Grid
 
 ### Individual Game Implementations
 Each game is self-contained in a single HTML file with embedded CSS and JavaScript:
@@ -77,6 +84,16 @@ Each game is self-contained in a single HTML file with embedded CSS and JavaScri
 - **Type**: Classic sliding puzzle
 - **Implementation**: Pure CSS Grid + JavaScript
 - **Features**: Move counter, timer, responsive design
+
+#### Tetris (`tetris.html`)
+- **Type**: Classic block-stacking game
+- **Implementation**: HTML5 Canvas + JavaScript
+- **Features**: Next-piece preview, score tracking, mobile-friendly layout
+
+#### Birds vs. Robots (`birds_vs_robots.html`)
+- **Type**: Action game
+- **Implementation**: HTML5 Canvas + JavaScript
+- **Features**: Multi-wave gameplay, touch controls
 
 ## 🧮 Math Directory (`/math/`)
 
@@ -156,7 +173,7 @@ let gameState = 'start';  // Controls UI visibility
 1. Create new HTML file in `/games/` directory
 2. Implement game logic using Canvas API
 3. Integrate math module if needed
-4. Update games index.html to include new game
+4. Update root `index.html` to link to the new game
 5. Test across different devices and browsers
 
 ### Adding New Math Features
@@ -197,6 +214,8 @@ open math/test_math.html
 open games/mountain_dung_dodger.html
 open games/elemental_warrior.html
 open games/fifteen_puzzle.html
+open games/tetris.html
+open games/birds_vs_robots.html
 ```
 
 ### Integration Testing
