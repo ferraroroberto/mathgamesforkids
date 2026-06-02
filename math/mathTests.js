@@ -5,6 +5,74 @@
  */
 
 class MathTests {
+    /**
+     * One shared set of operation generators. Each takes a `range` object and
+     * returns a `{ problem, answer }` pair, mirroring the original inline
+     * templates exactly (same `rand(0..n-1)+1` bounds and `?`-suffixed strings).
+     */
+    static get OPERATIONS() {
+        // Inclusive integer in [1, max] — matches Math.floor(random()*max)+1.
+        const r = (max) => Math.floor(Math.random() * max) + 1;
+        return {
+            // Addition: first addend in [1, maxA]; second in [1, cap - first].
+            addition: ({ maxA, cap }) => {
+                const num1 = r(maxA);
+                const num2 = Math.floor(Math.random() * (cap - num1)) + 1;
+                return { problem: `${num1} + ${num2} = ?`, answer: num1 + num2 };
+            },
+            // Subtraction: minuend in [1, max]; subtrahend in [1, minuend].
+            subtraction: ({ max }) => {
+                const num1 = r(max);
+                const num2 = Math.floor(Math.random() * num1) + 1;
+                return { problem: `${num1} - ${num2} = ?`, answer: num1 - num2 };
+            },
+            // Multiplication: both factors in [1, max].
+            multiplication: ({ max }) => {
+                const num1 = r(max);
+                const num2 = r(max);
+                return { problem: `${num1} × ${num2} = ?`, answer: num1 * num2 };
+            }
+        };
+    }
+
+    /**
+     * Per-grade operation mix. For each grade, operations are tried in order
+     * and selected when `Math.random()` falls below `threshold` (cumulative);
+     * the final entry's threshold is 1 so an operation is always chosen.
+     * `range` carries the bounds passed to the matching generator.
+     */
+    static get GRADE_CONFIG() {
+        return {
+            // Grade 1: Addition up to 10
+            1: [
+                { op: 'addition', threshold: 1, range: { maxA: 9, cap: 10 } }
+            ],
+            // Grade 2: Addition up to 20, subtraction up to 10
+            2: [
+                { op: 'addition', threshold: 0.7, range: { maxA: 15, cap: 20 } },
+                { op: 'subtraction', threshold: 1, range: { max: 10 } }
+            ],
+            // Grade 3: Addition up to 50, subtraction up to 20, simple multiplication
+            3: [
+                { op: 'addition', threshold: 0.5, range: { maxA: 30, cap: 50 } },
+                { op: 'subtraction', threshold: 0.8, range: { max: 20 } },
+                { op: 'multiplication', threshold: 1, range: { max: 5 } }
+            ],
+            // Grade 4: Addition up to 100, subtraction up to 50, multiplication tables 1-6
+            4: [
+                { op: 'addition', threshold: 0.4, range: { maxA: 60, cap: 100 } },
+                { op: 'subtraction', threshold: 0.7, range: { max: 50 } },
+                { op: 'multiplication', threshold: 1, range: { max: 6 } }
+            ],
+            // Grade 5: Addition up to 200, subtraction up to 100, multiplication tables 1-10
+            5: [
+                { op: 'addition', threshold: 0.3, range: { maxA: 120, cap: 200 } },
+                { op: 'subtraction', threshold: 0.6, range: { max: 100 } },
+                { op: 'multiplication', threshold: 1, range: { max: 10 } }
+            ]
+        };
+    }
+
     constructor() {
         this.currentProblem = null;
         this.exerciseCount = 0;
@@ -15,102 +83,31 @@ class MathTests {
     }
 
     /**
-     * Generate a math problem based on difficulty level
+     * Generate a math problem based on difficulty level.
+     *
+     * Per-grade differences are driven by GRADE_CONFIG (see the static getter
+     * below): each grade lists the operations it can produce, the cumulative
+     * probability threshold that selects each operation, and the random ranges
+     * fed to one shared set of operation generators (MathTests.OPERATIONS).
+     *
      * @param {number} difficulty - Difficulty level (1-5, corresponding to grades)
      * @returns {object} Object containing problem string and answer number
      */
     generateMathProblem(difficulty) {
-        let problem, answer;
-        
         // Default to grade 1 if difficulty is invalid
         if (!difficulty || difficulty < 1 || difficulty > 5) {
             difficulty = 1;
         }
-        
-        switch(difficulty) {
-            case 1: // Grade 1: Addition up to 10
-                const num1 = Math.floor(Math.random() * 9) + 1; // Corrected to ensure sum is <= 10
-                const num2 = Math.floor(Math.random() * (10 - num1)) + 1;
-                problem = `${num1} + ${num2} = ?`;
-                answer = num1 + num2;
-                break;
-                
-            case 2: // Grade 2: Addition up to 20, subtraction up to 10
-                if (Math.random() < 0.7) {
-                    const num1 = Math.floor(Math.random() * 15) + 1;
-                    const num2 = Math.floor(Math.random() * (20 - num1)) + 1;
-                    problem = `${num1} + ${num2} = ?`;
-                    answer = num1 + num2;
-                } else {
-                    const num1 = Math.floor(Math.random() * 10) + 1;
-                    const num2 = Math.floor(Math.random() * num1) + 1;
-                    problem = `${num1} - ${num2} = ?`;
-                    answer = num1 - num2;
-                }
-                break;
-                
-            case 3: // Grade 3: Addition up to 50, subtraction up to 20, simple multiplication
-                const operation = Math.random();
-                if (operation < 0.5) {
-                    const num1 = Math.floor(Math.random() * 30) + 1;
-                    const num2 = Math.floor(Math.random() * (50 - num1)) + 1;
-                    problem = `${num1} + ${num2} = ?`;
-                    answer = num1 + num2;
-                } else if (operation < 0.8) {
-                    const num1 = Math.floor(Math.random() * 20) + 1;
-                    const num2 = Math.floor(Math.random() * num1) + 1;
-                    problem = `${num1} - ${num2} = ?`;
-                    answer = num1 - num2;
-                } else {
-                    const num1 = Math.floor(Math.random() * 5) + 1;
-                    const num2 = Math.floor(Math.random() * 5) + 1;
-                    problem = `${num1} × ${num2} = ?`;
-                    answer = num1 * num2;
-                }
-                break;
-                
-            case 4: // Grade 4: Addition up to 100, subtraction up to 50, multiplication tables 1-6
-                const op = Math.random();
-                if (op < 0.4) {
-                    const num1 = Math.floor(Math.random() * 60) + 1;
-                    const num2 = Math.floor(Math.random() * (100 - num1)) + 1;
-                    problem = `${num1} + ${num2} = ?`;
-                    answer = num1 + num2;
-                } else if (op < 0.7) {
-                    const num1 = Math.floor(Math.random() * 50) + 1;
-                    const num2 = Math.floor(Math.random() * num1) + 1;
-                    problem = `${num1} - ${num2} = ?`;
-                    answer = num1 - num2;
-                } else {
-                    const num1 = Math.floor(Math.random() * 6) + 1;
-                    const num2 = Math.floor(Math.random() * 6) + 1;
-                    problem = `${num1} × ${num2} = ?`;
-                    answer = num1 * num2;
-                }
-                break;
-                
-            case 5: // Grade 5: Addition up to 200, subtraction up to 100, multiplication tables 1-10
-                const op5 = Math.random();
-                if (op5 < 0.3) {
-                    const num1 = Math.floor(Math.random() * 120) + 1;
-                    const num2 = Math.floor(Math.random() * (200 - num1)) + 1;
-                    problem = `${num1} + ${num2} = ?`;
-                    answer = num1 + num2;
-                } else if (op5 < 0.6) {
-                    const num1 = Math.floor(Math.random() * 100) + 1;
-                    const num2 = Math.floor(Math.random() * num1) + 1;
-                    problem = `${num1} - ${num2} = ?`;
-                    answer = num1 - num2;
-                } else {
-                    const num1 = Math.floor(Math.random() * 10) + 1;
-                    const num2 = Math.floor(Math.random() * 10) + 1;
-                    problem = `${num1} × ${num2} = ?`;
-                    answer = num1 * num2;
-                }
-                break;
-        }
-        
-        return { problem, answer };
+
+        const operations = MathTests.OPERATIONS;
+        const config = MathTests.GRADE_CONFIG[difficulty];
+
+        // Pick an operation by walking the cumulative probability thresholds.
+        // The last entry's threshold is 1, so the loop always selects one.
+        const roll = Math.random();
+        const choice = config.find(entry => roll < entry.threshold) || config[config.length - 1];
+
+        return operations[choice.op](choice.range);
     }
 
     /**
