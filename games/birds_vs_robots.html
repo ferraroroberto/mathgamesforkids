@@ -7,6 +7,7 @@
     <title>Birds vs. Robots</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="../math/mathTests.js"></script>
+    <script src="../math/mathSessionUI.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -901,75 +902,52 @@
         gameOverModal.classList.add('visible');
     }
 
-    function startMathExercise() {
-        const problem = mathTests.startMathExercise(selectedGrade, 3); // Use selected grade, 3 exercises
-        mathProblem.textContent = problem.problem;
-
-        mathAnswer.value = '';
-        mathResult.innerHTML = '';
-        mathProgress.style.width = '0%';
-
-        mathModal.classList.add('visible');
-        mathAnswer.focus(); // Focus on input for Enter key
-    }
-
-    function submitMathAnswer() {
-        const userAnswer = parseInt(mathAnswer.value);
-        if (isNaN(userAnswer)) {
-            alert('Please enter a valid number');
-            return;
+    // Math problem functions — shared session loop, game-specific reward tail.
+    const mathSession = createMathSessionUI({
+        mathTests,
+        getDifficulty: () => selectedGrade,
+        ids: {
+            problem: 'mathProblem',
+            answer: 'mathAnswer',
+            result: 'mathResult',
+            progress: 'mathProgress',
+            container: 'math-modal'   // modal toggled via the 'visible' class
+        },
+        containerToggleClass: 'visible',
+        containerVisibleWhen: 'class-present',
+        resultClass: 'math-result',
+        focusAnswerOnStart: true,     // focus input for Enter key
+        invalidInput: 'alert',
+        onFinish: (sessionSummary) => {
+            // Reward: score bonus, with different routing depending on whether
+            // this was the pre-game challenge, the wave-0 placement start, or
+            // a between-waves session.
+            if (!gameState || gameState.wave === undefined) {
+                // Initial math challenge (before the game starts) — bank the
+                // bonus for game start, then show difficulty selection.
+                initialMathBonus = calculateMathBonus(sessionSummary.correctAnswers);
+                showBonusMessage(getBonusMessage(sessionSummary.correctAnswers));
+                difficultyModal.classList.add('visible');
+            } else if (gameState.wave === 0) {
+                // Game initialized but wave 0 — start the loop for bird placement.
+                giveMathBonus(sessionSummary.correctAnswers);
+                gameLoop();
+            } else {
+                // Wave-end math — apply bonus and arm the next-wave button.
+                giveMathBonus(sessionSummary.correctAnswers);
+                startWaveBtn.disabled = false;
+                startWaveBtn.textContent = `START WAVE ${gameState.wave + 1}`;
+            }
         }
+    });
 
-        const result = mathTests.submitMathAnswer(userAnswer);
-
-        if (result.isCorrect) {
-            mathResult.innerHTML = '<div class="math-result correct">✅ Correct! Well done!</div>';
-        } else {
-            mathResult.innerHTML = `<div class="math-result incorrect">❌ Wrong! The answer was ${result.correctAnswer}</div>`;
-        }
-
-        mathProgress.style.width = `${(result.exerciseCount / 3) * 100}%`;
-
-        if (!result.isSessionComplete) {
-            setTimeout(() => {
-                mathProblem.textContent = result.nextProblem.problem;
-                mathAnswer.value = '';
-                mathResult.innerHTML = '';
-            }, 1500);
-        } else {
-            setTimeout(() => {
-                finishMathSession();
-            }, 1500);
-        }
-    }
-
-    function finishMathSession() {
-        mathModal.classList.remove('visible');
-
-        const sessionSummary = mathTests.finishMathSession();
-        
-        // Check if game has been initialized yet
-        if (!gameState || gameState.wave === undefined) {
-            // This is the initial math challenge (before game starts)
-            // Store the bonus for when game starts
-            initialMathBonus = calculateMathBonus(sessionSummary.correctAnswers);
-            showBonusMessage(getBonusMessage(sessionSummary.correctAnswers));
-            
-            // Show difficulty selection
-            difficultyModal.classList.add('visible');
-        } else if (gameState.wave === 0) {
-            // Game initialized but wave 0 - start the game loop for bird placement
-            giveMathBonus(sessionSummary.correctAnswers);
-            gameLoop();
-        } else {
-            // This is wave-end math - prepare for next wave
-            giveMathBonus(sessionSummary.correctAnswers);
-            
-            // Enable the start wave button so player can place birds
-            startWaveBtn.disabled = false;
-            startWaveBtn.textContent = `START WAVE ${gameState.wave + 1}`;
-        }
-    }
+    // Expose globally so inline onclick handlers and other scripts can call them.
+    window.startMathExercise = mathSession.startMathExercise;
+    window.submitMathAnswer = mathSession.submitMathAnswer;
+    window.finishMathSession = mathSession.finishMathSession;
+    var startMathExercise = window.startMathExercise;
+    var submitMathAnswer = window.submitMathAnswer;
+    var finishMathSession = window.finishMathSession;
 
     function calculateMathBonus(correctAnswers) {
         if (correctAnswers === 3) {

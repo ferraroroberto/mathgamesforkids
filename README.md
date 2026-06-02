@@ -20,7 +20,8 @@ This repository contains a collection of educational games, mathematical tools, 
 │   ├── random_name_wheel.html   # Wheel-of-names spinner
 │   └── random_name_wheel.README.md # Random name wheel documentation
 └── math/                        # Mathematical tools and modules
-    ├── mathTests.js            # Reusable math problem generator
+    ├── mathTests.js            # Reusable math problem generator (table-driven)
+    ├── mathSessionUI.js        # Shared math session UI factory (4 games)
     └── test_math.html          # Math module testing interface
 ```
 
@@ -97,6 +98,9 @@ Each game is self-contained in a single HTML file with embedded CSS and JavaScri
 
 ## 🧮 Math Directory (`/math/`)
 
+### Session UI Factory (`mathSessionUI.js`)
+A factory function `createMathSessionUI(options)` that centralises the math-exercise presentation loop shared by all four games. It handles problem display, correct/incorrect feedback, progress-bar advancement, 1500 ms inter-problem timing, and session completion. Each game provides its own DOM element ids and an `onFinish(summary)` callback for game-specific reward logic (lives, score bonuses, etc.).
+
 ### Math Module (`mathTests.js`)
 A reusable JavaScript class that provides:
 
@@ -136,12 +140,15 @@ class MathTests {
 ## 🔧 Technical Implementation Details
 
 ### 1. Module Integration Pattern
-Games integrate with the math module using relative paths:
+Games integrate with the math modules using relative paths:
 
 ```html
 <!-- In game files -->
 <script src="../math/mathTests.js"></script>
+<script src="../math/mathSessionUI.js"></script>
 ```
+
+`mathSessionUI.js` exports a `createMathSessionUI(options)` factory that centralises the problem-render → correct/incorrect feedback → progress-bar → 1500 ms cadence → finish loop. Each game passes its DOM ids and an `onFinish(summary)` callback carrying its own reward semantics (lives, score bonuses, plain start-game). This replaces the four formerly-identical `submitMathAnswer` / `finishMathSession` copy-paste blocks.
 
 ### 2. Canvas Rendering Architecture
 All games use a consistent rendering pattern:
