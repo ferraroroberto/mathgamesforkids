@@ -22,6 +22,7 @@ This repository contains a collection of educational games, mathematical tools, 
 └── math/                        # Mathematical tools and modules
     ├── mathTests.js            # Reusable math problem generator (table-driven)
     ├── mathSessionUI.js        # Shared math session UI factory (4 games)
+    ├── livesReward.js          # Shared lives-reward bookkeeping (platformers)
     └── test_math.html          # Math module testing interface
 ```
 
@@ -99,7 +100,10 @@ Each game is self-contained in a single HTML file with embedded CSS and JavaScri
 ## 🧮 Math Directory (`/math/`)
 
 ### Session UI Factory (`mathSessionUI.js`)
-A factory function `createMathSessionUI(options)` that centralises the math-exercise presentation loop shared by all four games. It handles problem display, correct/incorrect feedback, progress-bar advancement, 1500 ms inter-problem timing, and session completion. Each game provides its own DOM element ids and an `onFinish(summary)` callback for game-specific reward logic (lives, score bonuses, etc.).
+A factory function `createMathSessionUI(options)` that centralises the math-exercise presentation loop shared by all four games. It handles problem display, correct/incorrect feedback, progress-bar advancement, 1500 ms inter-problem timing, and session completion. Each game provides its own DOM element ids and an `onFinish(summary)` callback for game-specific reward logic (lives, score bonuses, etc.). Games wire their submit button via `addEventListener` against the factory's returned handlers — no global aliasing.
+
+### Lives Reward (`livesReward.js`)
+A helper `livesRewardFromSession(player, sessionSummary)` that owns the lives bookkeeping the two platformers (`mountain_dung_dodger`, `elemental_warrior`) apply after a math session: 3 correct → +1 life (capped at 5), 2 correct → no change, otherwise → −1 life (floored at 1). Both games call it from their `onFinish` callback before their own state-transition tail, replacing a block that was byte-for-byte identical in each.
 
 ### Math Module (`mathTests.js`)
 A reusable JavaScript class that provides:

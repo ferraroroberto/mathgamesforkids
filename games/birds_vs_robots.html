@@ -413,7 +413,7 @@
         <p style="margin: 1rem 0; text-align: center;">Solve the math problem to continue!</p>
         <div class="math-problem" id="mathProblem"></div>
         <input type="number" class="math-input" id="mathAnswer" placeholder="?" min="0" max="999">
-        <button class="math-submit" onclick="submitMathAnswer()">SUBMIT</button>
+        <button class="math-submit" id="mathSubmit">SUBMIT</button>
         <div id="mathResult"></div>
     </div>
 </div>
@@ -941,13 +941,11 @@
         }
     });
 
-    // Expose globally so inline onclick handlers and other scripts can call them.
-    window.startMathExercise = mathSession.startMathExercise;
-    window.submitMathAnswer = mathSession.submitMathAnswer;
-    window.finishMathSession = mathSession.finishMathSession;
-    var startMathExercise = window.startMathExercise;
-    var submitMathAnswer = window.submitMathAnswer;
-    var finishMathSession = window.finishMathSession;
+    // Local bindings for in-script calls; submit button is wired via
+    // addEventListener below (no globals needed).
+    const startMathExercise = mathSession.startMathExercise;
+    const submitMathAnswer = mathSession.submitMathAnswer;
+    document.getElementById('mathSubmit').addEventListener('click', submitMathAnswer);
 
     function calculateMathBonus(correctAnswers) {
         if (correctAnswers === 3) {
