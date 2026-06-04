@@ -21,7 +21,7 @@ function livesRewardFromSession(player, sessionSummary) {
     if (sessionSummary.correctAnswers === 3) {
         player.lives = Math.min(player.lives + 1, 5); // Max 5 lives
     } else if (sessionSummary.correctAnswers === 2) {
-        // Keep current lives
+        /* no-op: 2 correct holds lives steady */
     } else {
         // 1 or 0 correct → lose a life, floored at 1
         player.lives = Math.max(player.lives - 1, 1);
