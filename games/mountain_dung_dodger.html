@@ -292,7 +292,7 @@
             <p id="mathInstructions">Solve the math problem to continue!</p>
             <div class="mathProblem" id="mathProblem"></div>
             <input type="number" class="mathInput" id="mathAnswer" placeholder="?" min="0" max="999">
-            <button class="mathSubmit" onclick="submitMathAnswer()">Submit Answer</button>
+            <button class="mathSubmit" id="mathSubmit">Submit Answer</button>
             <div id="mathResult"></div>
         </div>
         
@@ -307,6 +307,7 @@
 
             <script src="../math/mathTests.js"></script>
     <script src="../math/mathSessionUI.js"></script>
+    <script src="../math/livesReward.js"></script>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -367,17 +368,9 @@
             containerVisibleWhen: 'class-absent',
             resultClass: 'mathResult',
             onFinish: (sessionSummary) => {
-                // Reward: lives change based on performance (+1 capped at 5,
-                // hold at 2 correct, -1 floored at 1 otherwise).
-                if (sessionSummary.correctAnswers === 3) {
-                    player.lives = Math.min(player.lives + 1, 5); // Max 5 lives
-                } else if (sessionSummary.correctAnswers === 2) {
-                    // Keep current lives
-                } else if (sessionSummary.correctAnswers === 1) {
-                    player.lives = Math.max(player.lives - 1, 1);
-                } else {
-                    player.lives = Math.max(player.lives - 1, 1);
-                }
+                // Reward lives based on performance (shared rule), then run the
+                // per-game state-transition tail.
+                livesRewardFromSession(player, sessionSummary);
 
                 updateHUD();
 
@@ -388,16 +381,14 @@
             }
         });
 
-        // Expose globally so inline onclick handlers and other scripts can call them.
+        // Local bindings for in-script calls; submit button is wired via
+        // addEventListener below (no globals needed).
+        const submitMathAnswer = mathSession.submitMathAnswer;
         function startMathExercise() {
             mathSession.startMathExercise();
             gameState = 'math';
         }
-        window.startMathExercise = startMathExercise;
-        window.submitMathAnswer = mathSession.submitMathAnswer;
-        window.finishMathSession = mathSession.finishMathSession;
-        var submitMathAnswer = window.submitMathAnswer;
-        var finishMathSession = window.finishMathSession;
+        document.getElementById('mathSubmit').addEventListener('click', submitMathAnswer);
         
         // showMessage function removed - not in original
         
