@@ -55,7 +55,7 @@ This repository contains a collection of educational games, mathematical tools, 
 - **Frontend**: HTML5, CSS3, JavaScript (ES6+)
 - **Graphics**: HTML5 Canvas API for 2D rendering
 - **Architecture**: Modular design with external dependencies
-- **Dependencies**: Pure vanilla JavaScript (no external libraries)
+- **Dependencies**: Most games are vanilla; `tetris.html` depends on Tone.js (audio) and Tailwind CSS (layout) + Press Start 2P font (both CDN); `birds_vs_robots.html` depends on Tailwind CSS + Press Start 2P font; `fifteen_puzzle.html` is the only canvas game that is fully dependency-free
 - **Responsive Design**: Mobile-first approach with touch controls
 
 ### Design Principles
@@ -89,13 +89,15 @@ Each game is self-contained in a single HTML file with embedded CSS and JavaScri
 
 #### Tetris (`tetris.html`)
 - **Type**: Classic block-stacking game
-- **Implementation**: HTML5 Canvas + JavaScript
+- **Implementation**: HTML5 Canvas + JavaScript (+ Tone.js for audio, Tailwind for layout)
+- **Math Integration**: Math challenge gate on game start — player selects a grade level and completes a math session before the first piece falls
 - **Features**: Next-piece preview, score tracking, mobile-friendly layout
 
 #### Birds vs. Robots (`birds_vs_robots.html`)
-- **Type**: Action game
-- **Implementation**: HTML5 Canvas + JavaScript
-- **Features**: Multi-wave gameplay, touch controls
+- **Type**: Tower-defense strategy game
+- **Implementation**: HTML5 Canvas + JavaScript (+ Tailwind for layout)
+- **Math Integration**: Math challenge gate before first bird placement; between-wave math sessions award seed bonuses (perfect → +50 seeds, great → +25 seeds, keep-trying → +10 seeds)
+- **Features**: Place bird types (Pecker, Bomber, Freezer) to defend your base, multi-wave gameplay, touch controls
 
 ## 🧮 Math Directory (`/math/`)
 
@@ -214,20 +216,15 @@ let gameState = 'start';  // Controls UI visibility
 ## 🔍 Testing and Validation
 
 ### Math Module Testing
-```bash
-# Open math testing interface
-open math/test_math.html
-```
+Start a local server (see "Local Development Server" below), then navigate to `http://localhost:8000/math/test_math.html`.
 
 ### Game Testing
-```bash
-# Test individual games
-open games/mountain_dung_dodger.html
-open games/elemental_warrior.html
-open games/fifteen_puzzle.html
-open games/tetris.html
-open games/birds_vs_robots.html
-```
+Start a local server (see "Local Development Server" below), then navigate to the game URL, e.g.:
+- `http://localhost:8000/games/mountain_dung_dodger.html`
+- `http://localhost:8000/games/elemental_warrior.html`
+- `http://localhost:8000/games/fifteen_puzzle.html`
+- `http://localhost:8000/games/tetris.html`
+- `http://localhost:8000/games/birds_vs_robots.html`
 
 ### Integration Testing
 - Verify math module loads correctly in games
