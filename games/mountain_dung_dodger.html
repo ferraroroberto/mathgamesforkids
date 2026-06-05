@@ -350,8 +350,6 @@
         let keys = {};
         let touchControls = { left: false, right: false, jump: false };
         
-        // Math problem generator - now handled by MathTests module
-        
         // Math problem functions — shared session loop, game-specific reward tail.
         const mathSession = createMathSessionUI({
             mathTests,
@@ -389,8 +387,6 @@
             gameState = 'math';
         }
         document.getElementById('mathSubmit').addEventListener('click', submitMathAnswer);
-        
-        // showMessage function removed - not in original
         
         function showDifficultyScreen() {
             document.getElementById('startScreen').classList.add('hidden');

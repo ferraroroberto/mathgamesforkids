@@ -492,7 +492,6 @@
             // Always create a projectile in the direction the player is facing
             const direction = player.facing;
             createProjectile(player.x + (direction > 0 ? player.width : 0), player.y + player.height/2, direction, currentElement.color, 'player');
-            console.log('Player projectile created at:', player.x + (direction > 0 ? player.width : 0), player.y + player.height/2); // Debug log
             
             updateHUD();
         }
@@ -542,7 +541,6 @@
         // Robot shooting
         function robotShoot(robot) {
             createProjectile(robot.x, robot.y + robot.height/2, -1, robot.elementColor, 'enemy');
-            console.log('Robot projectile created at:', robot.x, robot.y + robot.height/2); // Debug log
         }
         
         // Math problem functions — shared session loop, game-specific reward tail.
@@ -595,7 +593,6 @@
         
         // Generate level
         function generateLevel(levelNum) {
-            console.log('Generating level:', levelNum); // Debug log
             platforms = [];
             robots = [];
             particles = [];
@@ -665,8 +662,6 @@
                 height: 60
             };
             
-            console.log('Level generated with', robots.length, 'robots'); // Debug log
-            
             // Reset player
             player.x = 50;
             player.y = 355;
@@ -727,7 +722,6 @@
                 if (robot.lastShot > 60 && Math.random() < 0.02) { // Increased frequency and probability
                     robotShoot(robot);
                     robot.lastShot = 0;
-                    console.log('Robot shot!', robot.x, robot.y); // Debug log
                 }
             }
             
@@ -921,7 +915,6 @@
                 const pixelSize = Math.max(1, Math.floor(size));
                 const element = ELEMENTS.find(e => e.name === robot.element);
                 const elementColor = element ? element.color : '#666666';
-                console.log('Drawing robot at:', robot.x, robot.y, 'size:', size); // Debug log
                 
                 // Shadow
                 ctx.fillStyle = '#000000';
@@ -1011,7 +1004,6 @@
             for (let proj of projectiles) {
                 ctx.fillStyle = proj.color;
                 ctx.fillRect(proj.x, proj.y, proj.width, proj.height);
-                console.log('Drawing projectile at:', proj.x, proj.y, 'from:', proj.from); // Debug log
             }
             
             // Player
