@@ -231,33 +231,6 @@ Start a local server (see "Local Development Server" below), then navigate to th
 - Test responsive design across different screen sizes
 - Validate touch controls on mobile devices
 
-## 🎯 Performance Optimization
-
-### Rendering Optimizations
-- **Object Culling**: Only renders visible objects
-- **Efficient Collision**: Simple rectangle-based detection
-- **Particle Management**: Limits active particle count
-- **Canvas Optimization**: Minimizes state changes
-
-### Memory Management
-- **Object Pooling**: Reuses objects instead of creating new ones
-- **Garbage Collection**: Minimizes memory allocation
-- **Resource Cleanup**: Removes unused objects promptly
-
-## 🔮 Future Enhancements
-
-### Technical Improvements
-- **WebGL Rendering**: Better graphics performance
-- **Procedural Generation**: More varied level designs
-- **AI Opponents**: Computer-controlled characters
-- **Network Features**: Online leaderboards and sharing
-
-### Architecture Enhancements
-- **Build System**: Webpack or Vite for bundling
-- **TypeScript**: Type safety and better tooling
-- **Testing Framework**: Jest or Vitest for unit tests
-- **CI/CD**: Automated testing and deployment
-
 ## 🛠️ Development Setup
 
 ### Prerequisites
@@ -283,39 +256,9 @@ npx serve .
 php -S localhost:8000
 ```
 
-## 📚 Learning Resources
-
-### Concepts Demonstrated
-- **Game Loop Architecture**: How games maintain smooth animation
-- **State Management**: Controlling different game screens
-- **Event Handling**: Responding to user input
-- **Collision Detection**: Basic physics simulation
-- **Canvas Graphics**: Drawing and animating on web pages
-- **Mobile Development**: Touch interfaces and responsive design
-- **Modular Design**: Separating concerns and creating reusable components
-
-### Educational Value
-This project demonstrates several important programming concepts:
-- **Separation of Concerns**: Games vs. math logic
-- **Module Design**: Reusable components
-- **Responsive Design**: Mobile-first development
-- **Performance Optimization**: Efficient rendering and memory management
-- **User Experience**: Intuitive interfaces and smooth interactions
-
 ## 🤝 Contributing
 
-### Code Style
-- Use consistent indentation (2 or 4 spaces)
-- Follow existing naming conventions
-- Add JSDoc comments for complex functions
-- Test changes across different browsers
-
-### Pull Request Process
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request with clear description
+See `CLAUDE.md` for the real conventions: stack, layout rules, how to add a game, and commit/PR guidelines.
 
 ---
 
