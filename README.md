@@ -126,6 +126,8 @@ class MathTests {
     finishMathSession()
     getSessionStats()
     reset()
+    setDifficulty(difficulty)
+    getDifficultyDescription(difficulty)
 }
 ```
 
