@@ -45,7 +45,7 @@ An interactive HTML-based random name picker that works like a wheel of fortune.
 - Pure HTML, CSS, and JavaScript (no external dependencies)
 - Canvas-based wheel rendering for smooth performance
 - Easing animations for realistic spin physics
-- Local storage of results (persists during session)
+- Winners list kept in memory (resets on page reload)
 - Mobile-friendly touch interactions
 
 ## 📝 Usage Examples
