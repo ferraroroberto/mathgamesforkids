@@ -22,6 +22,10 @@ A static, dependency-light collection of browser games, math tools, and HTML exp
   - `test_math.html` — standalone testing interface for the math module.
 - `funstuff/` — standalone HTML experiments, each with its own `*.README.md`.
 
+## Internal architecture
+
+[`docs/architecture.mmd`](docs/architecture.mmd) is a hand-authored Mermaid diagram of this repo's own internal structure (`index.html`'s links into `games/` and `funstuff/`, and each game's imports from the shared `math/` modules). Update it in the same PR as any material structural change (a new game, a new shared math module, a new external dependency) — same anti-staleness contract as a `.fleet.toml` `description` field. It is not auto-generated and there is no gate that checks it for drift.
+
 ## Conventions
 
 - **Reuse the `math/` modules — don't re-inline.** The session loop and lives logic were deliberately factored out of the games into `mathSessionUI.js` / `livesReward.js` (they were byte-for-byte duplicated before). Extend the shared helper; never paste a fresh copy into a game.

@@ -1,0 +1,62 @@
+%% docs/architecture.mmd — mathgamesforkids' own internal structure.
+%% Hand-authored, not generated — this is a static, dependency-light site with
+%% no build step, so there's no structured source to crawl for its own shape
+%% (the same reason a `.fleet.toml` `description` field is hand-written, not
+%% scraped). Update this diagram in the same PR as any material structural
+%% change (a new game, a new shared math module, a new external dependency).
+%% See fleet-config CLAUDE.md's "Every repo carries a `.fleet.toml`" section
+%% for the general convention this diagram is a companion to.
+
+flowchart TB
+  HUB["index.html\nhub / navigation page"]
+
+  subgraph games["games/ — each a single self-contained .html\n(embedded CSS + JS)"]
+    DODGER["mountain_dung_dodger.html\nplatformer, 320x480 canvas"]
+    WARRIOR["elemental_warrior.html\nelement combat, 400x600 canvas"]
+    PUZZLE["fifteen_puzzle.html\nsliding puzzle — dependency-free,\nno math-module use"]
+    TETRIS["tetris.html\nblock-stacking"]
+    BIRDS["birds_vs_robots.html\ntower defense"]
+  end
+  HUB --> DODGER
+  HUB --> WARRIOR
+  HUB --> PUZZLE
+  HUB --> TETRIS
+  HUB --> BIRDS
+
+  subgraph mathmod["math/ — shared modules, imported via relative <script src>"]
+    MATHTESTS["mathTests.js\nMathTests class — grade 1-5\nproblem generator, table-driven"]
+    SESSIONUI["mathSessionUI.js\ncreateMathSessionUI(options) factory —\nrender -> feedback -> progress bar ->\n1500ms cadence -> onFinish(summary)"]
+    LIVES["livesReward.js\nlivesRewardFromSession(player, summary) —\n3 correct: +1 life (cap 5); 2: no change;\nelse: -1 life (floor 1)"]
+    TESTPAGE["test_math.html\nstandalone testing interface for\nmathTests.js + mathSessionUI.js"]
+  end
+  TESTPAGE --> MATHTESTS
+  TESTPAGE --> SESSIONUI
+
+  DODGER --> MATHTESTS
+  DODGER --> SESSIONUI
+  DODGER --> LIVES
+  WARRIOR --> MATHTESTS
+  WARRIOR --> SESSIONUI
+  WARRIOR --> LIVES
+  TETRIS --> MATHTESTS
+  TETRIS --> SESSIONUI
+  BIRDS --> MATHTESTS
+  BIRDS --> SESSIONUI
+
+  subgraph funstuff["funstuff/ — standalone HTML experiments,\neach with its own *.README.md"]
+    CAPTCHA["annoying_captcha.html"]
+    WHEEL["random_name_wheel.html"]
+  end
+  HUB --> CAPTCHA
+  HUB --> WHEEL
+
+  subgraph cdn["External CDN dependencies (per-game, no local vendoring)"]
+    TONE["Tone.js\naudio"]
+    TAILWIND["Tailwind CSS\nlayout"]
+    FONT["Press Start 2P\nGoogle Fonts"]
+  end
+  TETRIS -.-> TONE
+  TETRIS -.-> TAILWIND
+  TETRIS -.-> FONT
+  BIRDS -.-> TAILWIND
+  BIRDS -.-> FONT
