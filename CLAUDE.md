@@ -2,9 +2,7 @@
 
 Canonical instructions for AI coding agents working in this repository. Claude Code reads this file directly as project memory. Other agents (Cursor, Codex, etc.) reach it via the one-line `AGENTS.md` pointer.
 
-## Plan mode is the default
-
-Every non-trivial request starts in plan mode (anything beyond a one-line fix, a typo, or a question answerable without touching code). In plan mode: investigate freely, but don't edit files, run destructive commands, or commit. Present the plan, and only execute after explicit approval.
+> Universal dev-workflow directives (plan mode, asking, before/while editing, branch & PR pipeline, documentation discipline) live once in the machine config (`~/.claude/CLAUDE.md`) and are not restated here. This file owns only what is specific to this project's shape. The `## Git` section below is the deliberate exception: it is restated because agents that reach this repo through `AGENTS.md` alone never see the machine config.
 
 ## What this project is
 
