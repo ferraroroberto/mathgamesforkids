@@ -1,9 +1,5 @@
 # Project Instructions
 
-Canonical instructions for AI coding agents working in this repository. Claude Code reads this file directly as project memory. Other agents (Cursor, Codex, etc.) reach it via the one-line `AGENTS.md` pointer.
-
-> Universal dev-workflow directives (plan mode, asking, before/while editing, branch & PR pipeline, documentation discipline) live once in the machine config (`~/.claude/CLAUDE.md`) and are not restated here. This file owns only what is specific to this project's shape. The `## Git` section below is the deliberate exception: it is restated because agents that reach this repo through `AGENTS.md` alone never see the machine config.
-
 ## What this project is
 
 A static, dependency-light collection of browser games, math tools, and HTML experiments for kids. No build step, no framework, no `package.json` — open `index.html` in a browser and it runs.
@@ -26,7 +22,7 @@ A static, dependency-light collection of browser games, math tools, and HTML exp
 
 ## Conventions
 
-- **Reuse the `math/` modules — don't re-inline.** The session loop and lives logic were deliberately factored out of the games into `mathSessionUI.js` / `livesReward.js` (they were byte-for-byte duplicated before). Extend the shared helper; never paste a fresh copy into a game.
+- **Reuse the `math/` modules — don't re-inline.** The session loop and lives logic were deliberately factored out of the games into `mathSessionUI.js` / `livesReward.js` (they had been byte-for-byte duplicated). Extend the shared helper; never paste a fresh copy into a game.
 - Games wire their submit button via `addEventListener` against the factory's returned handlers — **no global aliasing**.
 - Canvas games use the standard `update()` → `draw()` → `requestAnimationFrame()` loop and a simple string game-state machine (`'start'`, `'playing'`, `'math'`, `'gameover'`).
 - **Mobile-first**: large touch controls, viewport locked against zoom, 60 FPS target.
@@ -44,5 +40,6 @@ python -m http.server 8000   # then http://localhost:8000/
 Test the math module at `http://localhost:8000/math/test_math.html`.
 
 ## Git
+*Restated deliberately: agents reaching this repo through `AGENTS.md` alone never see the machine config.*
 
 Conventional commit prefixes (`feat:` `fix:` `refactor:` `docs:` `chore:`). Never add `Co-Authored-By: Claude` or any AI-attribution trailer. Don't commit or push unless asked.
