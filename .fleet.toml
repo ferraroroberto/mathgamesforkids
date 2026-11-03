@@ -5,3 +5,6 @@
 layer       = "working-web"
 icon        = "🧮"
 description = "Educational games & HTML experiments."
+
+[vendored]
+page-foot = { src = "app/webapp/static/_vendored/page-foot", sha = "35c1f11348e100fa6b5da487411424c6d6ced43c", dest = "_vendored/page-foot" }
