@@ -14,6 +14,7 @@ A static, dependency-light collection of browser games, math tools, and HTML exp
   - `mathSessionUI.js` — `createMathSessionUI(options)` factory: the shared problem-render → feedback → progress-bar → 1500 ms cadence → finish loop. Each game passes its own DOM ids and an `onFinish(summary)` callback.
   - `livesReward.js` — `livesRewardFromSession(player, summary)`: lives bookkeeping for the two platformers (3 correct → +1 life capped at 5, 2 → no change, else → −1 floored at 1).
   - `test_math.html` — standalone testing interface for the math module.
+- `_vendored/page-foot/` — build-identity footer, vendored verbatim from project-scaffolding (never edit; re-vendor). `index.html` fills it from `version.json`, which `python scripts/write_version.py` generates (git-ignored); without it the footer stays empty.
 - `funstuff/` — standalone HTML experiments, each with its own `*.README.md`.
 
 ## Internal architecture

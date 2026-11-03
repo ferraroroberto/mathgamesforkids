@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Retro 80s Game Collection</title>
+    <link rel="stylesheet" href="_vendored/page-foot/page-foot.css">
     <style>
+        :root {
+            --muted: #B0BEC5;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -138,24 +143,6 @@
             transform: translateY(-2px);
         }
 
-        /* Footer */
-        .footer {
-            text-align: center;
-            margin-top: 60px;
-            padding: 20px;
-            color: #B0BEC5;
-            font-size: 14px;
-        }
-
-        .footer a {
-            color: #4CAF50;
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
         /* Fun Stuff Section Styles */
         .fun-stuff-section {
             margin-top: 80px;
@@ -275,7 +262,7 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container app">
         <div class="header">
             <h1>🎮 Retro 80s Game Collection</h1>
             <p>A collection of educational games and interactive experiences with a retro aesthetic</p>
@@ -342,10 +329,26 @@
             </div>
         </div>
 
-        <div class="footer">
-            <p>Built with vanilla JavaScript, HTML5 Canvas, and modern web technologies</p>
-            <p>View the <a href="README.md">technical documentation</a> for development details</p>
-        </div>
+        <footer class="page-foot">
+            <p id="buildReadout"></p>
+        </footer>
     </div>
+
+    <script type="module">
+        import { buildReadoutText } from './_vendored/page-foot/page-foot.js';
+
+        async function showBuild() {
+            const out = document.getElementById('buildReadout');
+            try {
+                const res = await fetch('version.json', { cache: 'no-store' });
+                if (!res.ok) throw new Error(res.status);
+                const body = await res.json();
+                out.textContent = buildReadoutText(body.git_sha || 'unknown', body.built_at || '');
+            } catch (_) {
+                out.textContent = '';
+            }
+        }
+        showBuild();
+    </script>
 </body>
 </html>
