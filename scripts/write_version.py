@@ -8,12 +8,17 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+# `rev-parse` and `log -1` read local refs and answer in milliseconds; 30 s means git itself is stuck.
+GIT_TIMEOUT_S = 30
 
 
 def _git(*args: str) -> str:
-    return subprocess.run(
-        ["git", *args], cwd=ROOT, check=True, capture_output=True, text=True
-    ).stdout.strip()
+    try:
+        return subprocess.run(
+            ["git", *args], cwd=ROOT, check=True, capture_output=True, text=True, timeout=GIT_TIMEOUT_S
+        ).stdout.strip()
+    except subprocess.TimeoutExpired:
+        raise SystemExit(f"❌ git {args[0]} did not finish within {GIT_TIMEOUT_S}s; version.json not written") from None
 
 
 def main() -> None:
